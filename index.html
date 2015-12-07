@@ -1,0 +1,32 @@
+<!doctype <!DOCTYPE html>
+<html>
+<head>
+  <title>Neighborhood</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div id="mapDiv"></div>
+
+  <div class="ui-overlay">
+    <form class="ui-form" data-bind="submit: populateMarkers">
+      <input autofocus class="ui-search" type="text" data-bind="value: poi"></input>
+      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search"></i></button>
+    </form>
+    <i class="icon fa fa-caret-down" data-bind="visible: markerArray"></i>
+  </div>
+
+  <ul class="place-list" data-bind="visible: expandList, foreach: markerArray" style="display:none">
+    <li class="place-list-item">
+      <h2 class="place-name" data-bind="text: name"></h2>
+    </li>
+  </ul>
+
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+  <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
