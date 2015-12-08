@@ -21,7 +21,7 @@ html {
   justify-content: space-between;
   background-color: #fff;
   box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s;
+  transition: all 0.3s ease-in-out;
 }
 
 .icon {
@@ -36,52 +36,73 @@ html {
 .ui-form {
   margin: 0;
   padding-left: 1rem;
+  opacity: 0.1;
+  transition: all 0.3s ease-in-out;
 }
-
 
 .ui-search {
   font: 1.75rem "Arial";
-  font-variant: small-caps;
   border: 0;
   border-bottom: 1px solid #333;
   color: #333;
-  opacity: 0.3;
-  transition: opacity 0.2s;
+  transition: all 0.3s ease-in-out;
 }
 
 .ui-search:focus {
   outline: 0;
-  opacity: 1;
 }
 
 .search-button {
   background-color: #fff;
   border: 0;
-  transform: scaleX(-1);
-  opacity: 0.3;
-  transition: opacity 0.2s;
-}
-
-.ui-search-focus {
-  opacity: 1;
+  transition: all 0.4s ease-in-out;
 }
 
 .search-button:focus {
   outline: 0;
 }
 
-.place-list {
+.places {
   position: fixed;
   z-index: 1;
-  top: 2rem;
+  top: 4.5rem;
   left: 0;
   width: 100%;
   height: calc(100% - 20px);
-  padding: 1rem 0 1rem 0;
+  padding: 0;
   margin: 0;
   background-color: #fff;
   box-shadow: 0 5px 2px -2px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
+}
+
+.ui-filter-form {
+  display: block;
+  margin: 2em auto 1em;
+  padding-left: 1rem;
+  opacity: 0.1;
+  transition: all 0.3s ease-in-out;
+}
+
+.ui-filter {
+  font: 1.75rem "Arial";
+  border: 0;
+  border-bottom: 1px solid #333;
+  color: #333;
+  transition: all 0.3s ease-in-out;
+}
+
+.filter-button {
+  transition: all 0.3s ease-in-out;
+}
+
+.ui-filter:focus {
+  outline: 0;
+  opacity: 0.8;
+}
+
+.ui-focus-opac {
+  opacity: 0.8;
 }
 
 .place-list-item {
@@ -110,11 +131,10 @@ html {
   .ui-search {
     font-size: 2rem;
     width: 300px;
-    transition: width 0.3s;
+    transition: width 0.3s ease-in-out;
   }
 
-  .place-list {
-    top: 4.5em;
+  .places {
     width: 500px;
   }
 }

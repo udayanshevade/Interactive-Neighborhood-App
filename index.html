@@ -10,19 +10,25 @@
 <body>
   <div id="mapDiv"></div>
 
-  <div class="ui-overlay">
-    <form class="ui-form" data-bind="submit: populateMarkers">
-      <input autofocus class="ui-search" type="text" data-bind="value: poi"></input>
+  <header class="ui-overlay">
+    <form class="ui-form" data-bind="submit: getVenueData">
       <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search"></i></button>
+      <input class="ui-search" type="text" data-bind="value: poi"></input>
     </form>
-    <i class="icon fa fa-caret-down" data-bind="visible: markerArray"></i>
-  </div>
+    <i class="icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces"></i>
+  </header>
 
-  <ul class="place-list" data-bind="visible: expandList, foreach: markerArray" style="display:none">
-    <li class="place-list-item">
-      <h2 class="place-name" data-bind="text: name"></h2>
-    </li>
-  </ul>
+  <section class="places" data-bind="visible: expandList" style="display:none">
+    <div class="ui-filter-form">
+      <i class="icon fa fa-filter filter-button"></i>
+      <input class="ui-filter" type="text" data-bind="textInput: filterQuery"></input>
+    </div>
+    <ul class="place-list" data-bind="foreach: venuesArray">
+      <li class="place-list-item">
+        <h2 class="place-name" data-bind="text: name"></h2>
+      </li>
+    </ul>
+  </section>
 
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>

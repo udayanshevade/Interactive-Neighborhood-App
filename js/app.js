@@ -5,15 +5,27 @@ var viewModel = function() {
 
     this.init = function() {
 
-        // initialize defaults
+        this.Foursquare = {
+            cID: "AHMKTGNPJOKRI5HSWIQ4GZVRFDXUA2UD4T4ZRBIYRN413QL5",
+            cSecret: "S3D4Y0R1430KP33VNL3MZW320ZFV22YQ2VT02SUX2XCTAD5R",
+            APIbaseURL: "https://api.foursquare.com/",
+            version: "20140601",
+            query: ko.observable('topPicks'),
+            radius: ko.observable(2000)
+        };
 
         // initialize Maps geocoder
         this.geocoder = new google.maps.Geocoder();
 
         // initialize observables
+        this.searchFocus = ko.observable(true);
         this.poi = ko.observable('');
+
+        this.filterFocus = ko.observable(false);
+        this.filterQuery = ko.observable('');
         // array of markers
         this.markerArray = ko.observableArray();
+        this.venuesArray = ko.observableArray();
 
         this.expandList = ko.observable(false);
 
@@ -28,16 +40,38 @@ var viewModel = function() {
             map.setCenter(center);
         });
 
-        $('.fa-caret-down').on('click', function() {
-            self.expandList(!self.expandList());
-        });
 
         $('.ui-search').focus(function() {
-            $('.search-button').addClass('ui-search-focus');
+            self.focusSearch();
         }).focusout(function() {
-            $('.search-button').removeClass('ui-search-focus');
+            self.focusOutSearch();
         });
 
+        $('.ui-search').focus();
+
+        $('.ui-form').mouseover(function() {
+            self.focusSearch()
+        }).mouseout(function() {
+            if (!$('.ui-search').is(':focus')) {
+                self.focusOutSearch();
+            }
+        });
+
+    };
+
+    this.expandPlaces = function() {
+        self.expandList(!self.expandList());
+    };
+
+    this.focusSearch = function() {
+        $('.ui-form').addClass('ui-focus-opac');
+        $('.ui-filter-form').removeClass('ui-focus-opac');
+    };
+
+    this.focusOutSearch = function() {
+        $('.ui-filter').focus();
+        $('.ui-form').removeClass('ui-focus-opac');
+        $('.ui-filter-form').addClass('ui-focus-opac');
     };
 
     this.initializeMap = function() {
@@ -58,7 +92,7 @@ var viewModel = function() {
 
                 self.infoWindow = new google.maps.InfoWindow();
 
-                self.getLocation(pos.lat, pos.lng);
+                self.geoLocate(pos.lat, pos.lng);
 
             }, function() {
                 handleLocationError();
@@ -77,81 +111,86 @@ var viewModel = function() {
 
     };
 
-    this.clearMarkers = function(lat, lng) {
-        this.markerArray().forEach(function(marker) {
-            marker.setMap(null);
-        });
+    this.hideMarker = function(marker) {
+        marker.setMap(null);
     };
 
-    // use a text based search to return markers
-    this.populateMarkers = function() {
+    this.delMarker = function(marker) {
+        marker = null;
+    };
 
-        if (this.markerArray().length) {
-            this.clearMarkers();
-        }
-
-        self.mapBounds = new google.maps.LatLngBounds();
-
-        var service = new google.maps.places.PlacesService(map);
-        var request = {
-            "query": this.poi()
-        };
-
-        service.textSearch(request, function(results, status) {
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-
-                var place, coordinates, lat, lng, bounds, marker;
-
-                for (var i = 0; i < results.length; i++) {
-                    place = results[i];
-
-                    if (place.rating > 3.5) {
-
-                        coordinates = place.geometry.location;
-                        lat = coordinates.lat();
-                        lng = coordinates.lng();
-
-                        bounds = self.mapBounds;
-
-                        // If the request succeeds, draw the place location on
-                        // the map as a marker, and register an event to handle a
-                        // click on the marker.
-                        marker = new google.maps.Marker({
-                            map: map,
-                            position: place.geometry.location,
-                            name: place.name,
-                        });
-
-                        self.markerArray.push(marker);
-
-                        google.maps.event.addListener(marker, 'click', (function(marker, infoWindow, place){
-                            return function() {
-                                infoWindow.setContent(place.name)
-                                infoWindow.open(map, this);
-                                map.panTo(place.geometry.location);
-                            }
-                        })(marker, self.infoWindow, place));
-
-                        bounds.extend(new google.maps.LatLng(lat, lng));
-                        // fit the map to the new marker
-                        map.fitBounds(bounds);
-                        // center the map
-                        map.setCenter(bounds.getCenter());
-                    }
+    // use a Foursquare based search to return info about venues
+    this.getVenueData = function() {
+        $.ajax({
+            "url": self.Foursquare.APIbaseURL + "v2/venues/explore?" + "client_id=" + self.Foursquare.cID + "&client_secret=" + self.Foursquare.cSecret + "&v=" + self.Foursquare.version + "&radius=" + self.Foursquare.radius() + "&section=" + self.Foursquare.query() + "&near=" + self.poi(),
+            "success": function(data) {
+                var venue;
+                var venues = data.response.groups[0].items;
+                for (var v = 0, len = venues.length; v < len; v++) {
+                    venue = venues[v].venue;
+                    console.log(venue);
+                    self.venuesArray.push(venue);
                 }
+                self.populateMap();
             }
         });
+
     };
 
+    this.clearMap = function() {
+        this.markerArray().forEach(function(marker) {
+            self.hideMarker(marker);
+            self.delMarker(marker);
+        });
+    };
+
+    this.populateMap = function() {
+        var arr = this.venuesArray();
+        for (var m = 0, len = arr.length; m < len; m++) {
+            this.setMarker(arr[m]);
+        }
+    };
+
+    this.setMarker = function(place) {
+        var lat = place.location.lat;
+        var lng = place.location.lng;
+        var pos = {
+            "lat": lat,
+            "lng": lng
+        };
+
+        marker = new google.maps.Marker({
+            map: map,
+            position: pos
+        });
+
+        self.markerArray.push(marker);
+
+        google.maps.event.addListener(marker, 'click', (function(marker, infoWindow, place){
+            return function() {
+              infoWindow.setContent(place.name)
+              infoWindow.open(map, this);
+              map.panTo(pos);
+            }
+        })(marker, self.infoWindow, place));
+
+        bounds = self.mapBounds;
+
+        bounds.extend(new google.maps.LatLng(lat, lng));
+        // fit the map to the new marker
+        map.fitBounds(bounds);
+        // center the map
+        map.setCenter(bounds.getCenter());
+    };
 
 
     // convert latLng to a text location
-    this.getLocation = function(lat, lng) {
+    this.geoLocate = function(lat, lng) {
         var latlng = new google.maps.LatLng(lat, lng);
         this.geocoder.geocode({'latLng': latlng}, function(results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
-                self.poi('Entertainment in ' + results[1].address_components[0].long_name);
-                self.populateMarkers();
+                self.poi(results[1].address_components[0].long_name);
+                self.getVenueData();
             }
         });
     };
