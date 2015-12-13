@@ -9,13 +9,14 @@
 </head>
 <body>
   <div id="mapDiv"></div>
+  <div id="mapFilter"></div>
 
   <header class="ui-overlay">
-    <form class="ui-form" data-bind="submit: getVenueData">
+    <form class="ui-form" data-bind="submit: updateSearch">
       <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search"></i></button>
       <input class="ui-search" type="text" data-bind="value: poi"></input>
     </form>
-    <i class="icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces"></i>
+    <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: expandList() }"></i>
   </header>
 
   <section class="places" data-bind="visible: expandList" style="display:none">
@@ -23,12 +24,19 @@
       <i class="icon fa fa-filter filter-button"></i>
       <input class="ui-filter" type="text" data-bind="textInput: filterQuery"></input>
     </div>
-    <ul class="place-list" data-bind="foreach: venuesArray">
+    <ul class="places-list" data-bind="foreach: venuesArray">
       <li class="place-list-item">
         <h2 class="place-name" data-bind="text: name"></h2>
       </li>
     </ul>
   </section>
+
+  <aside class="settings-wrapper">
+    <form class="settings-form">
+      <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: currentMode() ==='dark'"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() ==='light'"></i>
+      </button>
+    </form>
+  </aside>
 
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>

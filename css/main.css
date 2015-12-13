@@ -42,6 +42,7 @@ html {
 
 .ui-search {
   font: 1.75rem "Arial";
+  font-variant: small-caps;
   border: 0;
   border-bottom: 1px solid #333;
   color: #333;
@@ -68,24 +69,32 @@ html {
   top: 4.5rem;
   left: 0;
   width: 100%;
-  height: calc(100% - 20px);
+  height: calc(100% - 4.5rem);
   padding: 0;
   margin: 0;
   background-color: #fff;
   box-shadow: 0 5px 2px -2px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
+}
+
+.places-icon {
+  transition: transform 0.2s;
+}
+
+.expandIcon {
+  transform: scaleY(-1);
 }
 
 .ui-filter-form {
   display: block;
-  margin: 2em auto 1em;
+  margin: 2rem auto 1rem;
   padding-left: 1rem;
   opacity: 0.1;
   transition: all 0.3s ease-in-out;
 }
 
 .ui-filter {
-  font: 1.75rem "Arial";
+  font: 1.5rem "Arial";
+  font-variant: small-caps;
   border: 0;
   border-bottom: 1px solid #333;
   color: #333;
@@ -105,16 +114,73 @@ html {
   opacity: 0.8;
 }
 
+.places-list {
+  padding-left: 0;
+  height: calc(100% - 7rem);
+  overflow-y: auto;
+}
+
 .place-list-item {
   list-style: none;
-  padding: 1rem;
+  padding: 1rem 0 1rem 2rem;
+}
+
+.place-list-item:hover {
+  background-color: rgba(245,245,245,0.8);
 }
 
 .place-name {
-  font: 1rem "Arial";
+  font: 1.5rem "Arial";
+}
+
+::-webkit-scrollbar {
+  width: 1.25rem;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  height: 2rem;
+  background-color: #333;
+}
+
+
+.settings-wrapper {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+}
+
+.mode-button {
+  background-color: transparent;
+  border: none;
+  opacity: 0.5;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.mode-button:hover {
+  opacity: 1;
+}
+
+.mode-option {
+  font-size: 2.5rem;
+  font-weight: bold;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.night-toggle {
+  color: #333;
+}
+
+.day-toggle {
+  color: #fff;
 }
 
 @media screen and (min-width: 600px) {
+
   .icon {
     font-size: 2rem;
     padding: 1.75rem;
@@ -137,4 +203,5 @@ html {
   .places {
     width: 500px;
   }
+
 }
