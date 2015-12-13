@@ -66,7 +66,7 @@ html {
 .places {
   position: fixed;
   z-index: 1;
-  top: 4.5rem;
+  top: 5.5rem;
   left: 0;
   width: 100%;
   height: calc(100% - 4.5rem);
@@ -93,7 +93,7 @@ html {
 }
 
 .ui-filter {
-  font: 1.5rem "Arial";
+  font: 1.75rem "Arial";
   font-variant: small-caps;
   border: 0;
   border-bottom: 1px solid #333;
@@ -116,7 +116,7 @@ html {
 
 .places-list {
   padding-left: 0;
-  height: calc(100% - 7rem);
+  height: calc(100% - 9.5rem);
   overflow-y: auto;
 }
 
@@ -158,6 +158,11 @@ html {
   border: none;
   opacity: 0.5;
   transition: opacity 0.2s ease-in-out;
+}
+
+.mode-button:focus,
+.mode-button:active {
+  outline: 0;
 }
 
 .mode-button:hover {

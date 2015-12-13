@@ -7,12 +7,12 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
+<body data-bind="css: { dark: currentMode() }">
   <div id="mapDiv"></div>
 
   <header class="ui-overlay">
     <form class="ui-form" data-bind="submit: updateSearch">
-      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search"></i></button>
+      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon"></i></button>
       <input class="ui-search" type="text" data-bind="value: poi, hasFocus: !placesExpanded()"></input>
     </form>
     <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }"></i>
@@ -21,10 +21,10 @@
   <section class="places" data-bind="visible: placesExpanded" style="display:none">
     <div class="ui-filter-form">
       <i class="icon fa fa-filter filter-button"></i>
-      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()"></input>
+      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded(), event: { keyup: filterVenues() } ">
     </div>
     <ul class="places-list" data-bind="foreach: venuesArray">
-      <li class="place-list-item">
+      <li class="place-list-item" data-bind="visible: $data.venueVisible">
         <h2 class="place-name" data-bind="text: name"></h2>
       </li>
     </ul>
@@ -32,7 +32,7 @@
 
   <aside class="settings-wrapper">
     <form class="settings-form">
-      <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: currentMode() ==='dark'"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() ==='light'"></i>
+      <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: !currentMode()"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() ==='light'"></i>
       </button>
     </form>
   </aside>
