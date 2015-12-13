@@ -29,13 +29,12 @@ var viewModel = function() {
         this.markerArray = ko.observableArray();
         this.venuesArray = ko.observableArray();
 
-        this.expandList = ko.observable(false);
+        this.placesExpanded = ko.observable(false);
 
         this.currentMode = ko.observable('light');
 
         // initialize map on window load
         google.maps.event.addDomListener(window, "load", self.initializeMap.bind(this));
-
 
         // resize and recenter map on window resize
         google.maps.event.addDomListener(window, 'resize', function() {
@@ -75,7 +74,7 @@ var viewModel = function() {
     };
 
     this.expandPlaces = function() {
-        self.expandList(!self.expandList());
+        self.placesExpanded(!self.placesExpanded());
     };
 
     this.focusSearch = function() {

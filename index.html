@@ -9,20 +9,19 @@
 </head>
 <body>
   <div id="mapDiv"></div>
-  <div id="mapFilter"></div>
 
   <header class="ui-overlay">
     <form class="ui-form" data-bind="submit: updateSearch">
       <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search"></i></button>
-      <input class="ui-search" type="text" data-bind="value: poi"></input>
+      <input class="ui-search" type="text" data-bind="value: poi, hasFocus: !placesExpanded()"></input>
     </form>
-    <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: expandList() }"></i>
+    <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }"></i>
   </header>
 
-  <section class="places" data-bind="visible: expandList" style="display:none">
+  <section class="places" data-bind="visible: placesExpanded" style="display:none">
     <div class="ui-filter-form">
       <i class="icon fa fa-filter filter-button"></i>
-      <input class="ui-filter" type="text" data-bind="textInput: filterQuery"></input>
+      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()"></input>
     </div>
     <ul class="places-list" data-bind="foreach: venuesArray">
       <li class="place-list-item">
