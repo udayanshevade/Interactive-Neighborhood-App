@@ -6,7 +6,7 @@ var viewModel = function() {
 
         this.configFoursquare();
 
-        // initialize Maps geocoder
+        // initialize Maps geocoder for reuse
         this.geocoder = new google.maps.Geocoder();
 
         // initialize observables
@@ -170,8 +170,19 @@ var viewModel = function() {
                 lng: loc.lng()
             });
         }
+        self.hideMarkers();
         self.venuesArray([]);
+        self.mapBounds = new google.maps.LatLngBounds();
         self.getVenueData();
+    };
+
+    this.hideMarkers = function() {
+        var len = self.venuesArray().length;
+        var venue;
+        for (var i = 0; i < len; i++) {
+            venue = self.venuesArray()[i];
+            venue.marker.setMap(null);
+        }
     };
 
     // use a Foursquare based search to return info about venues
@@ -239,6 +250,25 @@ var viewModel = function() {
         return marker;
     };
 
+    this.chooseVenue = function(data, event) {
+        self.hideMarkers();
+        data.marker.setMap(self.map);
+        self.map.setCenter(data.marker.getPosition());
+    };
+
+    this.showAll = function(event) {
+        var len = self.venuesArray().length;
+        var venue;
+        for (var i = 0; i < len; i++) {
+            venue = self.venuesArray()[i];
+            venue.marker.setMap(self.map);
+        }
+        self.map.fitBounds(self.mapBounds);
+    };
+
+    this.favoriteVenue = function() {
+        // add backend to favorite venue
+    };
 
     // convert latLng to a text location
     this.geoLocate = function(lat, lng) {

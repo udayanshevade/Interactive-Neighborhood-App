@@ -14,44 +14,78 @@
 
   <header class="ui-overlay">
     <form class="ui-form" data-bind="submit: updateSearch">
+
       <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate"></i>
+
       <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon"></i></button>
+
       <input class="ui-search" type="text" data-bind="textInput: searchTerm"></input>
+
       <span class="search-in">in</span>
+
       <input class="ui-search" type="text" data-bind="textInput: poi, hasFocus: !placesExpanded()"></input>
+
     </form>
     <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }"></i>
   </header>
 
   <section class="places" data-bind="visible: placesExpanded" style="display:none">
-    <div class="ui-filter-form">
+
+    <header class="ui-filter-form">
+
       <i class="icon fa fa-filter filter-button"></i>
+
       <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded(), event: { keyup: filterVenues() } ">
-    </div>
+
+    </header>
+
+    <h3 class="show-all" data-bind="click: showAll">show all</h3>
+
     <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
+
       <li class="place-list-item" data-bind="visible: venue.venueVisible">
+
         <header class="place-header">
+
           <h2 class="place-name" data-bind="text: name"></h2>
+
           <div class="place-options">
-            <i class="icon fa fa-info info-icon" data-bind="click: $parent.toggleVenueExpand"></i>
+
+            <i class="icon fa fa-star place-icon" data-bind="click: $parent.favoriteVenue"></i>
+
+            <i class="icon fa fa-map-marker place-icon" data-bind="click: $parent.chooseVenue"></i>
+
+            <i class="icon fa fa-info place-icon" data-bind="click: $parent.toggleVenueExpand"></i>
+
           </div>
+
         </header>
+
         <section class="place-info" data-bind="visible: venue.venueExpanded">
+
           <div class="info-wrapper">
 
             <h5 class="contact">
+
               <i class="fa fa-phone contact-icon"></i>
+
               <a class="contact-link" data-bind="attr: { href: 'tel' + venue.contact.formattedPhone }, text: venue.contact.formattedPhone">
               </a>
+
             </h5>
 
             <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
 
             <h5 class="contact">
-              <a class="contact-link website-link" data-bind="attr: { href: venue.url }">
+
+              <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
+
                 website
+
                 <i class="fa fa-link contact-icon website-icon"></i>
+
               </a>
+
             </h5>
 
 

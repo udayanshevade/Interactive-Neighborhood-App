@@ -97,7 +97,7 @@ html {
 
 .ui-filter-form {
   display: block;
-  margin: 2rem auto 1rem;
+  margin: 0.5rem auto;
   padding-left: 1rem;
   opacity: 0.1;
   transition: all 0.3s ease-in-out;
@@ -126,9 +126,15 @@ html {
   opacity: 0.8;
 }
 
+.show-all {
+  font: small-caps 1.5rem "Arial", sans-serif;
+  text-align: center;
+  cursor: pointer;
+}
+
 .places-list {
   padding-left: 0;
-  height: calc(100% - 9.5rem);
+  height: calc(100% - 11.5rem);
   overflow-y: auto;
 }
 
@@ -155,7 +161,7 @@ html {
   display: flex;
 }
 
-.info-icon {
+.place-icon {
   line-height: 2.75rem;
 }
 
@@ -220,7 +226,6 @@ html {
   background-color: #333;
 }
 
-
 .settings-wrapper {
   position: absolute;
   right: 1rem;
@@ -271,7 +276,7 @@ html {
 
   .ui-search {
     font-size: 1.75rem;
-    width: 150px;
+    width: 100px;
     transition: width 0.3s ease-in-out;
   }
 
@@ -290,6 +295,14 @@ html {
 
   .places {
     width: 500px;
+  }
+
+  .places-list {
+    height: calc(100% - 13rem);
+  }
+
+  .place-name:hover {
+    cursor: pointer;
   }
 
 }
