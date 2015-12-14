@@ -12,6 +12,7 @@ var viewModel = function() {
         // initialize observables
         this.searchFocus = ko.observable(true);
 
+        this.searchTerm = ko.observable('Top picks in');
         this.poi = ko.observable('');
 
         this.coordinates = ko.observable({
@@ -25,8 +26,7 @@ var viewModel = function() {
 
         this.filterQuery = ko.observable('');
 
-        // array of markers
-        this.markerArray = ko.observableArray();
+        // array of venues with markers
         this.venuesArray = ko.observableArray();
 
         this.placesExpanded = ko.observable(false);
@@ -68,8 +68,8 @@ var viewModel = function() {
             cSecret: "S3D4Y0R1430KP33VNL3MZW320ZFV22YQ2VT02SUX2XCTAD5R",
             APIbaseURL: "https://api.foursquare.com/",
             version: "20140601",
-            query: ko.observable('topPicks'),
-            radius: ko.observable(500),
+            defaultQuery: ko.observable('topPicks'),
+            radius: ko.observable(2500),
         };
     };
 
@@ -138,15 +138,15 @@ var viewModel = function() {
 
 
             }.bind(this), function() {
-                handleLocationError();
+                self.handleLocationError();
             });
 
         } else {
             // Browser doesn't support Geolocation
-            handleLocationError();
+            this.handleLocationError();
         }
         // Geolocation error handling
-        function handleLocationError() {
+        this.handleLocationError = function() {
             // TODO: replace with actual error handling
             console.log('Error: The Geolocation service failed.');
         }
@@ -154,16 +154,7 @@ var viewModel = function() {
         this.mapBounds = new google.maps.LatLngBounds();
     };
 
-    this.hideMarker = function(marker) {
-        marker.setMap(null);
-    };
-
-    this.delMarker = function() {
-        this.markerArray().pop().setMap(null);
-    };
-
     this.updateSearch = function() {
-        this.clearMap();
         var service = new google.maps.places.PlacesService(self.map);
         var request = {
             "query": self.poi()
@@ -179,12 +170,19 @@ var viewModel = function() {
                 lng: loc.lng()
             });
         }
+        self.venuesArray([]);
         self.getVenueData();
     };
 
     // use a Foursquare based search to return info about venues
     this.getVenueData = function() {
-        var url = self.Foursquare.APIbaseURL + "v2/venues/explore?" + "client_id=" + self.Foursquare.cID + "&client_secret=" + self.Foursquare.cSecret + "&v=" + self.Foursquare.version + "&radius=" + self.Foursquare.radius() + "&section=" + self.Foursquare.query() + "&ll=" + self.latLng();
+        var filter;
+        if (self.searchTerm() && self.searchTerm() !== 'Top picks in') {
+            filter = '&query=' + self.searchTerm();
+        } else {
+            filter = '&section=' + self.Foursquare.defaultQuery();
+        }
+        var url = self.Foursquare.APIbaseURL + 'v2/venues/explore?' + 'client_id=' + self.Foursquare.cID + '&client_secret=' + self.Foursquare.cSecret + '&v=' + self.Foursquare.version + filter + '&radius=' + self.Foursquare.radius() + '&ll=' + self.latLng();
         $.ajax({
             "url": url,
             "success": function(data) {
@@ -192,30 +190,24 @@ var viewModel = function() {
                 var venues = data.response.groups[0].items;
                 for (var v = 0, len = venues.length; v < len; v++) {
                     venue = venues[v].venue;
+                    console.log(venue);
+                    if (!venue.hours) {
+                        venue.hours = {
+                            isOpen: false,
+                            status: "Not Available"
+                        };
+                    }
                     venue.venueVisible = ko.observable(true);
+                    venue.venueExpanded = ko.observable(false);
+                    venue.marker = self.createMarker(venue);
                     self.venuesArray.push(venue);
                 }
-                self.populateMap();
             }
         });
 
     };
 
-    this.clearMap = function() {
-        var len = this.markerArray().length;
-        for (var i = 0; i < len; i++) {
-            this.markerArray()[i].setMap(null);
-        }
-    };
-
-    this.populateMap = function() {
-        var arr = this.venuesArray();
-        for (var m = 0, len = arr.length; m < len; m++) {
-            this.setMarker(arr[m]);
-        }
-    };
-
-    this.setMarker = function(place) {
+    this.createMarker = function(place) {
         var lat = place.location.lat;
         var lng = place.location.lng;
         var pos = {
@@ -227,8 +219,6 @@ var viewModel = function() {
             map: self.map,
             position: pos
         });
-
-        self.markerArray.push(marker);
 
         google.maps.event.addListener(marker, 'click', (function(marker, infoWindow, place){
             return function() {
@@ -245,18 +235,38 @@ var viewModel = function() {
         this.map.fitBounds(bounds);
         // center the map
         this.map.setCenter(bounds.getCenter());
+        // return marker
+        return marker;
     };
 
 
     // convert latLng to a text location
     this.geoLocate = function(lat, lng) {
-        var latlng = new google.maps.LatLng(lat, lng);
-        this.geocoder.geocode({'latLng': latlng}, function(results, status) {
+        var latlng;
+        if (typeof lat === 'number' && typeof lng === 'number') {
+            latlng = new google.maps.LatLng(lat, lng);
+        } else {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                self.geocoder.geocode({'latLng': latlng}, function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        self.getLocations(results);
+                    }
+                });
+
+            }, self.handleLocationError);
+        }
+        self.geocoder.geocode({'latLng': latlng}, function(results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
-                self.poi(results[1].address_components[0].long_name);
-                self.getVenueData();
+                self.getLocations(results);
             }
         });
+    };
+
+    this.getLocations = function(result) {
+        self.venuesArray([]);
+        self.poi(result[0].address_components[2].long_name);
+        self.getVenueData();
     };
 
     // toggle the dark/light mode
@@ -284,6 +294,9 @@ var viewModel = function() {
         }
     };
 
+    this.toggleVenueExpand = function($data, event) {
+        $data.venueExpanded(!$data.venueExpanded());
+    };
 
     this.init();
 

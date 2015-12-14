@@ -29,24 +29,34 @@ html {
   padding: 1.5rem;
 }
 
+.locate-icon {
+  padding-left: 1rem;
+  padding-right: 0;
+}
+
 .fa:hover {
   cursor: pointer;
 }
 
 .ui-form {
   margin: 0;
-  padding-left: 1rem;
   opacity: 0.1;
   transition: all 0.3s ease-in-out;
 }
 
 .ui-search {
-  font: 1.75rem "Arial";
+  font: 600 1.5rem "Arial", sans-serif;
+  width: 90px;
   font-variant: small-caps;
   border: 0;
   border-bottom: 1px solid #333;
   color: #333;
   transition: all 0.3s ease-in-out;
+}
+
+.search-in {
+  font: small-caps 1.25rem "Arial", sans-serif;
+  padding: 0 0.5rem;
 }
 
 .ui-search:focus {
@@ -55,6 +65,7 @@ html {
 
 .search-button {
   background-color: #fff;
+  padding-left: 1rem;
   border: 0;
   transition: all 0.4s ease-in-out;
 }
@@ -66,10 +77,10 @@ html {
 .places {
   position: fixed;
   z-index: 1;
-  top: 5.5rem;
+  top: 4rem;
   left: 0;
   width: 100%;
-  height: calc(100% - 4.5rem);
+  height: calc(100% - 3rem);
   padding: 0;
   margin: 0;
   background-color: #fff;
@@ -93,8 +104,9 @@ html {
 }
 
 .ui-filter {
-  font: 1.75rem "Arial";
+  font: 1.5rem "Arial";
   font-variant: small-caps;
+  width: 200px;
   border: 0;
   border-bottom: 1px solid #333;
   color: #333;
@@ -129,8 +141,70 @@ html {
   background-color: rgba(245,245,245,0.8);
 }
 
+.place-header {
+  display: flex;
+  justify-content: space-between;
+}
+
 .place-name {
-  font: 1.5rem "Arial";
+  display: inline-block;
+  font: 1.75rem/2.75rem "Arial", sans-serif;
+}
+
+.place-options {
+  display: flex;
+}
+
+.info-icon {
+  line-height: 2.75rem;
+}
+
+.place-info {
+  margin-right: 1.5rem;
+  border-top: 1px dotted #8c8b8b;
+}
+
+.info-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.open-status {
+  display: inline-block;
+  font: 1.25rem "Arial", sans-serif;
+}
+
+.contact {
+  font: 1.25rem "Arial", sans-serif;
+}
+
+.contact-icon {
+  font-size: 1.25rem;
+  padding-right: 0.75rem;
+}
+
+.contact-link {
+  font: 1.25rem "Arial", sans-serif;
+  display: inline-block;
+  color: #333;
+  text-decoration: none;
+}
+
+.contact-link:hover,
+.contact-link:active,
+.contact-link:focus {
+  color: #333;
+  text-decoration: none;
+}
+
+.website-link {
+  font-variant: small-caps;
+  font-size: 1.35rem;
+}
+
+.website-icon {
+  padding-left: 0.75rem;
+  padding-right: 0;
 }
 
 ::-webkit-scrollbar {
@@ -156,7 +230,7 @@ html {
 .mode-button {
   background-color: transparent;
   border: none;
-  opacity: 0.5;
+  opacity: 0.7;
   transition: opacity 0.2s ease-in-out;
 }
 
@@ -195,14 +269,23 @@ html {
     width: 500px;
   }
 
-  .ui-form {
-    padding-left: 1rem;
+  .ui-search {
+    font-size: 1.75rem;
+    width: 150px;
+    transition: width 0.3s ease-in-out;
   }
 
-  .ui-search {
-    font-size: 2rem;
-    width: 300px;
-    transition: width 0.3s ease-in-out;
+  .ui-filter {
+    width: 250px;
+  }
+
+  .search-button {
+    padding-left: 0.5rem;
+  }
+
+  .search-in {
+    font-size: 1.75rem;
+    padding: 0 1rem;
   }
 
   .places {
