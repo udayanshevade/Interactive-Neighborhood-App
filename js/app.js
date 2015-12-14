@@ -251,7 +251,6 @@ var viewModel = function() {
     };
 
     this.chooseVenue = function(data, event) {
-        self.hideMarkers();
         data.marker.setMap(self.map);
         self.map.setCenter(data.marker.getPosition());
     };
@@ -320,7 +319,11 @@ var viewModel = function() {
             venueName = venue.name.toLowerCase();
             if (venueName.indexOf(search) >= 0) {
                 venue.venueVisible(true);
-            } else { venue.venueVisible(false); }
+                venue.marker.setMap(self.map);
+            } else {
+                venue.venueVisible(false);
+                venue.marker.setMap(null);
+            }
         }
     };
 
