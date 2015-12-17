@@ -12,7 +12,7 @@ var viewModel = function() {
         // initialize observables
         this.searchFocus = ko.observable(true);
 
-        this.searchTerm = ko.observable('Top picks in');
+        this.searchTerm = ko.observable('Popular');
         this.poi = ko.observable('');
 
         this.coordinates = ko.observable({
@@ -59,6 +59,8 @@ var viewModel = function() {
                 self.focusOutSearch();
             }
         });
+
+        this.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
 
     };
 
@@ -111,7 +113,7 @@ var viewModel = function() {
 
                 self.coordinates(pos);
 
-                var mapOptions = {
+                self.mapOptions = {
                     center: pos,
                     disableDefaultUI: true,
                     mapTypeControlOptions: {
@@ -120,22 +122,13 @@ var viewModel = function() {
                     ]}
                 };
 
-                this.map = new google.maps.Map(document.getElementById('mapDiv'), mapOptions);
+                this.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
 
                 this.infoWindow = new google.maps.InfoWindow();
 
                 self.geoLocate(pos.lat, pos.lng);
 
-                var currentTime = new Date().getHours();
-
-                if (currentTime <= 19 && currentTime >= 7) {
-                    self.currentMode('light');
-                } else { self.currentMode(''); }
-
-                // Associate styled map with the MapTypeId
-                self.toggleMapMode();
-
-
+                self.initializeTime();
 
             }.bind(this), function() {
                 self.handleLocationError();
@@ -149,10 +142,51 @@ var viewModel = function() {
         this.handleLocationError = function() {
             // TODO: replace with actual error handling
             console.log('Error: The Geolocation service failed.');
+            var result = $.ajax({
+                url: 'http://freegeoip.net/json/',
+                success: function(result) {
+                    var pos = {
+                        lat: result.latitude,
+                        lng: result.longitude
+                    };
+
+                    self.coordinates(pos);
+
+                    self.mapOptions = {
+                        center: pos,
+                        disableDefaultUI: true,
+                        mapTypeControlOptions: {
+                            mapTypeIds: [
+                            google.maps.MapTypeId.ROADMAP, 'map_style'
+                        ]}
+                    };
+
+                    self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+
+                    self.infoWindow = new google.maps.InfoWindow();
+
+                    self.geoLocate(pos.lat, pos.lng);
+
+                    self.initializeTime();
+
+                }
+            });
         }
 
         this.mapBounds = new google.maps.LatLngBounds();
     };
+
+    this.initializeTime = function() {
+        var currentTime = new Date().getHours();
+
+        if (currentTime <= 19 && currentTime >= 7) {
+            self.currentMode('light');
+        } else { self.currentMode(''); }
+
+        // Associate styled map with the MapTypeId
+        self.toggleMapMode();
+
+    }
 
     this.updateSearch = function() {
         var service = new google.maps.places.PlacesService(self.map);
@@ -188,7 +222,7 @@ var viewModel = function() {
     // use a Foursquare based search to return info about venues
     this.getVenueData = function() {
         var filter;
-        if (self.searchTerm() && self.searchTerm() !== 'Top picks in') {
+        if (self.searchTerm() && self.searchTerm() !== 'Popular') {
             filter = '&query=' + self.searchTerm();
         } else {
             filter = '&section=' + self.Foursquare.defaultQuery();
@@ -208,15 +242,37 @@ var viewModel = function() {
                             status: "Not Available"
                         };
                     }
+                    venue.rating = parseFloat(venue.rating).toFixed(1);
+                    if (venue.rating === 'NaN') {
+                        venue.rating = '~';
+                    }
+                    if (!venue.price) {
+                        venue.price = {
+                            'tier': 0
+                        };
+                    }
                     venue.venueVisible = ko.observable(true);
                     venue.venueExpanded = ko.observable(false);
                     venue.marker = self.createMarker(venue);
                     self.venuesArray.push(venue);
                 }
+                self.orderVenues();
             }
         });
 
     };
+
+    this.orderVenues = function() {
+        var venuesArray = self.venuesArray();
+        var orderedVenues = venuesArray.sort(function(a, b) {
+            if (a.rating > b.rating || b.rating === 'NaN') {
+                return -1;
+            } if (b.rating > a.rating || a.rating === 'NaN') {
+                return 1;
+            } return 0;
+        });
+        self.venuesArray(orderedVenues);
+    }
 
     this.createMarker = function(place) {
         var lat = place.location.lat;
@@ -226,18 +282,40 @@ var viewModel = function() {
             "lng": lng
         };
 
+        var icon = place.categories[0].icon;
+        var bg = 'bg_';
+        var size = '32';
+        var img = icon.prefix;
+        var ext = icon.suffix;
+
+        if (self.currentMode()) {
+            bg = '';
+        }
+
+        var iconImage = img + bg + size + ext;
+
         var marker = new google.maps.Marker({
             map: self.map,
-            position: pos
+            position: pos,
+            icon: iconImage,
+            size: new google.maps.Size(5, 5)
         });
 
-        google.maps.event.addListener(marker, 'click', (function(marker, infoWindow, place){
+        var placeRating = place.rating || 'No rating';
+        var placePrice = new Array(place.price.tier + 1).join('$');
+
+        var content = '<div class="infowindow"><h3 class="infowindow-title">' + place.name + '</h3><div class="infowindow-info"><h4 class="infowindow-rating">' + placeRating + '</h4><h4 class="infowindow-price">' + placePrice + '</h4></div></div>';
+
+        marker.content = content;
+
+        google.maps.event.addListener(marker, 'click', (function(content, marker, infoWindow, place){
             return function() {
-              infoWindow.setContent(place.name)
-              infoWindow.open(self.map, this);
-              self.map.panTo(pos);
+                infoWindow.setContent(marker.content)
+                infoWindow.open(self.map, this);
+                self.map.panTo(marker.getPosition());
+                self.toggleVenueExpand(place);
             }
-        })(marker, self.infoWindow, place));
+        })(content, marker, self.infoWindow, place));
 
         bounds = self.mapBounds;
 
@@ -251,8 +329,16 @@ var viewModel = function() {
     };
 
     this.chooseVenue = function(data, event) {
+        var len = self.venuesArray().length;
+        var venue;
+        for (var i = 0; i < len; i++) {
+            venue = self.venuesArray()[i];
+            venue.venueExpanded(false);
+        }
         data.marker.setMap(self.map);
-        self.map.setCenter(data.marker.getPosition());
+        self.infoWindow.setContent(data.marker.content);
+        self.infoWindow.open(self.map, data.marker);
+        self.map.panTo(data.marker.getPosition());
     };
 
     this.showAll = function(event) {
@@ -328,6 +414,13 @@ var viewModel = function() {
     };
 
     this.toggleVenueExpand = function($data, event) {
+        var len = self.venuesArray().length;
+        var venue;
+        for (var i = 0; i < len; i++) {
+            venue = self.venuesArray()[i];
+            venue.venueExpanded(false);
+        }
+        self.chooseVenue($data, event);
         $data.venueExpanded(!$data.venueExpanded());
     };
 
