@@ -43,9 +43,9 @@
 
     <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
 
-      <li class="place-list-item" data-bind="visible: venue.venueVisible, click: $parent.toggleVenueExpand, css: {placeListItemExpanded: venue.venueExpanded}">
+      <li class="place-list-item" data-bind="visible: venue.venueVisible, css: {placeListItemExpanded: venue.venueExpanded}">
 
-        <header class="place-header">
+        <header class="place-header" data-bind="click: $parent.toggleVenueExpand">
 
           <div class="place-name-wrapper">
 
