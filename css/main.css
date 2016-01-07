@@ -1,3 +1,11 @@
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 html,
 body,
 #mapDiv {
@@ -143,7 +151,8 @@ html {
 }
 
 .places {
-  opacity: 0.85;
+  z-index: 2;
+  opacity: 0.95;
 }
 
 .places-list {
@@ -157,7 +166,8 @@ html {
   padding: 1rem 0 1rem 2rem;
 }
 
-.place-list-item:hover {
+.place-list-item:hover,
+.placeListItemExpanded {
   background-color: rgba(245,245,245,0.8);
 }
 
@@ -219,6 +229,11 @@ html {
   justify-content: space-between;
 }
 
+.place-type {
+  display: block;
+  font: 1.25rem "Arial", sans-serif;
+}
+
 .open-status {
   display: inline-block;
   font: 1.25rem "Arial", sans-serif;
@@ -273,7 +288,7 @@ html {
 .settings-wrapper {
   position: absolute;
   right: 1rem;
-  bottom: 1rem;
+  bottom: 2.5rem;
 }
 
 .mode-button {
@@ -305,6 +320,73 @@ html {
 
 .day-toggle {
   color: #fff;
+}
+
+.login-wrapper {
+  background-color: transparent;
+  position: absolute;
+  z-index: 1;
+  bottom: 2.5rem;
+  width: 5rem;
+  left: 1rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.loginWrapperExpand {
+  background-color: #fff;
+  left: 0;
+  width: 100%;
+}
+
+.login-form {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 0;
+}
+
+.login-icon {
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.login-icon:hover {
+  opacity: 1;
+}
+
+.login-icon:before {
+  font-size: 2.5rem;
+  color: #333;
+}
+
+.dark .login-icon:before {
+  color: #fff;
+}
+
+.dark .login-form .login-icon:before {
+  color: #666;
+}
+
+.fa-times {
+  padding-left: 1.5rem;
+}
+
+.login-input {
+  margin: auto 0;
+  margin-left: 1rem;
+  outline: none;
+  border: 0;
+  border-bottom: 1px solid #666;
+  font: small-caps 1.75rem "Open Sans", sans-serif;
+}
+
+.login-button {
+  background-color: transparent;
+  outline: 0;
+  border: 0;
+}
+
+.fa-sign-in {
+  padding-left: 0;
 }
 
 .infowindow {
@@ -369,12 +451,21 @@ html {
   }
 
   .place-list-item:hover {
+    background-color: rgba(245,245,245,0.8);
     cursor: pointer;
   }
 
   .place-name {
     font-size: 1.5rem;
     letter-spacing: 0.1rem;
+  }
+
+  .loginWrapperExpand {
+    width: 500px;
+  }
+
+  .login-input {
+    font-size: 2.25rem;
   }
 
 }

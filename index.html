@@ -35,7 +35,7 @@
 
       <i class="icon fa fa-filter filter-button"></i>
 
-      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded(), event: { keyup: filterVenues() } ">
+      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded(), event: { keyup: filterVenues() }">
 
     </header>
 
@@ -43,7 +43,7 @@
 
     <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
 
-      <li class="place-list-item" data-bind="visible: venue.venueVisible, click: $parent.toggleVenueExpand">
+      <li class="place-list-item" data-bind="visible: venue.venueVisible, click: $parent.toggleVenueExpand, css: {placeListItemExpanded: venue.venueExpanded}">
 
         <header class="place-header">
 
@@ -67,7 +67,13 @@
 
         <section class="place-info" data-bind="visible: venue.venueExpanded">
 
+          <div class="info-pic">
+            <img data-bind="attr: { src: venue.photoURL }" alt="place-image">
+          </div>
+
           <div class="info-wrapper">
+
+            <h5 class="place-type" data-bind="text: venue.categories[0].name"></h5>
 
             <h5 class="contact" data-bind="if: venue.contact.formattedPhone">
 
@@ -89,7 +95,6 @@
 
             </h5>
 
-
           </div>
         </section>
       </li>
@@ -98,7 +103,7 @@
 
   <aside class="settings-wrapper">
     <form class="settings-form">
-      <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: !currentMode()"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() ==='light'"></i>
+      <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: !currentMode()"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() === 'light'"></i>
       </button>
     </form>
   </aside>
