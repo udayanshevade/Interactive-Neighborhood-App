@@ -43,23 +43,6 @@ var viewModel = function() {
             self.map.setCenter(center);
         });
 
-
-        $('.ui-search').focus(function() {
-            self.focusSearch();
-        }).focusout(function() {
-            self.focusOutSearch();
-        });
-
-        $('.ui-search').focus();
-
-        $('.ui-form').mouseover(function() {
-            self.focusSearch()
-        }).mouseout(function() {
-            if (!$('.ui-search').is(':focus')) {
-                self.focusOutSearch();
-            }
-        });
-
         this.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
 
         this.user = ko.observable('');
@@ -387,6 +370,7 @@ var viewModel = function() {
                 latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 self.geocoder.geocode({'latLng': latlng}, function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
+                        self.poi(results[0].address_components[2].long_name);
                         self.coordinates({
                             'lat': latlng.lat(),
                             'lng': latlng.lng()

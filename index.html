@@ -13,17 +13,17 @@
   <div id="mapDiv"></div>
 
   <header class="ui-overlay">
-    <form class="ui-form" data-bind="submit: updateSearch">
+    <form class="ui-form" data-bind="submit: updateSearch, event: { mouseover: focusSearch, mouseout: focusOutSearch } ">
 
       <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate"></i>
 
       <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon"></i></button>
 
-      <input class="ui-search" type="text" data-bind="textInput: searchTerm"></input>
+      <input class="ui-search" type="text" data-bind="textInput: searchTerm, hasFocus: !placesExpanded(), event: { mouseover: focusSearch, mouseout: focusOutSearch } "></input>
 
       <span class="search-in">in</span>
 
-      <input class="ui-search" type="text" data-bind="textInput: poi, hasFocus: !placesExpanded()"></input>
+      <input class="ui-search" type="text" data-bind="textInput: poi, event: { mouseover: focusSearch, mouseout: focusOutSearch }"></input>
 
     </form>
     <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }"></i>
@@ -67,7 +67,7 @@
 
         <section class="place-info" data-bind="visible: venue.venueExpanded">
 
-          <div class="info-pic">
+          <div class="info-pic" data-bind="if: venue.photoURL">
             <img data-bind="attr: { src: venue.photoURL }" alt="place-image">
           </div>
 
