@@ -45,10 +45,31 @@ var viewModel = function() {
 
         this.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
 
+        this.usersRef = this.myDataRef.child('users');
+
+        this.venuesRef = this.myDataRef.child('venues');
+
         this.user = ko.observable('');
 
-        this.loggingIn = ko.observable(false);
+        this.loggedIn = ko.observable(false);
 
+        this.loginExpanded = ko.observable(false);
+
+        if (typeof(Storage)) {
+            this.localStorageAvailable = true;
+            this.getLocalUser();
+        } else {
+            this.localStorageAvailable = false;
+        }
+
+    };
+
+    this.getLocalUser = function() {
+        var user = localStorage.user;
+        if (user) {
+            this.user(user);
+            this.login();
+        }
     };
 
     this.configFoursquare = function() {
@@ -158,7 +179,7 @@ var viewModel = function() {
 
                 }
             });
-        }
+        };
 
         this.mapBounds = new google.maps.LatLngBounds();
     };
@@ -244,6 +265,7 @@ var viewModel = function() {
                     }
                     venue.venueVisible = ko.observable(true);
                     venue.venueExpanded = ko.observable(false);
+                    venue.favorited = ko.observable(false);
                     venue.marker = self.createMarker(venue);
                     self.venuesArray.push(venue);
                 }
@@ -254,6 +276,10 @@ var viewModel = function() {
     };
 
     this.orderVenues = function() {
+        if (self.loggedIn()) {
+            console.log('importing...');
+            self.importUserFavorites(self.user());
+        }
         var venuesArray = self.venuesArray();
         var orderedVenues = venuesArray.sort(function(a, b) {
             if (a.rating > b.rating || b.rating === 'NaN') {
@@ -263,7 +289,7 @@ var viewModel = function() {
             } return 0;
         });
         self.venuesArray(orderedVenues);
-    }
+    };
 
     this.createMarker = function(place) {
         var lat = place.location.lat;
@@ -315,7 +341,7 @@ var viewModel = function() {
                 infoWindow.open(self.map, this);
                 self.map.panTo(marker.getPosition());
                 self.toggleVenueExpand(place);
-            }
+            };
         })(content, marker, self.infoWindow, place));
 
         self.mapBounds.extend(new google.maps.LatLng(lat, lng));
@@ -337,6 +363,7 @@ var viewModel = function() {
         data.marker.setMap(self.map);
         self.infoWindow.setContent(data.marker.content);
         self.infoWindow.open(self.map, data.marker);
+        self.map.setZoom(14);
         self.map.panTo(data.marker.getPosition());
     };
 
@@ -346,13 +373,28 @@ var viewModel = function() {
         var venue;
         for (var i = 0; i < len; i++) {
             venue = self.venuesArray()[i];
+            venue.venueVisible(true);
             venue.marker.setMap(self.map);
+            venue.venueExpanded(false);
         }
         self.map.fitBounds(self.mapBounds);
     };
 
-    this.favoriteVenue = function() {
-        // add backend to favorite venue
+    this.showFavorites = function(event) {
+        self.infoWindow.close();
+        var len = self.venuesArray().length;
+        var venue;
+        for (var i = 0; i < len; i++) {
+            venue = self.venuesArray()[i];
+            if (venue.favorited()) {
+                venue.marker.setMap(self.map);
+            } else {
+                venue.venueVisible(false);
+                venue.marker.setMap(null);
+            }
+            venue.venueExpanded(false);
+        }
+        self.map.fitBounds(self.mapBounds);
     };
 
     // convert latLng to a text location
@@ -433,8 +475,158 @@ var viewModel = function() {
                 venue.venueExpanded(false);
             }
             self.chooseVenue($data, event);
+        } else {
+            self.infoWindow.close();
         }
         $data.venueExpanded(!$data.venueExpanded());
+    };
+
+    this.toggleLogin = function() {
+        this.loginExpanded(!this.loginExpanded());
+    };
+
+    this.login = function() {
+        var loginPath = 'users/' + self.user();
+        var user = self.user();
+        this.myDataRef.child(loginPath).once('value', function(snapshot) {
+
+            var result = snapshot.val();
+
+            if (result) {
+                console.log('Welcome back, ' + user + '!');
+                self.importUserFavorites(user);
+            } else {
+                var users = {};
+                users[user] = 'No favorites yet.';
+
+                self.usersRef.update(users, function(error) {
+                    if (error) {
+                        console.log('Data could not be saved.');
+                    } else { console.log('Save success.'); }
+                });
+
+            }
+
+            self.loggedIn(true);
+
+            if (self.localStorageAvailable) {
+                localStorage.user = user;
+            }
+        });
+    };
+
+    this.toggleVenueFavorite = function(current) {
+        if (self.loggedIn()) {
+            self.checkUserFavorites(self.user(), current, 'favorite');
+        } else { console.log('Please login first!'); }
+    };
+
+    this.favoriteVenue = function(result, current) {
+        var user = self.user();
+        if (!result) {
+            var location = {};
+            location.id = current.id;
+            self.usersRef.child(user).push().update(location, function(error) {
+                if (error) {
+                    alert('Whoops try again later.');
+                } else {
+                    current.favorited(true);
+                }
+            });
+        } else {
+            current.favorited(false);
+        }
+    };
+
+    this.readFavorites = function() {
+        this.usersRef.once('value', function(snapshot) {
+            // var favorites = snapshot.val().favorites;
+            if (true) {
+                snapshot.forEach(function(child) {
+                    var user = child.key();
+                    self.checkUserFavorites(user);
+                });
+            } else { /* */ }
+        });
+    };
+
+    this.checkUserFavorites = function(user, current, mode) {
+        var result = false;
+        this.usersRef.child(user).once('value', function(snapshot) {
+            var venueID = current.id;
+            var favorite, storedVenueID, firebaseID, result;
+            var userFavoritesLen = snapshot.numChildren();
+
+            if (userFavoritesLen) {
+                snapshot.forEach(function(childSnapshot) {
+                    favorite = childSnapshot.val();
+                    firebaseID = childSnapshot.key();
+
+                    storedVenueID = favorite.id;
+
+                    result = (storedVenueID === venueID);
+
+                    if (result) {
+                        self.userAction(result,
+                                    current,
+                                    mode,
+                                    firebaseID,
+                                    userFavoritesLen);
+                        return true;
+                    }
+                });
+
+                if (!result) {
+                    self.userAction(result,
+                                    current,
+                                    mode);
+                }
+
+            } else {
+                self.userAction(result, current, mode);
+            }
+
+        });
+    };
+
+    this.userAction = function(result, current, mode, fID, len) {
+        var user = self.user();
+        switch (mode) {
+                case ('favorite'):
+                    if (result) {
+                        var node = user + '/' + fID;
+                        if (len > 1) {
+                            self.usersRef.child(node).remove();
+                            current.favorited(false);
+                        } else {
+                            var users = {};
+                            users[user] = 'No favorites yet.';
+                            self.usersRef.update(users, function(error) {
+                                if (error) {
+                                    console.log('Data could not be saved.');
+                                } else { console.log('Save success.'); }
+                            });
+                        }
+                        current.favorited(false);
+                    } else {
+                        self.favoriteVenue(result, current);
+                        current.favorited(true);
+                    }
+                    break;
+                case ('import'):
+                    if (result) {
+                        current.favorited(true);
+                    } else {
+                        current.favorited(false);
+                    }
+                    break;
+        }
+    };
+
+    this.importUserFavorites = function(user) {
+        self.venuesArray().forEach(function(venue) {
+            self.checkUserFavorites(user, venue, 'import');
+        });
     };
 
     // initialize view

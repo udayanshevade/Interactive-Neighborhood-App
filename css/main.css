@@ -144,7 +144,13 @@ html {
   opacity: 0.8;
 }
 
-.show-all {
+.show-options {
+  display: flex;
+  justify-content: space-around;
+}
+
+.show-all,
+.show-favorites {
   font: small-caps 1.5rem "Arial", sans-serif;
   text-align: center;
   cursor: pointer;
@@ -219,6 +225,14 @@ html {
   line-height: 2.75rem;
 }
 
+.favorited:before {
+  color: gold;
+}
+
+.placeListItemExpanded .marker-icon:before {
+  color: #f5040b;
+}
+
 .place-info {
   margin-right: 1.5rem;
   border-top: 1px dotted #8c8b8b;
@@ -289,6 +303,11 @@ html {
   position: absolute;
   right: 1rem;
   bottom: 2.5rem;
+  padding: 1rem 0;
+}
+
+.settings-form {
+  margin: 0;
 }
 
 .mode-button {
@@ -329,11 +348,13 @@ html {
   bottom: 2.5rem;
   width: 5rem;
   left: 1rem;
+  padding: 1rem 0;
   transition: all 0.3s ease-in-out;
 }
 
 .loginWrapperExpand {
   background-color: #fff;
+  box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
   left: 0;
   width: 100%;
 }
@@ -465,7 +486,8 @@ html {
   }
 
   .login-input {
-    font-size: 2.25rem;
+    font-size: 2rem;
+    margin: 0.5rem 0;
   }
 
 }

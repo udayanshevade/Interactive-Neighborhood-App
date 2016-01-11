@@ -39,7 +39,12 @@
 
     </header>
 
-    <h3 class="show-all" data-bind="click: showAll">show all</h3>
+    <div class="show-options">
+
+      <h3 class="show-all" data-bind="click: showAll">show all</h3>
+      <h3 class="show-favorites" data-bind="click: showFavorites">show favorites</h3>
+
+    </div>
 
     <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
 
@@ -57,9 +62,9 @@
 
           <div class="place-options">
 
-            <i class="icon fa fa-star place-icon" data-bind="click: $parent.favoriteVenue"></i>
+            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, css: { favorited: favorited }"></i>
 
-            <i class="icon fa fa-map-marker place-icon" data-bind="click: $parent.chooseVenue"></i>
+            <i class="icon fa fa-map-marker place-icon marker-icon" data-bind="click: $parent.chooseVenue"></i>
 
           </div>
 
@@ -100,6 +105,21 @@
       </li>
     </ul>
   </section>
+
+  <aside class="login-wrapper" data-bind="css: { loginWrapperExpand: loginExpanded }">
+    <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin">
+      <i class="fa fa-user mode-option login-icon"></i>
+    </button>
+    <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
+      <button type="submit" class="login-button">
+        <i class="fa fa-sign-in login-icon"></i>
+      </button>
+      <input class="login-input" type="text" data-bind="textInput: user, hasFocus: loginExpanded" placeholder="Create user or Login">
+      <button class="login-button" data-bind="click: toggleLogin">
+        <i class="fa fa-times login-icon"></i>
+      </button>
+    </form>
+  </aside>
 
   <aside class="settings-wrapper">
     <form class="settings-form">
