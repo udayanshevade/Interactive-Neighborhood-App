@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Neighborhood</title>
+  <title>Neighborhood Map</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -62,7 +62,7 @@
 
           <div class="place-options">
 
-            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, css: { favorited: favorited }"></i>
+            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, css: { favorited: venue.favorited }"></i>
 
             <i class="icon fa fa-map-marker place-icon marker-icon" data-bind="click: $parent.chooseVenue"></i>
 
@@ -73,7 +73,9 @@
         <section class="place-info" data-bind="visible: venue.venueExpanded">
 
           <div class="info-pic" data-bind="if: venue.photoURL">
-            <img data-bind="attr: { src: venue.photoURL }" alt="place-image">
+            <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
+            <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="place-image">
+            <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
           </div>
 
           <div class="info-wrapper">
@@ -88,8 +90,6 @@
 
             </h5>
 
-            <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
-
             <h5 class="contact" data-bind="if: venue.url">
 
               <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
@@ -101,6 +101,7 @@
             </h5>
 
           </div>
+          <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
         </section>
       </li>
     </ul>
@@ -131,7 +132,7 @@
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
   <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
-  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+  <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
   <script src="js/app.js"></script>
 
   <script>

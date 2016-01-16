@@ -5,6 +5,7 @@ var viewModel = function() {
     this.init = function() {
 
         this.configFoursquare();
+        this.configFlickr();
 
         // initialize Maps geocoder for reuse
         this.geocoder = new google.maps.Geocoder();
@@ -83,6 +84,17 @@ var viewModel = function() {
         };
     };
 
+    this.configFlickr = function() {
+        this.Flickr = {
+            key: "&api_key=e3ce05cd3fe0a8e29946f1afa5afc492",
+            secret: "1c5a3dd9614db005",
+            method: "&method=flickr.photos.search",
+            APIbaseURL: "https://api.flickr.com/services/rest/?format=json",
+            sort: "&sort=interestingness-desc",
+            mode: "&nojsoncallback=1"
+        };
+    };
+
     this.expandPlaces = function() {
         self.placesExpanded(!self.placesExpanded());
     };
@@ -148,8 +160,7 @@ var viewModel = function() {
         }
         // Geolocation error handling
         this.handleLocationError = function() {
-            // TODO: replace with actual error handling
-            console.log('Error: The Geolocation service failed.');
+            console.log('Error: Primary geolocation failed.');
             var result = $.ajax({
                 url: 'http://freegeoip.net/json/',
                 success: function(result) {
@@ -223,7 +234,7 @@ var viewModel = function() {
         var venue;
         for (var i = 0; i < len; i++) {
             venue = self.venuesArray()[i];
-            venue.marker.setMap(null);
+            venue.marker.marker.setMap(null);
         }
     };
 
@@ -237,13 +248,15 @@ var viewModel = function() {
             filter = '&section=' + self.Foursquare.defaultQuery();
         }
         var url = self.Foursquare.APIbaseURL + 'v2/venues/explore?' + 'client_id=' + self.Foursquare.cID + '&client_secret=' + self.Foursquare.cSecret + '&v=' + self.Foursquare.version + filter + '&radius=' + self.Foursquare.radius() + '&ll=' + self.latLng() + '&time=any&day=any&limit=35&venuePhotos=1';
-        $.ajax({
-            "url": url,
-            "success": function(data) {
+        $.getJSON(url)
+            .success(function(data) {
                 var venue;
                 var venues = data.response.groups[0].items;
                 for (var v = 0, len = venues.length; v < len; v++) {
                     venue = venues[v].venue;
+
+                    var photo;
+
                     if (!venue.hours) {
                         venue.hours = {
                             isOpen: false,
@@ -259,25 +272,37 @@ var viewModel = function() {
                             'tier': 0
                         };
                     }
-                    if (venue.featuredPhotos) {
-                        var photo = venue.featuredPhotos.items[0];
-                        venue.photoURL = photo.prefix + '250x100' + photo.suffix;
+
+                    venue.currentPic = 0;
+
+                    var photos = venue.featuredPhotos;
+                    if (photos && photos.items.length) {
+                        var initialPhoto = photos.items[venue.currentPic];
+                        initialPhoto.size = '250x100';
+                        venue.photoURL = ko.observable(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
+                        venue.infowindowPic = venue.photoURL();
                     }
+
                     venue.venueVisible = ko.observable(true);
                     venue.venueExpanded = ko.observable(false);
                     venue.favorited = ko.observable(false);
-                    venue.marker = self.createMarker(venue);
-                    self.venuesArray.push(venue);
-                }
-                self.orderVenues();
-            }
-        });
 
+                    venue.marker = new self.Marker(venue);
+                    self.venuesArray.push(venue);
+
+                    console.log(venue);
+                }
+            setTimeout(function() {
+                self.orderVenues();
+                self.venuesArray().forEach(function(venue) {
+                    self.getPhotos(venue);
+                });
+            }, 1000);
+        });
     };
 
     this.orderVenues = function() {
         if (self.loggedIn()) {
-            console.log('importing...');
             self.importUserFavorites(self.user());
         }
         var venuesArray = self.venuesArray();
@@ -291,66 +316,106 @@ var viewModel = function() {
         self.venuesArray(orderedVenues);
     };
 
-    this.createMarker = function(place) {
+    this.getPhotos = function(place) {
+        var images;
         var lat = place.location.lat;
         var lng = place.location.lng;
-        var pos = {
-            "lat": lat,
-            "lng": lng
+
+        var url = self.Flickr.APIbaseURL + self.Flickr.key + self.Flickr.method + self.Flickr.sort + self.Flickr.mode + '&lat=' + lat + '&lon=' + lng + '&text=' + place.name;
+
+        $.getJSON(url).success(function(data) {
+            var photos = data.photos.photo;
+            if (photos.length) {
+                var imagePrefix, imageSuffix;
+
+                photos.forEach(function(photoData) {
+                    imagePrefix = 'https://farm' + photoData.farm + '.staticflickr.com/'
+                    imageSuffix = photoData.server + '/' + photoData.id + '_' + photoData.secret + '.jpg';
+                    place.featuredPhotos.items.push({
+                        prefix: imagePrefix,
+                        suffix: imageSuffix,
+                        size: ''
+                    });
+                });
+
+            } else {
+                console.log('Flickr image for ' + place.name + ' is not provided.');
+            }
+        }).fail(function(data) {
+                console.log("Flickr Failed.");
+        });
+    };
+
+    this.Marker = function(place) {
+        var that = this;
+
+        this.lat = place.location.lat;
+        this.lng = place.location.lng;
+        this.pos = {
+            "lat": this.lat,
+            "lng": this.lng
         };
 
-        var icon = place.categories[0].icon;
-        var bg = 'bg_';
-        var size = '32';
-        var img = icon.prefix;
-        var ext = icon.suffix;
+        this.name = place.name;
 
-        var iconImage = img + bg + size + ext;
+        this.icon = place.categories[0].icon;
+        this.bg = 'bg_';
+        this.size = '32';
+        var img = this.icon.prefix;
+        var ext = this.icon.suffix;
 
-        var marker = new google.maps.Marker({
+        this.iconImage = img + this.bg + this.size + ext;
+
+        this.marker = new google.maps.Marker({
             map: self.map,
-            position: pos,
-            icon: iconImage,
+            position: this.pos,
+            icon: this.iconImage,
             size: new google.maps.Size(5, 5)
         });
 
-        var placeRating = place.rating || 'No rating';
-        var placePrice = new Array(place.price.tier + 1).join('$');
+        this.placeRating = place.rating || 'No rating';
+        this.placePrice = new Array(place.price.tier + 1).join('$');
 
-        var placePhoto = place.photoURL || '';
-        var placeImage;
+        var placePhoto = place.infowindowPic || '';
         if (placePhoto) {
-            placeImage = '<img class="infowindow-pic" src=' + placePhoto + '>';
-        } else { placeImage = placePhoto; }
+            this.placeImage = '<img class="infowindow-img" src=' + placePhoto + '>';
+        } else { this.placeImage = placePhoto; }
 
-        var content = '<div class="infowindow"><h3 class="infowindow-title">' + place.name + '</h3><div class="infowindow-pic">' + placeImage + '</div><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + placeRating + '</h4><h4 class="infowindow-price">Price: ' + placePrice + '</h4></div></div>';
+        this.marker.content = '<div class="infowindow"><h3 class="infowindow-title">' + this.name + '</h3><div class="infowindow-pic">' + this.placeImage + '</div><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div>';
 
-        marker.content = content;
-
-        marker.toggleAnimation = function() {
-            if (marker.getAnimation() !== null) {
-                marker.setAnimation(null);
-            } else {
-                marker.setAnimation(google.maps.Animation.BOUNCE);
-            }
-        };
-
-        google.maps.event.addListener(marker, 'click', (function(content, marker, infoWindow, place){
+        google.maps.event.addListener(this.marker, 'click', (function(content, marker, infoWindow, place){
             return function() {
                 infoWindow.setContent(marker.content);
                 infoWindow.open(self.map, this);
                 self.map.panTo(marker.getPosition());
                 self.toggleVenueExpand(place);
             };
-        })(content, marker, self.infoWindow, place));
+        })(this.marker.content, this.marker, self.infoWindow, place));
 
-        self.mapBounds.extend(new google.maps.LatLng(lat, lng));
+        self.mapBounds.extend(new google.maps.LatLng(that.lat, that.lng));
         // fit the map to the new marker
-        this.map.fitBounds(self.mapBounds);
+        self.map.fitBounds(self.mapBounds);
         // center the map
-        this.map.setCenter(self.mapBounds.getCenter());
-        // return marker
-        return marker;
+        self.map.setCenter(self.mapBounds.getCenter());
+    };
+
+    this.cyclePics = function(direction, data) {
+        var photos = data.featuredPhotos;
+        if (photos && photos.items.length) {
+            var photosLen = photos.items.length;
+            if (direction === 'backwards') {
+                if (data.currentPic > 0) {
+                    data.currentPic--;
+                } else { data.currentPic = photosLen - 1; }
+            } else {
+                if (data.currentPic < photosLen - 1) {
+                    data.currentPic++;
+                } else { data.currentPic = 0; }
+            }
+            var initialPhoto = photos.items[data.currentPic];
+            data.photoURL(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
+        }
+        console.log(data.currentPic);
     };
 
     this.chooseVenue = function(data, event) {
@@ -360,11 +425,11 @@ var viewModel = function() {
             venue = self.venuesArray()[i];
             venue.venueExpanded(false);
         }
-        data.marker.setMap(self.map);
-        self.infoWindow.setContent(data.marker.content);
-        self.infoWindow.open(self.map, data.marker);
+        data.marker.marker.setMap(self.map);
+        self.infoWindow.setContent(data.marker.marker.content);
+        self.infoWindow.open(self.map, data.marker.marker);
         self.map.setZoom(14);
-        self.map.panTo(data.marker.getPosition());
+        self.map.panTo(data.marker.marker.getPosition());
     };
 
     this.showAll = function(event) {
@@ -374,7 +439,7 @@ var viewModel = function() {
         for (var i = 0; i < len; i++) {
             venue = self.venuesArray()[i];
             venue.venueVisible(true);
-            venue.marker.setMap(self.map);
+            venue.marker.marker.setMap(self.map);
             venue.venueExpanded(false);
         }
         self.map.fitBounds(self.mapBounds);
@@ -387,10 +452,10 @@ var viewModel = function() {
         for (var i = 0; i < len; i++) {
             venue = self.venuesArray()[i];
             if (venue.favorited()) {
-                venue.marker.setMap(self.map);
+                venue.marker.marker.setMap(self.map);
             } else {
                 venue.venueVisible(false);
-                venue.marker.setMap(null);
+                venue.marker.marker.setMap(null);
             }
             venue.venueExpanded(false);
         }
@@ -456,10 +521,10 @@ var viewModel = function() {
             venueName = venue.name.toLowerCase();
             if (venueName.indexOf(search) >= 0) {
                 venue.venueVisible(true);
-                venue.marker.setMap(self.map);
+                venue.marker.marker.setMap(self.map);
             } else {
                 venue.venueVisible(false);
-                venue.marker.setMap(null);
+                venue.marker.marker.setMap(null);
             }
         }
     };

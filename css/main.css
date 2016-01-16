@@ -230,12 +230,36 @@ html {
 }
 
 .placeListItemExpanded .marker-icon:before {
-  color: #f5040b;
+  color: darkred;
 }
 
 .place-info {
   margin-right: 1.5rem;
   border-top: 1px dotted #8c8b8b;
+}
+
+.info-pic {
+  display: flex;
+  justify-content: space-around;
+}
+
+.place-image {
+  max-width: 80%;
+  height: 150px;
+}
+
+.info-pic .fa {
+  padding: 1rem;
+  align-self: center;
+}
+
+.info-pic .fa:before {
+  opacity: 0.3;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.info-pic .fa:hover:before {
+  opacity: 1;
 }
 
 .info-wrapper {
@@ -249,7 +273,7 @@ html {
 }
 
 .open-status {
-  display: inline-block;
+  margin: 0.5rem 0;
   font: 1.25rem "Arial", sans-serif;
 }
 
@@ -423,6 +447,14 @@ html {
   justify-content: space-around;
 }
 
+.infowindow-pic {
+  max-width: 100%;
+}
+
+.infowindow-fa {
+  align-self: center;
+}
+
 .infowindow-rating {
   font: 600 1.35rem "Open Sans", sans-serif;
   padding-right: 1rem;
@@ -479,6 +511,10 @@ html {
   .place-name {
     font-size: 1.5rem;
     letter-spacing: 0.1rem;
+  }
+
+  .info-pic {
+    width: 80%;
   }
 
   .loginWrapperExpand {
