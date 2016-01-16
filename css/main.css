@@ -23,6 +23,10 @@ html {
   opacity: 0.75;
 }
 
+.fade {
+  opacity: 0.5;
+}
+
 .map-marker-hover {
   opacity: 1;
 }
@@ -62,7 +66,7 @@ html {
 }
 
 .ui-search {
-  font: 600 1.5rem "Arial", sans-serif;
+  font: 600 1.6rem "Arial", sans-serif;
   letter-spacing: 0.1rem;
   width: 90px;
   font-variant: small-caps;
@@ -73,7 +77,7 @@ html {
 }
 
 .search-in {
-  font: small-caps 1.25rem "Arial", sans-serif;
+  font: small-caps 1.45rem "Arial", sans-serif;
   padding: 0 0.5rem;
 }
 
@@ -122,7 +126,7 @@ html {
 }
 
 .ui-filter {
-  font: 1.5rem "Arial";
+  font: 1.6rem "Arial";
   font-variant: small-caps;
   width: 200px;
   border: 0;
@@ -151,7 +155,8 @@ html {
 
 .show-all,
 .show-favorites {
-  font: small-caps 1.5rem "Arial", sans-serif;
+  font: small-caps 1.6rem "Arial", sans-serif;
+  letter-spacing: 0.1rem;
   text-align: center;
   cursor: pointer;
 }
@@ -170,6 +175,7 @@ html {
 .place-list-item {
   list-style: none;
   padding: 1rem 0 1rem 2rem;
+  border-bottom: 1px dashed #777;
 }
 
 .place-list-item:hover,
@@ -183,8 +189,7 @@ html {
 }
 
 .place-name {
-  display: inline-block;
-  font: 600 small-caps 1.35rem/2.75rem "Arial", sans-serif;
+  font: 600 small-caps 1.6rem/2.75rem "Arial", sans-serif;
   letter-spacing: 0.05rem;
 }
 
@@ -269,25 +274,27 @@ html {
 
 .place-type {
   display: block;
-  font: 1.25rem "Arial", sans-serif;
+  font: 1.45rem "Arial", sans-serif;
 }
 
 .open-status {
   margin: 0.5rem 0;
-  font: 1.25rem "Arial", sans-serif;
+  font: 1.45rem "Arial", sans-serif;
 }
 
-.contact {
-  font: 1.25rem "Arial", sans-serif;
+.contact-text {
+  display: inline-block;
+  font: 1.45rem "Arial", sans-serif;
+  letter-spacing: 0.1rem;
 }
 
 .contact-icon {
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   padding-right: 0.75rem;
 }
 
 .contact-link {
-  font: 1.25rem "Arial", sans-serif;
+  font: 1.45rem "Arial", sans-serif;
   display: inline-block;
   color: #333;
   text-decoration: none;
@@ -464,6 +471,42 @@ html {
   font: 600 1.35rem "Open Sans", sans-serif;
 }
 
+.alert-modal {
+  position: absolute;
+  width: 300px;
+  min-height: 200px;
+  background-color: #fff;
+  box-shadow: 1px 2px 6px rgba(0,0,0,0.3);
+  left: calc(50% - 150px);
+  top: -100vh;
+  transition: top 0.3s ease-in-out;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.alert {
+  top: calc(50% - 100px);
+}
+
+.alert-title {
+  font: 400 small-caps 2rem "Open Sans", sans-serif;
+}
+
+.alert-details {
+  font: 400 1.5rem/1.25 "Open Sans", sans-serif;
+}
+
+.alert-close {
+  text-align: right;
+  display: block;
+}
+
+.alert-close:before {
+  font-size: 1.5rem;
+}
+
 @media screen and (min-width: 600px) {
 
   .icon {
@@ -509,6 +552,7 @@ html {
   }
 
   .place-name {
+    display: inline-block;
     font-size: 1.5rem;
     letter-spacing: 0.1rem;
   }

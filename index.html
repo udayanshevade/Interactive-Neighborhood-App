@@ -10,7 +10,7 @@
 </head>
 
 <body data-bind="css: { dark: currentMode() }">
-  <div id="mapDiv"></div>
+  <div id="mapDiv" data-bind="css: { fade: alerting } "></div>
 
   <header class="ui-overlay">
     <form class="ui-form" data-bind="submit: updateSearch, event: { mouseover: focusSearch, mouseout: focusOutSearch } ">
@@ -82,23 +82,25 @@
 
             <h5 class="place-type" data-bind="text: venue.categories[0].name"></h5>
 
-            <h5 class="contact" data-bind="if: venue.contact.formattedPhone">
+            <div class="contact">
+              <h5 class="contact-text" data-bind="if: venue.contact.formattedPhone">
 
-              <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
-                <i class="fa fa-phone contact-icon"></i>
-              </a>
+                <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
+                  <i class="fa fa-phone contact-icon"></i>
+                </a>
 
-            </h5>
+              </h5>
 
-            <h5 class="contact" data-bind="if: venue.url">
+              <h5 class="contact-text" data-bind="if: venue.url">
 
-              <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
+                <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
 
-                <i class="fa fa-link contact-icon website-icon"></i>
+                  <i class="fa fa-link contact-icon website-icon"></i>
 
-              </a>
+                </a>
 
-            </h5>
+              </h5>
+            </div>
 
           </div>
           <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
@@ -127,6 +129,14 @@
       <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: !currentMode()"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() === 'light'"></i>
       </button>
     </form>
+  </aside>
+
+  <aside class="alert-modal" data-bind="css: { alert: alerting } ">
+    <div class="modal-body">
+      <i class="alert-close fa fa-times" data-bind="click: toggleAlert"></i>
+      <h3 class="alert-title" data-bind="text: alertTitle"></h3>
+      <h5 class="alert-details" data-bind="text: alertDetails"></h5>
+    </div>
   </aside>
 
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>

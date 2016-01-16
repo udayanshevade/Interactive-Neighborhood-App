@@ -4,13 +4,15 @@ var viewModel = function() {
 
     this.init = function() {
 
+        // configure API requirements
         this.configFoursquare();
         this.configFlickr();
 
-        // initialize Maps geocoder for reuse
+        // initialize Google Maps geocoder for reuse
         this.geocoder = new google.maps.Geocoder();
 
         // initialize observables
+
         this.searchFocus = ko.observable(true);
 
         this.searchTerm = ko.observable('Popular');
@@ -44,6 +46,11 @@ var viewModel = function() {
             self.map.setCenter(center);
         });
 
+        this.alerting = ko.observable(false);
+
+        this.alertTitle = ko.observable();
+        this.alertDetails = ko.observable();
+
         this.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
 
         this.usersRef = this.myDataRef.child('users');
@@ -70,6 +77,10 @@ var viewModel = function() {
         if (user) {
             this.user(user);
             this.login();
+        } else {
+            this.alertTitle('welcome');
+            this.alertDetails('Please feel free to explore the map, create a user profile, and favorite locations.');
+            this.toggleAlert('open', 'temporary');
         }
     };
 
@@ -108,6 +119,18 @@ var viewModel = function() {
         $('.ui-filter').focus();
         $('.ui-form').removeClass('ui-focus-opac');
         $('.ui-filter-form').addClass('ui-focus-opac');
+    };
+
+    this.toggleAlert = function(mode, temp) {
+        if (mode === 'open') { this.alerting(true); }
+        else { this.alerting(false); }
+
+        if (temp === 'temporary') {
+            setTimeout(function() {
+                self.alerting(false);
+            }, 15000);
+        }
+
     };
 
     this.initializeMap = function() {
@@ -160,7 +183,11 @@ var viewModel = function() {
         }
         // Geolocation error handling
         this.handleLocationError = function() {
-            console.log('Error: Primary geolocation failed.');
+
+            this.alertTitle('geolocation error')
+            this.alertDetails('Please enable browser geolocation and try again for more accurate results, or attempt a new search.');
+            this.toggleAlert('open');
+
             var result = $.ajax({
                 url: 'http://freegeoip.net/json/',
                 success: function(result) {
@@ -243,11 +270,13 @@ var viewModel = function() {
         var filter;
         if (self.searchTerm() &&
             self.searchTerm().toLowerCase() !== 'popular') {
-            filter = '&query=' + self.searchTerm();
+            filter = '&query=' + self.searchTerm().split(' ').join('&');
         } else {
             filter = '&section=' + self.Foursquare.defaultQuery();
         }
+
         var url = self.Foursquare.APIbaseURL + 'v2/venues/explore?' + 'client_id=' + self.Foursquare.cID + '&client_secret=' + self.Foursquare.cSecret + '&v=' + self.Foursquare.version + filter + '&radius=' + self.Foursquare.radius() + '&ll=' + self.latLng() + '&time=any&day=any&limit=35&venuePhotos=1';
+
         $.getJSON(url)
             .success(function(data) {
                 var venue;
@@ -289,8 +318,6 @@ var viewModel = function() {
 
                     venue.marker = new self.Marker(venue);
                     self.venuesArray.push(venue);
-
-                    console.log(venue);
                 }
             setTimeout(function() {
                 self.orderVenues();
@@ -298,6 +325,10 @@ var viewModel = function() {
                     self.getPhotos(venue);
                 });
             }, 1000);
+        }).error(function(data) {
+            self.alertTitle('foursquare error');
+            self.alertDetails('There was an error with the Foursquare query. Please try again momentarily, or refine the query.');
+            self.toggleAlert('open');
         });
     };
 
@@ -331,6 +362,11 @@ var viewModel = function() {
                 photos.forEach(function(photoData) {
                     imagePrefix = 'https://farm' + photoData.farm + '.staticflickr.com/'
                     imageSuffix = photoData.server + '/' + photoData.id + '_' + photoData.secret + '.jpg';
+                    if (!place.featuredPhotos) {
+                        place.featuredPhotos = {
+                            'items': []
+                        }
+                    }
                     place.featuredPhotos.items.push({
                         prefix: imagePrefix,
                         suffix: imageSuffix,
@@ -342,7 +378,9 @@ var viewModel = function() {
                 console.log('Flickr image for ' + place.name + ' is not provided.');
             }
         }).fail(function(data) {
-                console.log("Flickr Failed.");
+                self.alertTitle('flickr error');
+                self.alertDetails('There was a problem harvesting Flickr photos for the venues. Please try again later.');
+                self.toggleAlert('open', 'temporary');
         });
     };
 
@@ -364,7 +402,7 @@ var viewModel = function() {
         var img = this.icon.prefix;
         var ext = this.icon.suffix;
 
-        this.iconImage = img + this.bg + this.size + ext;
+        this.iconImage = (img + this.bg + this.size + ext) || 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 
         this.marker = new google.maps.Marker({
             map: self.map,
@@ -374,7 +412,7 @@ var viewModel = function() {
         });
 
         this.placeRating = place.rating || 'No rating';
-        this.placePrice = new Array(place.price.tier + 1).join('$');
+        this.placePrice = new Array(place.price.tier + 1).join('$') || 'No price';
 
         var placePhoto = place.infowindowPic || '';
         if (placePhoto) {
@@ -415,7 +453,6 @@ var viewModel = function() {
             var initialPhoto = photos.items[data.currentPic];
             data.photoURL(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
         }
-        console.log(data.currentPic);
     };
 
     this.chooseVenue = function(data, event) {
@@ -550,40 +587,67 @@ var viewModel = function() {
         this.loginExpanded(!this.loginExpanded());
     };
 
+    this.contains = function(target, crosscheck) {
+        var val = false;
+        for (var l = 0, len = crosscheck.length; l < len; l++) {
+            if (target.indexOf(crosscheck.charAt(l)) > -1) {
+                val = true;
+            }
+        }
+        return val;
+    };
+
     this.login = function() {
         var loginPath = 'users/' + self.user();
         var user = self.user();
-        this.myDataRef.child(loginPath).once('value', function(snapshot) {
+        if (user && !self.contains(user, ' .#$[]')) {
+            this.myDataRef.child(loginPath).once('value', function(snapshot) {
 
-            var result = snapshot.val();
+                var result = snapshot.val();
 
-            if (result) {
-                console.log('Welcome back, ' + user + '!');
-                self.importUserFavorites(user);
-            } else {
-                var users = {};
-                users[user] = 'No favorites yet.';
+                if (result) {
+                    self.alertTitle('welcome back, ' + user);
+                    self.alertDetails('You are logged in. Please feel free to explore and favorite any locations you find enjoyable.');
+                    self.toggleAlert('open', 'temporary');
+                    self.importUserFavorites(user);
+                } else {
+                    var users = {};
+                    users[user] = 'No favorites yet.';
+                    self.usersRef.update(users, function(error) {
+                        if (error) {
+                            self.alertTitle('login error');
+                            self.alertDetails('The user profile could not be created at this time. Please try again later.');
+                            self.toggleAlert('open', 'temporary');
+                        } else {
+                            self.alertTitle('welcome, ' + user);
+                            self.alertDetails('The user profile was successfully created. Please feel free to explore and favorite any locations around the world you find enjoyable');
+                            self.toggleAlert('open', 'temporary');
+                        }
+                    });
 
-                self.usersRef.update(users, function(error) {
-                    if (error) {
-                        console.log('Data could not be saved.');
-                    } else { console.log('Save success.'); }
-                });
+                }
 
-            }
+                self.loggedIn(true);
 
-            self.loggedIn(true);
-
-            if (self.localStorageAvailable) {
-                localStorage.user = user;
-            }
-        });
+                if (self.localStorageAvailable) {
+                    localStorage.user = user;
+                }
+            });
+        } else {
+            self.alertTitle('user error');
+            self.alertDetails('Please use a valid name. Paths must be non-empty strings, not containing the following characters: ". # $ [ ]".');
+            self.toggleAlert('open', 'temporary');
+        }
     };
 
     this.toggleVenueFavorite = function(current) {
         if (self.loggedIn()) {
             self.checkUserFavorites(self.user(), current, 'favorite');
-        } else { console.log('Please login first!'); }
+        } else {
+            self.alertTitle('login required');
+            self.alertDetails('Please login or create a user profile first.');
+            self.toggleAlert('open', 'temporary');
+        }
     };
 
     this.favoriteVenue = function(result, current) {
@@ -593,7 +657,9 @@ var viewModel = function() {
             location.id = current.id;
             self.usersRef.child(user).push().update(location, function(error) {
                 if (error) {
-                    alert('Whoops try again later.');
+                    self.alertTitle('firebase error');
+                    self.alertDetails('There was an error while handling user favorites. Please try again later.');
+                    self.toggleAlert();
                 } else {
                     current.favorited(true);
                 }
@@ -668,8 +734,10 @@ var viewModel = function() {
                             users[user] = 'No favorites yet.';
                             self.usersRef.update(users, function(error) {
                                 if (error) {
-                                    console.log('Data could not be saved.');
-                                } else { console.log('Save success.'); }
+                                    self.alertTitle('favorite error');
+                                    self.alertDetails('There was an error in saving the user favorite. Please try again later.');
+                                    self.toggleAlert('open', 'temporary');
+                                }
                             });
                         }
                         current.favorited(false);
