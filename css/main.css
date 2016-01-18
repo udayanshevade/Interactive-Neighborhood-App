@@ -22,6 +22,36 @@ html {
   font-size: 65%;
 }
 
+.fa-spinner {
+  font-size: 4rem;
+  position: absolute;
+  z-index: 10;
+  top: calc(50% - 2rem);
+  left: calc(50% - 2rem);
+}
+
+@keyframes spinning {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spinning {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  animation: spinning linear 1s infinite;
+  -webkit-animation: spinning linear 1s infinite;
+}
 
 /*
  * Mobile styles
@@ -80,6 +110,7 @@ html {
   border: 0;
   border-bottom: 1px solid #333;
   color: #333;
+  opacity: 0.2;
   transition: all 0.3s ease-in-out;
 }
 
@@ -200,23 +231,6 @@ html {
   letter-spacing: 0.05rem;
 }
 
-.foursquare-link {
-  display: flex;
-  text-decoration: none;
-  color: #333;
-}
-
-.foursquare-text {
-  display: inline-block;
-  align-self: center;
-  font: small-caps 1.5rem "Open Sans" sans-serif;
-}
-
-.foursquare-logo {
-  align-self: center;
-  width: 2.5rem;
-}
-
 .place-rating {
   display: inline-block;
   font: 600 1.5rem/2.75rem "Open Sans", sans-serif;
@@ -265,36 +279,7 @@ html {
 
 .place-info {
   margin-right: 1.5rem;
-  padding: 2rem;
-}
-
-.info-pic-wrapper {
-  display: flex;
-  justify-content: center;
-}
-
-.info-pic {
-  display: flex;
-  justify-content: space-around;
-}
-
-.place-image {
-  max-width: 80%;
-  height: 150px;
-}
-
-.info-pic .fa {
-  padding: 1rem;
-  align-self: center;
-}
-
-.info-pic .fa:before {
-  opacity: 0.3;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.info-pic .fa:hover:before {
-  opacity: 1;
+  padding: 0 2rem;
 }
 
 /* Venue info */
@@ -311,12 +296,6 @@ html {
 .place-type {
   display: block;
   font: small-caps 600 1.45rem "Open Sans", sans-serif;
-}
-
-.open-status {
-  display: inline-block;
-  margin: 0 0 2rem;
-  font: 1.45rem "Open Sans", sans-serif;
 }
 
 .contact-text {
@@ -354,9 +333,65 @@ html {
   padding-right: 0;
 }
 
+.open-status {
+  display: inline-block;
+  margin: 0 0 1rem;
+  font: 1.45rem "Open Sans", sans-serif;
+}
+
+.foursquare-link {
+  display: block;
+  text-align: right;
+  margin: 0 0 1rem;
+  display: flex;
+  text-decoration: none;
+  color: #333;
+}
+
+.foursquare-text {
+  display: inline-block;
+  align-self: center;
+  font: small-caps 1.5rem "Open Sans" sans-serif;
+}
+
+.foursquare-logo {
+  align-self: center;
+  width: 2.5rem;
+}
+
+.info-pic-wrapper {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.info-pic {
+  display: flex;
+  justify-content: space-around;
+}
+
+.place-image {
+  max-width: 80%;
+  height: 150px;
+}
+
+.info-pic .fa {
+  padding: 1rem;
+  align-self: center;
+}
+
+.info-pic .fa:before {
+  opacity: 0.3;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.info-pic .fa:hover:before {
+  opacity: 1;
+}
+
 .yelp-title {
   margin: 0.5rem 0;
-  font: small-caps 1.25rem "Open Sans", sans-serif;
+  font: small-caps 1.35rem "Open Sans", sans-serif;
 }
 
 .yelp-review-wrapper {
@@ -542,7 +577,6 @@ html {
 .infowindow-price {
   font: 600 1.35rem "Open Sans", sans-serif;
 }
-
 
 /* alert modal */
 

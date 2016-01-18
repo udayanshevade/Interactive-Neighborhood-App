@@ -8,6 +8,8 @@ var viewModel = function() {
      */
     this.init = function() {
 
+        this.loading = ko.observable(true);
+
         // configure API requirements
         this.configFoursquare();
         this.configFlickr();
@@ -40,6 +42,11 @@ var viewModel = function() {
 
         // binds user filter input for returned venues
         this.filterQuery = ko.observable('');
+
+        // binds empty location of interest
+        this.anchorMarker = ko.observable();
+
+
 
         // binds array of returned venues
         this.venuesArray = ko.observableArray();
@@ -105,6 +112,19 @@ var viewModel = function() {
             this.alertTitle('welcome');
             this.alertDetails('Please feel free to explore the map, create a user profile, and favorite locations.');
             this.toggleAlert('open', 'temporary');
+        }
+    };
+
+
+
+    /**
+     * Fetches last searched location
+     */
+    this.getLastSearch = function() {
+        var lastPOI = localStorage.lastPOI;
+        var lastTerm = localStorage.lastTerm;
+        if (lastPOI && lastTerm) {
+            // TODO: get last search
         }
     };
 
@@ -186,7 +206,7 @@ var viewModel = function() {
             },
             error: function() {
                 self.alertTitle('Yelp error');
-                self.alertDetails('There was an error with the Yelp API. Please try again.');
+                self.alertDetails('There was an error with the Yelp API. Some or all data may be unavailable. Please try again.');
                 self.toggleAlert('open');
             }
         };
@@ -271,6 +291,11 @@ var viewModel = function() {
                 // initialize a blank infoWindow for later use
                 this.infoWindow = new google.maps.InfoWindow();
 
+                // listens for infowindow closing
+                google.maps.event.addListener(self.infoWindow, 'closeclick', function() {
+                    self.toggleMarkerBounce();
+                });
+
                 // enable the map using the geolocated coordinates
                 self.geoLocate(pos.lat, pos.lng);
 
@@ -351,6 +376,7 @@ var viewModel = function() {
      * User update of search
      */
     this.updateSearch = function() {
+        self.loading(true);
         // enable Google Maps API Places Service
         var service = new google.maps.places.PlacesService(self.map);
         // define search query with user point of interest
@@ -380,8 +406,29 @@ var viewModel = function() {
         self.hideMarkers();
         // empty current array of venues
         self.venuesArray([]);
+
         // define new map bounds
         self.mapBounds = new google.maps.LatLngBounds();
+
+        // define new central anchor marker
+        self.anchorMarker(new google.maps.Marker({
+            map: self.map,
+            position: {
+                "lat": self.coordinates().lat,
+                "lng": self.coordinates().lng
+            },
+            icon: 'img/target.svg',
+            size: new google.maps.Size(3, 3),
+            animation: google.maps.Animation.DROP
+        }));
+
+        google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
+            return function() {
+                infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
+                infoWindow.open(self.map, this);
+                self.map.panTo(marker.getPosition());
+            };
+        })(self.anchorMarker(), self.infoWindow));
         // get new venue data
         self.getVenuesData();
     };
@@ -392,6 +439,10 @@ var viewModel = function() {
      */
     this.hideMarkers = function() {
         var len = self.venuesArray().length;
+        if (self.anchorMarker()) {
+            self.anchorMarker().setMap(null);
+            self.anchorMarker('');
+        }
         var venue;
         for (var i = 0; i < len; i++) {
             venue = self.venuesArray()[i];
@@ -495,6 +546,7 @@ var viewModel = function() {
                 self.venuesArray().forEach(function(venue) {
                     self.getPhotos(venue);
                 });
+                self.loading(false);
             }, 750);
         }).error(function(data) {
             // toggle alert if the foursquare response fails
@@ -530,7 +582,9 @@ var viewModel = function() {
         // get yelp data for each venue
         for (var i = 0, len = orderedVenues.length; i < len; i++) {
             venue = orderedVenues[i];
-            self.getYelpData(venue);
+            if (venue.contact.phone) {
+                self.getYelpData(venue);
+            }
         }
 
     };
@@ -602,22 +656,27 @@ var viewModel = function() {
         // encapsulate title
         this.name = place.name;
 
-        // encapsulate icon properties
-        this.icon = place.categories[0].icon;
-        this.bg = 'bg_';
-        this.size = '32';
-        var img = this.icon.prefix;
-        var ext = this.icon.suffix;
+        if (place && place.categories) {
+            // encapsulate icon properties
+            this.icon = place.categories[0].icon;
+            var bg = 'bg_';
+            this.size = '32';
+            var img = this.icon.prefix;
+            var ext = this.icon.suffix;
 
-        // use custom icon if defined or default marker icon as a fallback
-        this.iconImage = (img + this.bg + this.size + ext) || 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+            // use custom icon if defined or default marker icon as a fallback
+            this.iconImage = (img + bg + this.size + ext);
+        } else {
+            this.iconImage = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+        }
 
         // create new Google Maps marker
         this.marker = new google.maps.Marker({
             map: self.map,
             position: this.pos,
             icon: this.iconImage,
-            size: new google.maps.Size(5, 5)
+            size: new google.maps.Size(5, 5),
+            animation: google.maps.Animation.DROP
         });
 
         // encapsulate rating
@@ -640,6 +699,7 @@ var viewModel = function() {
                 infoWindow.open(self.map, this);
                 self.map.panTo(marker.getPosition());
                 self.toggleVenueExpand(place);
+                self.toggleMarkerBounce(true, marker);
             };
         })(this.marker.content, this.marker, self.infoWindow, place));
 
@@ -686,13 +746,36 @@ var viewModel = function() {
             venue = self.venuesArray()[i];
             venue.venueExpanded(false);
         }
+        // set marker map property if undefined
         data.marker.marker.setMap(self.map);
+        // define specific content of infowindow
         self.infoWindow.setContent(data.marker.marker.content);
+        // toggle marker animation
+        self.toggleMarkerBounce(true, data.marker.marker);
+        // open infowindow
         self.infoWindow.open(self.map, data.marker.marker);
+        // zoom and pan
         self.map.setZoom(14);
         self.map.panTo(data.marker.marker.getPosition());
     };
 
+
+
+    /**
+     * Toggles Marker animation
+     */
+    this.toggleMarkerBounce = function(state, marker) {
+        // or end all marker animations
+        var venue, venues = self.venuesArray();
+        for (var i = 0, len = venues.length; i<len; i++) {
+            venue = self.venuesArray()[i];
+            venue.marker.marker.setAnimation(null);
+        }
+        // toggle specific marker to bounce
+        if (state) {
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+    };
 
 
     /**
@@ -757,6 +840,7 @@ var viewModel = function() {
                             'lat': latlng.lat(),
                             'lng': latlng.lng()
                         });
+                        self.loading(true);
                         self.updateLatLng();
                     }
                 });
@@ -773,6 +857,30 @@ var viewModel = function() {
      */
     this.getLocations = function(result) {
         self.hideMarkers();
+
+        if (self.anchorMarker()) {
+            self.anchorMarker().setMap(null);
+            self.anchorMarker('');
+        }
+
+        self.anchorMarker(new google.maps.Marker({
+            map: self.map,
+            position: {
+                "lat": self.coordinates().lat,
+                "lng": self.coordinates().lng
+            },
+            icon: 'img/target.svg',
+            size: new google.maps.Size(3, 3),
+        }));
+
+        google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
+            return function() {
+                infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
+                infoWindow.open(self.map, this);
+                self.map.panTo(marker.getPosition());
+            };
+        })(self.anchorMarker(), self.infoWindow));
+
         self.mapBounds = new google.maps.LatLngBounds();
         self.poi(result[0].address_components[2].long_name);
         self.getVenuesData();
@@ -832,6 +940,7 @@ var viewModel = function() {
             self.chooseVenue($data, event);
         } else {
             self.infoWindow.close();
+            self.toggleMarkerBounce();
         }
         $data.venueExpanded(!$data.venueExpanded());
     };

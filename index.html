@@ -11,8 +11,9 @@
 
 <!-- body -->
 <body data-bind="css: { dark: currentMode() }">
+  <i class="fa fa-spinner loading" data-bind="visible: loading"></i>
   <!-- map -->
-  <div id="mapDiv" data-bind="css: { fade: alerting } "></div>
+  <div id="mapDiv" data-bind="css: { fade: alerting, fade: loading } "></div>
 
   <!-- location search input -->
   <header class="ui-overlay">
@@ -76,23 +77,9 @@
 
         <!-- expanded venues information -->
         <section class="place-info" data-bind="visible: venue.venueExpanded">
-          <!-- venues picture -->
-          <div class="info-pic-wrapper">
-            <div class="info-pic" data-bind="if: venue.photoURL">
-              <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
-              <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="place-image">
-              <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
-            </div>
-          </div>
-
           <!-- place details -->
           <div class="info-wrapper">
             <h5 class="place-type" data-bind="text: venue.categories[0].name"></h5>
-            <!-- foursquare logo link -->
-            <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } ">
-              <span class="foursquare-text">more on:</span>
-              <img class="foursquare-logo" src="img/foursquare-logo.svg">
-            </a>
 
             <!-- place contact info -->
             <div class="contact">
@@ -112,6 +99,22 @@
           </div>
           <!-- open status -->
           <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
+
+          <!-- foursquare logo link -->
+          <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } ">
+            <span class="foursquare-text">more on:</span>
+            <img class="foursquare-logo" src="img/foursquare-logo.svg">
+          </a>
+
+          <!-- venues picture -->
+          <div class="info-pic-wrapper">
+            <div class="info-pic" data-bind="if: venue.photoURL">
+              <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
+              <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="place-image">
+              <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
+            </div>
+          </div>
+
           <!-- yelp review -->
           <div class="yelp-review-wrapper" data-bind="visible: venue.review">
             <h6 class="yelp-title">Yelp Review:</h6>
