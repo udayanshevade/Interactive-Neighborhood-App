@@ -74,7 +74,7 @@ html {
 
 /* ui-search */
 .ui-search {
-  font: small-caps 600 1.6rem "Arial", sans-serif;
+  font: small-caps 600 1.6rem "Open Sans", sans-serif;
   letter-spacing: 0.1rem;
   width: 90px;
   border: 0;
@@ -84,7 +84,7 @@ html {
 }
 
 .search-in {
-  font: small-caps 1.45rem "Arial", sans-serif;
+  font: small-caps 1.45rem "Open Sans", sans-serif;
   padding: 0 0.5rem;
 }
 
@@ -135,7 +135,7 @@ html {
 
 /* Filter the available venues */
 .ui-filter {
-  font: small-caps 1.6rem "Arial";
+  font: small-caps 1.6rem "Open Sans";
   width: 200px;
   opacity: 0.1;
   border: 0;
@@ -160,7 +160,7 @@ html {
 
 .show-all,
 .show-favorites {
-  font: small-caps 1.6rem "Arial", sans-serif;
+  font: small-caps 1.6rem "Open Sans", sans-serif;
   letter-spacing: 0.1rem;
   text-align: center;
   cursor: pointer;
@@ -196,13 +196,30 @@ html {
 }
 
 .place-name {
-  font: 600 small-caps 1.6rem/2.75rem "Arial", sans-serif;
+  font: 600 small-caps 1.6rem/2.75rem "Open Sans", sans-serif;
   letter-spacing: 0.05rem;
+}
+
+.foursquare-link {
+  display: flex;
+  text-decoration: none;
+  color: #333;
+}
+
+.foursquare-text {
+  display: inline-block;
+  align-self: center;
+  font: small-caps 1.5rem "Open Sans" sans-serif;
+}
+
+.foursquare-logo {
+  align-self: center;
+  width: 2.5rem;
 }
 
 .place-rating {
   display: inline-block;
-  font: 600 1.5rem/2.75rem "Arial", sans-serif;
+  font: 600 1.5rem/2.75rem "Open Sans", sans-serif;
   padding: 0.5rem;
   margin: 0;
   margin-right: 1rem;
@@ -243,12 +260,17 @@ html {
 }
 
 .placeListItemExpanded .marker-icon:before {
-  color: darkred;
+  color: #c40000;
 }
 
 .place-info {
   margin-right: 1.5rem;
-  border-top: 1px dotted #8c8b8b;
+  padding: 2rem;
+}
+
+.info-pic-wrapper {
+  display: flex;
+  justify-content: center;
 }
 
 .info-pic {
@@ -277,6 +299,10 @@ html {
 
 /* Venue info */
 
+.info-wrapper-outer {
+  margin: 0 auto;
+}
+
 .info-wrapper {
   display: flex;
   justify-content: space-between;
@@ -284,17 +310,18 @@ html {
 
 .place-type {
   display: block;
-  font: 1.45rem "Arial", sans-serif;
+  font: small-caps 600 1.45rem "Open Sans", sans-serif;
 }
 
 .open-status {
-  margin: 0.5rem 0;
-  font: 1.45rem "Arial", sans-serif;
+  display: inline-block;
+  margin: 0 0 2rem;
+  font: 1.45rem "Open Sans", sans-serif;
 }
 
 .contact-text {
   display: inline-block;
-  font: 1.45rem "Arial", sans-serif;
+  font: 1.45rem "Open Sans", sans-serif;
   letter-spacing: 0.1rem;
 }
 
@@ -304,7 +331,7 @@ html {
 }
 
 .contact-link {
-  font: 1.45rem "Arial", sans-serif;
+  font: 1.45rem "Open Sans", sans-serif;
   display: inline-block;
   color: #333;
   text-decoration: none;
@@ -325,6 +352,37 @@ html {
 .website-icon {
   padding-left: 0.75rem;
   padding-right: 0;
+}
+
+.yelp-title {
+  margin: 0.5rem 0;
+  font: small-caps 1.25rem "Open Sans", sans-serif;
+}
+
+.yelp-review-wrapper {
+  display: inline-block;
+  border-top: 1px dotted #ccc;
+  padding: 1rem 0;
+}
+
+.yelp-review {
+  margin: 0.5rem 1.5rem 1rem;
+  padding: 1rem 1.5rem 1rem;
+  font: 300 1.35rem/1.5 "Open Sans", sans-serif;
+  color: #333;
+  letter-spacing: 0.1rem;
+  border: 1px solid rgba(0,0,0,0.1);
+  background-color: #fff;
+}
+
+.yelp-link {
+  float: right;
+  color: #333;
+  text-decoration: none;
+}
+
+.yelp-logo {
+  width: 5rem;
 }
 
 .places-list::-webkit-scrollbar {
@@ -598,6 +656,11 @@ html {
   .login-input {
     font-size: 2rem;
     margin: 0.5rem 0;
+  }
+
+  .alert-modal {
+    width: 400px;
+    left: calc(50% - 200px);
   }
 
 }

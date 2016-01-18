@@ -3,7 +3,7 @@ var viewModel = function() {
     // alias reference to this
     var self = this;
 
-    /*
+    /**
      * Initialize app
      */
     this.init = function() {
@@ -12,17 +12,18 @@ var viewModel = function() {
         this.configFoursquare();
         this.configFlickr();
 
+        // configure yelp secrets
+        this.yelp_key_secret = "EbOO2hHGytkLpd1lycWv7K-faa4";
+        this.yelp_token_secret = "oZEPYCr8TQ2cNaqrDN7_G0ISsis";
+
         // initialize Google Maps geocoder for reuse
         this.geocoder = new google.maps.Geocoder();
 
         // Initialize observables
 
-        // determines form focus
-        this.searchFocus = ko.observable(true);
-
         // binds search term, e.g. 'popular', ''
         this.searchTerm = ko.observable('Popular');
-        // binds point of interest
+        // binds location
         this.poi = ko.observable('');
 
         // binds coordinates object for search
@@ -92,7 +93,7 @@ var viewModel = function() {
     };
 
 
-    /*
+    /**
      * Fetches the local user if one exists in localStorage
      */
     this.getLocalUser = function() {
@@ -108,14 +109,15 @@ var viewModel = function() {
     };
 
 
-    /*
-     * Configure an object with default Foursquare terms
+    /**
+     * Configure default Foursquare terms
      */
     this.configFoursquare = function() {
         this.Foursquare = {
             cID: "AHMKTGNPJOKRI5HSWIQ4GZVRFDXUA2UD4T4ZRBIYRN413QL5",
             cSecret: "S3D4Y0R1430KP33VNL3MZW320ZFV22YQ2VT02SUX2XCTAD5R",
             APIbaseURL: "https://api.foursquare.com/",
+            baseVenueURL: "https://foursquare.com/v/",
             version: "20140601",
             defaultQuery: ko.observable('topPicks'),
             radius: ko.observable(5000)
@@ -123,8 +125,8 @@ var viewModel = function() {
     };
 
 
-    /*
-     * Configure an object with default Flickr terms
+    /**
+     * Configure default Flickr terms
      */
     this.configFlickr = function() {
         this.Flickr = {
@@ -138,7 +140,65 @@ var viewModel = function() {
     };
 
 
+
     /*
+     * Get Yelp data
+     */
+    this.getYelpData = function(place) {
+        var baseURL = 'http://api.yelp.com/v2/phone_search';
+
+        // define Yelp parameters
+        var parameters = {
+            oauth_consumer_key: "cNPz9LqhgDj8zRplQ9P_FQ",
+            oauth_token: "CtUW644wLDpJK0flWMnh2aaZI1outOUw",
+            oauth_nonce: nonce_generate(),
+            oauth_timestamp: Math.floor(Date.now()/1000),
+            oauth_signature_method: "HMAC-SHA1",
+            oauth_version : "1.0",
+            callback: "cb", // needed for jsonp implementation
+            phone: place.contact.phone
+        };
+
+        // generate encoded signature
+        var encodedSignature = oauthSignature.generate('GET',
+            baseURL,
+            parameters,
+            self.yelp_key_secret,
+            self.yelp_token_secret);
+
+        // assign encoded signature
+        parameters.oauth_signature = encodedSignature;
+
+        // define the settings to pass into the ajax request
+        var settings = {
+            url: baseURL,
+            data: parameters,
+            cache: true,
+            dataType: "jsonp",
+            success: function(results) {
+                var business = results.businesses[0];
+                if (business) {
+                    // bind venue review
+                    place.review(business.snippet_text);
+                    // bind venue URL
+                    place.yelpURL(business.url);
+                }
+            },
+            error: function() {
+                self.alertTitle('Yelp error');
+                self.alertDetails('There was an error with the Yelp API. Please try again.');
+                self.toggleAlert('open');
+            }
+        };
+
+        // make Yelp API query
+        $.ajax(settings);
+
+    };
+
+
+
+    /**
      * Toggle expansion of the venues list
      */
     this.expandPlaces = function() {
@@ -147,7 +207,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Toggles the alert modal
      */
     this.toggleAlert = function(mode, temp) {
@@ -166,7 +226,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Initialize the Google Map
      */
     this.initializeMap = function() {
@@ -269,7 +329,7 @@ var viewModel = function() {
     };
 
 
-    /*
+    /**
      * Initialize the 'time' mode of the map display
      */
     this.initializeTime = function() {
@@ -287,7 +347,7 @@ var viewModel = function() {
     };
 
 
-    /*
+    /**
      * User update of search
      */
     this.updateSearch = function() {
@@ -303,7 +363,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Update current map coordinates
      */
     this.updateLatLng = function(results, status) {
@@ -327,7 +387,7 @@ var viewModel = function() {
     };
 
 
-    /*
+    /**
      * Delete markers
      */
     this.hideMarkers = function() {
@@ -342,8 +402,8 @@ var viewModel = function() {
     };
 
 
-    /*
-     * Use a Foursquare based search to return info about venues
+    /**
+     * Use a Foursquare based search to compile local venues
      */
     this.getVenuesData = function() {
         var filter;
@@ -370,6 +430,8 @@ var viewModel = function() {
                 for (var v = 0, len = venues.length; v < len; v++) {
                     // for each venue
                     venue = venues[v].venue;
+
+                    venue.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
 
                     var photo;
 
@@ -416,6 +478,10 @@ var viewModel = function() {
                     // no venues are favorited
                     venue.favorited = ko.observable(false);
 
+                    // bind empty observables for Yelp data
+                    venue.review = ko.observable();
+                    venue.yelpURL = ko.observable();
+
                     // create a new marker object
                     venue.marker = new self.Marker(venue);
                     // push the venue to the venues array
@@ -440,7 +506,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Order the venues according to the ratings
      */
     this.orderVenues = function() {
@@ -459,11 +525,19 @@ var viewModel = function() {
         });
         // save the ordered venues
         self.venuesArray(orderedVenues);
+
+        var venue;
+        // get yelp data for each venue
+        for (var i = 0, len = orderedVenues.length; i < len; i++) {
+            venue = orderedVenues[i];
+            self.getYelpData(venue);
+        }
+
     };
 
 
 
-    /*
+    /**
      * Get additional Flickr photos if any
      */
     this.getPhotos = function(place) {
@@ -513,7 +587,7 @@ var viewModel = function() {
     };
 
 
-    /*
+    /**
      * Marker class
      */
     this.Marker = function(place) {
@@ -579,8 +653,7 @@ var viewModel = function() {
 
 
 
-
-    /*
+    /**
      * Cycle through available photos
      */
     this.cyclePics = function(direction, data) {
@@ -603,7 +676,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Select and focus on venue from list or map
      */
     this.chooseVenue = function(data, event) {
@@ -622,7 +695,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Show all venues
      */
     this.showAll = function(event) {
@@ -640,7 +713,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Show only user favorites, if any
      */
     this.showFavorites = function(event) {
@@ -662,7 +735,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Convert geolocated coordinates to a text location
      */
     this.geoLocate = function(lat, lng) {
@@ -693,7 +766,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Empty existing locations
      * Set current location
      * Fetch new venues data
@@ -707,7 +780,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Toggle dark/light mode of map
      */
     this.toggleMapMode = function() {
@@ -722,7 +795,9 @@ var viewModel = function() {
         }
     };
 
-    /*
+
+
+    /**
      * Live filter of list of venues
      */
     this.filterVenues = function() {
@@ -743,7 +818,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Opens/closes chosen venue
      */
     this.toggleVenueExpand = function($data, event) {
@@ -763,7 +838,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Toggle Login interface
      */
     this.toggleLogin = function() {
@@ -772,7 +847,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Helper function to see if target contains
      * any character found in the crosscheck string
      */
@@ -787,7 +862,7 @@ var viewModel = function() {
     };
 
 
-    /*
+    /**
      * Log in the user via external app database
      */
     this.login = function() {
@@ -844,7 +919,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * User initiates favoriting
      */
     this.toggleVenueFavorite = function(current) {
@@ -861,7 +936,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Add venue to user favorites in database
      */
     this.favoriteVenue = function(result, current) {
@@ -889,7 +964,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Check user favorites in database
      */
     this.checkUserFavorites = function(user, current, mode) {
@@ -940,7 +1015,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * User action for each location depending on mode and result
      */
     this.userAction = function(result, current, mode, fID, len) {
@@ -995,7 +1070,7 @@ var viewModel = function() {
 
 
 
-    /*
+    /**
      * Imports user favorites if any
      */
     this.importUserFavorites = function(user) {
@@ -1005,6 +1080,17 @@ var viewModel = function() {
             self.checkUserFavorites(user, venue, 'import');
         });
     };
+
+
+
+    /**
+     * Generates a random number and returns it as a string for OAuthentication
+     * @return {string}
+     */
+    function nonce_generate() {
+      return (Math.floor(Math.random() * 1e12).toString());
+    }
+
 
     // Initialize the view
     this.init();

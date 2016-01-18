@@ -77,15 +77,22 @@
         <!-- expanded venues information -->
         <section class="place-info" data-bind="visible: venue.venueExpanded">
           <!-- venues picture -->
-          <div class="info-pic" data-bind="if: venue.photoURL">
-            <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
-            <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="place-image">
-            <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
+          <div class="info-pic-wrapper">
+            <div class="info-pic" data-bind="if: venue.photoURL">
+              <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
+              <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="place-image">
+              <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
+            </div>
           </div>
 
           <!-- place details -->
           <div class="info-wrapper">
             <h5 class="place-type" data-bind="text: venue.categories[0].name"></h5>
+            <!-- foursquare logo link -->
+            <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } ">
+              <span class="foursquare-text">more on:</span>
+              <img class="foursquare-logo" src="img/foursquare-logo.svg">
+            </a>
 
             <!-- place contact info -->
             <div class="contact">
@@ -105,6 +112,15 @@
           </div>
           <!-- open status -->
           <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
+          <!-- yelp review -->
+          <div class="yelp-review-wrapper" data-bind="visible: venue.review">
+            <h6 class="yelp-title">Yelp Review:</h6>
+            <p class="yelp-review" data-bind="text: venue.review"></p>
+            <a class="yelp-link" data-bind="attr: { href: venue.yelpURL }">
+              <i class="fa fa-share contact-icon"></i>
+              <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png">
+            </a>
+          </div>
         </section>
       </li>
     </ul>
@@ -149,6 +165,19 @@
   <script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
   <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
   <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+  <script src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>
   <script src="js/app.js"></script>
+
+  <script>
+      var cb = function() {
+        var l = document.createElement('link'); l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700';
+        var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h);
+      };
+      var raf = requestAnimationFrame || mozRequestAnimationFrame ||
+          webkitRequestAnimationFrame || msRequestAnimationFrame;
+      if (raf) raf(cb);
+      else window.addEventListener('load', cb);
+  </script>
 </body>
 </html>
