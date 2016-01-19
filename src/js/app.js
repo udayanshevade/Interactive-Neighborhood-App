@@ -179,7 +179,7 @@ var ViewModel = function() {
 
 
     /**
-     * Fetches last searched location
+     * TODO: Fetches last searched location
      */
     this.getLastSearch = function() {
         var lastPOI = localStorage.lastPOI;
@@ -1041,6 +1041,12 @@ var ViewModel = function() {
                 if (self.localStorageAvailable) {
                     localStorage.user = user;
                 }
+            }, function(err) {
+                if (err) {
+                    self.alertTitle('database error');
+                    self.alertDetails('There was an error contacting the database. Please check the connection and try again.')
+                    self.toggleAlert('open');
+                }
             });
         } else {
             // if login/signin invalid, create error alert
@@ -1081,7 +1087,7 @@ var ViewModel = function() {
             self.usersRef.child(user).push().update(location, function(error) {
                 // if update error, alert user
                 if (error) {
-                    self.alertTitle('firebase error');
+                    self.alertTitle('database error');
                     self.alertDetails('There was an error while handling user favorites. Please try again later.');
                     self.toggleAlert();
                 } else {
@@ -1142,6 +1148,12 @@ var ViewModel = function() {
                 self.userAction(result, current, mode);
             }
 
+        }, function(err) {
+            if (err) {
+                self.alertTitle('database error');
+                self.alertDetails('There was an error contacting the database. Please check the connection and try again.')
+                self.toggleAlert('open');
+            }
         });
     };
 
@@ -1163,7 +1175,13 @@ var ViewModel = function() {
                     // if there are multiple user favorites already
                     if (len > 1) {
                         // remove the database match
-                        self.usersRef.child(node).remove();
+                        self.usersRef.child(node).remove(function(error) {
+                            if (error) {
+                                self.alertTitle('database error');
+                                self.alertDetails('There was an error contacting the database. Please check the connection and try again.')
+                                self.toggleAlert('open');
+                            }
+                        });
                         // unfavorite the location
                         current.favorited(false);
                     } else {
@@ -1197,7 +1215,6 @@ var ViewModel = function() {
                 } else {
                     current.favorited(false);
                 }
-                console.log(logged + ', ' + current.favorited());
                 break;
         }
     };

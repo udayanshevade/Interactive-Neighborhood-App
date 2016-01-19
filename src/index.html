@@ -18,9 +18,9 @@
   <header class="ui-overlay">
     <form class="ui-form" data-bind="submit: updateSearch">
       <!-- geo location -->
-      <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate"></i>
+      <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate" title="Search near you"></i>
       <!-- search button -->
-      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon"></i></button>
+      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon" title="Search"></i></button>
       <!-- search a term -->
       <input class="ui-search" type="text" data-bind="textInput: searchTerm, hasFocus: !placesExpanded()">
 
@@ -30,7 +30,7 @@
 
     </form>
     <!-- expand venues -->
-    <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }"></i>
+    <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }" title="See Places"></i>
   </header>
 
   <!-- places section -->
@@ -38,7 +38,7 @@
 
     <!-- filter -->
     <header class="ui-filter-form">
-      <i class="icon fa fa-filter filter-button"></i>
+      <i class="icon fa fa-filter filter-button" title="Filter"></i>
       <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded(), event: { keyup: filterVenues() }">
     </header>
 
@@ -67,9 +67,9 @@
 
           <div class="place-options">
             <!-- favorite option -->
-            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, css: { favorited: venue.favorited }"></i>
+            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, css: { favorited: venue.favorited }" title="Favorite"></i>
             <!-- marker icon -->
-            <i class="icon fa fa-map-marker place-icon marker-icon" data-bind="click: $parent.chooseVenue"></i>
+            <i class="icon fa fa-map-marker place-icon marker-icon" data-bind="click: $parent.chooseVenue" title="Locate"></i>
           </div>
 
         </header>
@@ -88,13 +88,13 @@
               <!-- venue phone -->
               <h5 class="contact-text" data-bind="if: venue.contact.formattedPhone">
                 <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
-                  <i class="fa fa-phone contact-icon"></i>
+                  <i class="fa fa-phone contact-icon" title="Call"></i>
                 </a>
               </h5>
               <!-- venue link -->
               <h5 class="contact-text" data-bind="if: venue.url">
                 <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
-                  <i class="fa fa-link contact-icon website-icon"></i>
+                  <i class="fa fa-link contact-icon website-icon" title="Website"></i>
                 </a>
               </h5>
             </div>
@@ -103,16 +103,16 @@
           <!-- venues picture -->
           <div class="info-pic-wrapper">
             <div class="info-pic-container" data-bind="if: venue.photoURL">
-              <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
+              <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
               <div class="info-pic-div">
                 <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
               </div>
-              <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
+              <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
             </div>
           </div>
 
           <!-- foursquare logo link -->
-          <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } ">
+          <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
             <span class="foursquare-text">more on:</span>
             <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
           </a>
@@ -121,7 +121,7 @@
           <div class="yelp-review-wrapper" data-bind="visible: venue.review">
             <h6 class="yelp-title">Yelp Review:</h6>
             <p class="yelp-review" data-bind="text: venue.review"></p>
-            <a class="yelp-link" data-bind="attr: { href: venue.yelpURL }">
+            <a class="yelp-link" data-bind="attr: { href: venue.yelpURL }" title="Visit Yelp">
               <i class="fa fa-share contact-icon"></i>
               <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
             </a>
@@ -134,16 +134,16 @@
   <!-- login interface -->
   <aside class="login-wrapper" data-bind="css: { loginWrapperExpand: loginExpanded }">
     <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin">
-      <i class="fa fa-user mode-option login-icon"></i>
+      <i class="fa fa-user mode-option login-icon" title="Login"></i>
     </button>
     <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
-      <button type="submit" class="login-button">
-        <i class="fa fa-sign-in login-icon"></i>
+      <button type="submit" class="login-button" data-bind="click: login">
+        <i class="fa fa-sign-in login-icon" title="Login"></i>
       </button>
       <!-- login input -->
       <input class="login-input" type="text" data-bind="textInput: user, hasFocus: loginExpanded" placeholder="Create user or Login">
       <button class="login-button" data-bind="click: toggleLogin">
-        <i class="fa fa-times login-icon"></i>
+        <i class="fa fa-times login-icon" title="Cancel login"></i>
       </button>
     </form>
   </aside>
