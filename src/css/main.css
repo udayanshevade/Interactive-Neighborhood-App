@@ -23,8 +23,6 @@ html {
 }
 
 .fa-spinner {
-  font-size: 41.6px;
-  font-size: 41.6px;
   font-size: 4rem;
   position: absolute;
   z-index: 10;
@@ -97,18 +95,12 @@ html {
 
 /* icon styles */
 .icon {
-  font-size: 14.04px;
-  font-size: 14.04px;
   font-size: 1.35rem;
-  padding: 14.04px;
-  padding: 14.04px;
   padding: 1.35rem;
 }
 
 /* geolocate icon */
 .locate-icon {
-  padding-left: 10.4px;
-  padding-left: 10.4px;
   padding-left: 1rem;
   padding-right: 0;
 }
@@ -122,11 +114,7 @@ html {
 
 /* ui-search */
 .ui-search {
-  font: small-caps 600 16.64px "Open Sans", sans-serif;
-  font: small-caps 600 16.64px "Open Sans", sans-serif;
   font: small-caps 600 1.6rem "Open Sans", sans-serif;
-  letter-spacing: 1.04px;
-  letter-spacing: 1.04px;
   letter-spacing: 0.1rem;
   width: 90px;
   border: 0;
@@ -137,11 +125,7 @@ html {
 }
 
 .search-in {
-  font: small-caps 15.08px "Open Sans", sans-serif;
-  font: small-caps 15.08px "Open Sans", sans-serif;
   font: small-caps 1.45rem "Open Sans", sans-serif;
-  padding: 0 5.2px;
-  padding: 0 5.2px;
   padding: 0 0.5rem;
 }
 
@@ -152,8 +136,6 @@ html {
 
 .search-button {
   background-color: #fff;
-  padding-left: 10.4px;
-  padding-left: 10.4px;
   padding-left: 1rem;
   border: 0;
   transition: all 0.4s ease-in-out;
@@ -167,8 +149,6 @@ html {
 .places {
   position: fixed;
   z-index: 1;
-  top: 41.6px;
-  top: 41.6px;
   top: 4rem;
   left: 0;
   width: 100%;
@@ -192,19 +172,13 @@ html {
 
 .ui-filter-form {
   display: block;
-  margin: 5.2px auto;
-  margin: 5.2px auto;
   margin: 0.5rem auto;
-  padding-left: 10.4px;
-  padding-left: 10.4px;
   padding-left: 1rem;
   transition: all 0.3s ease-in-out;
 }
 
 /* Filter the available venues */
 .ui-filter {
-  font: small-caps 16.64px "Open Sans";
-  font: small-caps 16.64px "Open Sans";
   font: small-caps 1.6rem "Open Sans";
   width: 200px;
   opacity: 0.1;
@@ -234,11 +208,7 @@ html {
 
 .show-all,
 .show-favorites {
-  font: small-caps 16.64px "Open Sans", sans-serif;
-  font: small-caps 16.64px "Open Sans", sans-serif;
   font: small-caps 1.6rem "Open Sans", sans-serif;
-  letter-spacing: 1.04px;
-  letter-spacing: 1.04px;
   letter-spacing: 0.1rem;
   text-align: center;
   cursor: pointer;
@@ -259,9 +229,7 @@ html {
 
 .place-list-item {
   list-style: none;
-  padding: 10.4px 0 10.4px 20.8px;
-  padding: 10.4px 0 10.4px 20.8px;
-  padding: 1rem 0 1rem 2rem;
+  padding: 0 0 0 2rem;
   border-bottom: 1px dashed #777;
 }
 
@@ -277,11 +245,10 @@ html {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  padding: 1rem 0;
 }
 
 .place-name {
-  font: 600 small-caps 16.64px/28.6px "Open Sans", sans-serif;
-  font: 600 small-caps 16.64px/28.6px "Open Sans", sans-serif;
   font: 600 small-caps 1.6rem/2.75rem "Open Sans", sans-serif;
   letter-spacing: 0.52px;
   letter-spacing: 0.52px;
@@ -290,15 +257,9 @@ html {
 
 .place-rating {
   display: inline-block;
-  font: 600 15.6px/28.6px "Open Sans", sans-serif;
-  font: 600 15.6px/28.6px "Open Sans", sans-serif;
   font: 600 1.5rem/2.75rem "Open Sans", sans-serif;
-  padding: 5.2px;
-  padding: 5.2px;
   padding: 0.5rem;
   margin: 0;
-  margin-right: 10.4px;
-  margin-right: 10.4px;
   margin-right: 1rem;
   border-radius: 0.5rem;
 }
@@ -331,8 +292,6 @@ html {
 }
 
 .place-icon {
-  line-height: 28.6px;
-  line-height: 28.6px;
   line-height: 2.75rem;
 }
 
@@ -345,19 +304,11 @@ html {
 }
 
 .place-info {
-  margin-right: 15.6px;
-  margin-right: 15.6px;
   margin-right: 1.5rem;
-  padding: 0 20.8px;
-  padding: 0 20.8px;
   padding: 0 2rem;
 }
 
 /* Venue info */
-
-.info-wrapper-outer {
-  margin: 0 auto;
-}
 
 .info-wrapper {
   display: -webkit-flex;
@@ -366,37 +317,32 @@ html {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  border-top: 1px dashed #333;
+  border-bottom: 1px dotted #ccc;
+}
+
+.open-status {
+  display: block;
+  font: 1.45rem "Open Sans", sans-serif;
 }
 
 .place-type {
   display: block;
-  font: small-caps 600 15.08px "Open Sans", sans-serif;
-  font: small-caps 600 15.08px "Open Sans", sans-serif;
   font: small-caps 600 1.45rem "Open Sans", sans-serif;
 }
 
 .contact-text {
   display: inline-block;
-  font: 15.08px "Open Sans", sans-serif;
-  font: 15.08px "Open Sans", sans-serif;
   font: 1.45rem "Open Sans", sans-serif;
-  letter-spacing: 1.04px;
-  letter-spacing: 1.04px;
   letter-spacing: 0.1rem;
 }
 
 .contact-icon {
-  font-size: 15.08px;
-  font-size: 15.08px;
   font-size: 1.45rem;
-  padding-right: 7.8px;
-  padding-right: 7.8px;
   padding-right: 0.75rem;
 }
 
 .contact-link {
-  font: 15.08px "Open Sans", sans-serif;
-  font: 15.08px "Open Sans", sans-serif;
   font: 1.45rem "Open Sans", sans-serif;
   display: inline-block;
   color: #333;
@@ -412,34 +358,18 @@ html {
 
 .website-link {
   font-variant: small-caps;
-  font-size: 14.04px;
-  font-size: 14.04px;
   font-size: 1.35rem;
 }
 
 .website-icon {
-  padding-left: 7.8px;
-  padding-left: 7.8px;
   padding-left: 0.75rem;
   padding-right: 0;
-}
-
-.open-status {
-  display: inline-block;
-  margin: 0 0 10.4px;
-  margin: 0 0 10.4px;
-  margin: 0 0 1rem;
-  font: 15.08px "Open Sans", sans-serif;
-  font: 15.08px "Open Sans", sans-serif;
-  font: 1.45rem "Open Sans", sans-serif;
 }
 
 .foursquare-link {
   display: block;
   text-align: right;
-  margin: 0 0 10.4px;
-  margin: 0 0 10.4px;
-  margin: 0 0 1rem;
+  margin: 0 0 2rem;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -452,8 +382,6 @@ html {
   -ms-flex-item-align: center;
       -webkit-align-self: center;
           align-self: center;
-  font: small-caps 15.6px "Open Sans" sans-serif;
-  font: small-caps 15.6px "Open Sans" sans-serif;
   font: small-caps 1.5rem "Open Sans" sans-serif;
 }
 
@@ -461,15 +389,11 @@ html {
   -ms-flex-item-align: center;
       -webkit-align-self: center;
           align-self: center;
-  width: 26px;
-  width: 26px;
   width: 2.5rem;
 }
 
 .info-pic-wrapper {
-  margin-bottom: 20.8px;
-  margin-bottom: 20.8px;
-  margin-bottom: 2rem;
+  margin: 2rem 0;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -493,8 +417,6 @@ html {
 }
 
 .info-pic .fa {
-  padding: 10.4px;
-  padding: 10.4px;
   padding: 1rem;
   -ms-flex-item-align: center;
       -webkit-align-self: center;
@@ -510,36 +432,22 @@ html {
   opacity: 1;
 }
 
-.yelp-title {
-  margin: 5.2px 0;
-  margin: 5.2px 0;
-  margin: 0.5rem 0;
-  font: small-caps 14.04px "Open Sans", sans-serif;
-  font: small-caps 14.04px "Open Sans", sans-serif;
-  font: small-caps 1.35rem "Open Sans", sans-serif;
-}
-
 .yelp-review-wrapper {
   display: inline-block;
   border-top: 1px dotted #ccc;
-  padding: 10.4px 0;
-  padding: 10.4px 0;
   padding: 1rem 0;
 }
 
+.yelp-title {
+  margin: 1rem 0;
+  font: small-caps 1.35rem "Open Sans", sans-serif;
+}
+
 .yelp-review {
-  margin: 5.2px 15.6px 10.4px;
-  margin: 5.2px 15.6px 10.4px;
   margin: 0.5rem 1.5rem 1rem;
-  padding: 10.4px 15.6px 10.4px;
-  padding: 10.4px 15.6px 10.4px;
   padding: 1rem 1.5rem 1rem;
-  font: 300 14.04px/1.5 "Open Sans", sans-serif;
-  font: 300 14.04px/1.5 "Open Sans", sans-serif;
   font: 300 1.35rem/1.5 "Open Sans", sans-serif;
   color: #333;
-  letter-spacing: 1.04px;
-  letter-spacing: 1.04px;
   letter-spacing: 0.1rem;
   border: 1px solid rgba(0,0,0,0.1);
   background-color: #fff;
@@ -552,14 +460,10 @@ html {
 }
 
 .yelp-logo {
-  width: 52px;
-  width: 52px;
   width: 5rem;
 }
 
 .places-list::-webkit-scrollbar {
-  width: 13px;
-  width: 13px;
   width: 1.25rem;
 }
 
@@ -568,8 +472,6 @@ html {
 }
 
 .places-list::-webkit-scrollbar-thumb {
-  height: 20.8px;
-  height: 20.8px;
   height: 2rem;
   background-color: #333;
 }
@@ -578,14 +480,8 @@ html {
 
 .settings-wrapper {
   position: absolute;
-  right: 10.4px;
-  right: 10.4px;
   right: 1rem;
-  bottom: 26px;
-  bottom: 26px;
   bottom: 2.5rem;
-  padding: 10.4px 0;
-  padding: 10.4px 0;
   padding: 1rem 0;
 }
 
@@ -610,15 +506,9 @@ html {
 }
 
 .mode-option {
-  font-size: 26px;
-  font-size: 26px;
   font-size: 2.5rem;
   font-weight: bold;
-  width: 26px;
-  width: 26px;
   width: 2.5rem;
-  height: 26px;
-  height: 26px;
   height: 2.5rem;
 }
 
@@ -636,17 +526,9 @@ html {
   background-color: transparent;
   position: absolute;
   z-index: 1;
-  bottom: 26px;
-  bottom: 26px;
   bottom: 2.5rem;
-  width: 52px;
-  width: 52px;
   width: 5rem;
-  left: 10.4px;
-  left: 10.4px;
   left: 1rem;
-  padding: 10.4px 0;
-  padding: 10.4px 0;
   padding: 1rem 0;
   transition: all 0.3s ease-in-out;
 }
@@ -678,8 +560,6 @@ html {
 }
 
 .login-icon:before {
-  font-size: 26px;
-  font-size: 26px;
   font-size: 2.5rem;
   color: #333;
 }
@@ -693,21 +573,15 @@ html {
 }
 
 .fa-times {
-  padding-left: 15.6px;
-  padding-left: 15.6px;
   padding-left: 1.5rem;
 }
 
 .login-input {
   margin: auto 0;
-  margin-left: 10.4px;
-  margin-left: 10.4px;
   margin-left: 1rem;
   outline: none;
   border: 0;
   border-bottom: 1px solid #666;
-  font: small-caps 18.2px "Open Sans", sans-serif;
-  font: small-caps 18.2px "Open Sans", sans-serif;
   font: small-caps 1.75rem "Open Sans", sans-serif;
 }
 
@@ -726,8 +600,6 @@ html {
 }
 
 .infowindow-title {
-  font: 600 small-caps 15.6px "Open Sans", sans-serif;
-  font: 600 small-caps 15.6px "Open Sans", sans-serif;
   font: 600 small-caps 1.5rem "Open Sans", sans-serif;
 }
 
@@ -751,17 +623,11 @@ html {
 }
 
 .infowindow-rating {
-  font: 600 14.04px "Open Sans", sans-serif;
-  font: 600 14.04px "Open Sans", sans-serif;
   font: 600 1.35rem "Open Sans", sans-serif;
-  padding-right: 10.4px;
-  padding-right: 10.4px;
   padding-right: 1rem;
 }
 
 .infowindow-price {
-  font: 600 14.04px "Open Sans", sans-serif;
-  font: 600 14.04px "Open Sans", sans-serif;
   font: 600 1.35rem "Open Sans", sans-serif;
 }
 
@@ -774,13 +640,11 @@ html {
   background-color: #fff;
   box-shadow: 1px 2px 6px rgba(0,0,0,0.3);
   left: calc(50% - 150px);
-  top: -100vh;
+  top: -300px;
   transition: top 0.3s ease-in-out;
 }
 
 .modal-body {
-  padding: 15.6px;
-  padding: 15.6px;
   padding: 1.5rem;
 }
 
@@ -789,14 +653,10 @@ html {
 }
 
 .alert-title {
-  font: 400 small-caps 20.8px "Open Sans", sans-serif;
-  font: 400 small-caps 20.8px "Open Sans", sans-serif;
   font: 400 small-caps 2rem "Open Sans", sans-serif;
 }
 
 .alert-details {
-  font: 400 15.6px/1.25 "Open Sans", sans-serif;
-  font: 400 15.6px/1.25 "Open Sans", sans-serif;
   font: 400 1.5rem/1.25 "Open Sans", sans-serif;
 }
 
@@ -806,8 +666,6 @@ html {
 }
 
 .alert-close:before {
-  font-size: 15.6px;
-  font-size: 15.6px;
   font-size: 1.5rem;
 }
 
@@ -865,6 +723,14 @@ html {
 
   .place-list-item:hover {
     background-color: rgba(245,245,245,0.8);
+    cursor: pointer;
+  }
+
+  .placeListItemExpanded.place-list-item:hover {
+    cursor: default;
+  }
+
+  .placeListItemExpanded .place-header:hover {
     cursor: pointer;
   }
 

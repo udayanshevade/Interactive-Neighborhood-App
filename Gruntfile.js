@@ -10,7 +10,6 @@ module.exports = function(grunt) {
                     "annotation": 'dist/css/maps/'
                 },
                 "processors": [
-                    require('pixrem')(),
                     require('autoprefixer')({
                         browsers: ['last 2 versions']
                     }),

@@ -1,14 +1,28 @@
-var viewModel = function() {
+// precludes a deprecated synchronous XMLHttpRequest
+$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+    options.async = true;
+});
+
+var app = app || {};
+
+var ViewModel = function() {
 
     // alias reference to this
     var self = this;
+
+    // sets loading state of app
+    this.loading = ko.observable(true);
+
+    // binds whether the alert modal is visible
+    this.alerting = ko.observable(true);
+    // alert on geolocation
+    this.alertTitle = ko.observable('geolocation note');
+    this.alertDetails = ko.observable('For best results enable browser geolocation, or attempt a new search.');
 
     /**
      * Initialize app
      */
     this.init = function() {
-
-        this.loading = ko.observable(true);
 
         // configure API requirements
         this.configFoursquare();
@@ -58,7 +72,7 @@ var viewModel = function() {
         this.currentMode = ko.observable('');
 
         // initialize map on window load
-        google.maps.event.addDomListener(window, "load", self.initializeMap.bind(this));
+        this.initializeMap();
 
         // resize and recenter map on window resize
         google.maps.event.addDomListener(window, 'resize', function() {
@@ -67,21 +81,6 @@ var viewModel = function() {
             self.map.setCenter(center);
         });
 
-        // binds whether the alert modal is visible
-        this.alerting = ko.observable(false);
-
-        // binds alert modal title
-        this.alertTitle = ko.observable();
-        // binds alert modal description
-        this.alertDetails = ko.observable();
-
-        // initialize reference to Firebase database
-        this.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
-        // create reference to 'users' category in database
-        this.usersRef = this.myDataRef.child('users');
-        // TODO: set up a reference to 'venues' category in database
-        this.venuesRef = this.myDataRef.child('venues');
-
         // binds logged in user
         this.user = ko.observable('');
         // binds whether a user is successfully logged in
@@ -89,14 +88,6 @@ var viewModel = function() {
 
         // binds whether the login interface is visible
         this.loginExpanded = ko.observable(false);
-
-        // harvest persistent user from localStorage
-        if (typeof(Storage)) {
-            this.localStorageAvailable = true;
-            this.getLocalUser();
-        } else {
-            this.localStorageAvailable = false;
-        }
     };
 
 
@@ -109,9 +100,9 @@ var viewModel = function() {
             this.user(user);
             this.login();
         } else {
-            this.alertTitle('welcome');
-            this.alertDetails('Please feel free to explore the map, create a user profile, and favorite locations.');
-            this.toggleAlert('open', 'temporary');
+            this.alertTitle('welcome!');
+            this.alertDetails('Feel free to explore the map, create a user profile, and favorite locations.');
+            this.toggleAlert('open');
         }
     };
 
@@ -235,13 +226,6 @@ var viewModel = function() {
         if (mode === 'open') { this.alerting(true); }
         // closes the alert modal
         else { this.alerting(false); }
-
-        // if the alert is temporary closes the timeout
-        if (temp === 'temporary') {
-            setTimeout(function() {
-                self.alerting(false);
-            }, 15000);
-        }
     };
 
 
@@ -258,9 +242,9 @@ var viewModel = function() {
         var darkStyle = [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#707070"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#424242"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"lightness":17},{"color":"#484848"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"lightness":29},{"weight":0.2},{"color":"#ff0000"},{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}];
 
         // save the light and dark modes for switching
-        this.lightMode = new google.maps.StyledMapType(lightStyle,
+        self.lightMode = new google.maps.StyledMapType(lightStyle,
             {name: "Light Mode"});
-        this.darkMode = new google.maps.StyledMapType(darkStyle,
+        self.darkMode = new google.maps.StyledMapType(darkStyle,
             {name: "Dark Mode"});
 
         // if browser has navigator geolocation
@@ -275,7 +259,6 @@ var viewModel = function() {
                 // binds the coordinates
                 self.coordinates(pos);
 
-
                 // define the map options
                 self.mapOptions = {
                     center: pos,
@@ -286,74 +269,80 @@ var viewModel = function() {
                     ]}
                 };
 
-                this.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+
+                // define the time of day for the map style
+                self.initializeTime();
 
                 // initialize a blank infoWindow for later use
-                this.infoWindow = new google.maps.InfoWindow();
+                self.infoWindow = new google.maps.InfoWindow();
 
                 // listens for infowindow closing
                 google.maps.event.addListener(self.infoWindow, 'closeclick', function() {
                     self.toggleMarkerBounce();
                 });
 
-                // enable the map using the geolocated coordinates
-                self.geoLocate(pos.lat, pos.lng);
+                if (pos.lat === pos.lng === 0) {
+                    self.handleLocationError();
+                } else {
+                    // enable the map using the geolocated coordinates
+                    self.geoLocate(pos.lat, pos.lng);
+                }
 
-                // define the time of day for the map style
-                self.initializeTime();
-
-            }.bind(this), function() {
+            }, function() {
                 // handle the geolocation error
                 self.handleLocationError();
-            });
+            }, {timeout: 7500});
 
         } else {
             // fallback in case browser doesn't support geolocation
-            this.handleLocationError();
+            self.handleLocationError();
         }
 
-        // Geolocation error handling
-        this.handleLocationError = function() {
-            // enable the geolocation error
-            this.alertTitle('geolocation error');
-            this.alertDetails('Please enable browser geolocation and try again for more accurate results, or attempt a new search.');
-            this.toggleAlert('open');
-
-            // use third-party geolocation api for approximate geolocation
-            $.getJSON('http://freegeoip.net/json/')
-                .success(function(result) {
-                    var pos = {
-                        lat: result.latitude,
-                        lng: result.longitude
-                    };
-
-                    self.coordinates(pos);
-
-                    self.mapOptions = {
-                        center: pos,
-                        disableDefaultUI: true,
-                        mapTypeControlOptions: {
-                            mapTypeIds: [
-                            google.maps.MapTypeId.ROADMAP, 'map_style'
-                        ]}
-                    };
-
-                    self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
-
-                    self.infoWindow = new google.maps.InfoWindow();
-
-                    self.geoLocate(pos.lat, pos.lng);
-
-                    self.initializeTime();
-                }).error(function(result) {
-                    this.alertTitle('geolocation failed');
-                    this.alertDetails('Please enable browser geolocation and try again, or attempt a new search.');
-                    this.toggleAlert('open');
-                });
-        };
-
-        this.mapBounds = new google.maps.LatLngBounds();
+        self.mapBounds = new google.maps.LatLngBounds();
     };
+
+
+
+    /**
+     * Handles geolocation error or absence
+     */
+    self.handleLocationError = function() {
+        // use third-party geolocation api for approximate geolocation
+        $.getJSON('http://freegeoip.net/json/')
+            .success(function(result) {
+                var pos = {
+                    lat: result.latitude,
+                    lng: result.longitude
+                };
+
+                self.coordinates(pos);
+
+                self.mapOptions = {
+                    center: pos,
+                    disableDefaultUI: true,
+                    mapTypeControlOptions: {
+                        mapTypeIds: [
+                        google.maps.MapTypeId.ROADMAP, 'map_style'
+                    ]}
+                };
+
+                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+
+                self.infoWindow = new google.maps.InfoWindow();
+
+                self.geoLocate(pos.lat, pos.lng);
+
+                self.initializeTime();
+            }).error(function(result) {
+                self.poi('Rome');
+                self.alertTitle('geolocation failed');
+                self.alertDetails('All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.');
+                self.toggleAlert('open');
+                self.updateSearch();
+            });
+    };
+
 
 
     /**
@@ -419,8 +408,9 @@ var viewModel = function() {
                 "lat": self.coordinates().lat,
                 "lng": self.coordinates().lng
             },
-            icon: 'img/target.svg',
+            icon: 'img/x.svg',
             size: new google.maps.Size(3, 3),
+            title: 'X marks the spot.',
             animation: google.maps.Animation.DROP
         }));
 
@@ -542,14 +532,34 @@ var viewModel = function() {
                 }
             // after the api requests are processed
             setTimeout(function() {
+
                 // order the venues
                 self.orderVenues();
+
                 // get additional Flickr photos for each venue
                 self.venuesArray().forEach(function(venue) {
                     self.getPhotos(venue);
                 });
+
                 self.loading(false);
-            }, 750);
+
+                // initialize reference to Firebase database
+                self.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
+                // create reference to 'users' category in database
+                self.usersRef = self.myDataRef.child('users');
+                // TODO: set up a reference to 'venues' category in database
+                self.venuesRef = self.myDataRef.child('venues');
+
+                if (!self.loggedIn()) {
+                    // harvest persistent user from localStorage
+                    if (typeof(Storage)) {
+                        self.localStorageAvailable = true;
+                        self.getLocalUser();
+                    } else {
+                        self.localStorageAvailable = false;
+                    }
+                }
+            }, 500);
         }).error(function(data) {
             // toggle alert if the foursquare response fails
             self.alertTitle('foursquare error');
@@ -580,11 +590,12 @@ var viewModel = function() {
         // save the ordered venues
         self.venuesArray(orderedVenues);
 
-        var venue;
+        var venue, phone;
         // get yelp data for each venue
         for (var i = 0, len = orderedVenues.length; i < len; i++) {
             venue = orderedVenues[i];
-            if (venue.contact.phone) {
+            phone = venue.contact.phone;
+            if (phone && phone.length > 9 && phone.length < 9) {
                 self.getYelpData(venue);
             }
         }
@@ -638,7 +649,7 @@ var viewModel = function() {
             // if Flickr fails, display alert modal
             self.alertTitle('flickr error');
             self.alertDetails('There was a problem harvesting Flickr photos for the venues. Please try again later.');
-            self.toggleAlert('open', 'temporary');
+            self.toggleAlert('open');
         });
     };
 
@@ -769,7 +780,7 @@ var viewModel = function() {
     this.toggleMarkerBounce = function(state, marker) {
         // or end all marker animations
         var venue, venues = self.venuesArray();
-        for (var i = 0, len = venues.length; i<len; i++) {
+        for (var i = 0, len = venues.length; i < len; i++) {
             venue = self.venuesArray()[i];
             venue.marker.marker.setAnimation(null);
         }
@@ -805,17 +816,23 @@ var viewModel = function() {
         self.infoWindow.close();
         var len = self.venuesArray().length;
         var venue;
-        for (var i = 0; i < len; i++) {
-            venue = self.venuesArray()[i];
-            if (venue.favorited()) {
-                venue.marker.marker.setMap(self.map);
-            } else {
-                venue.venueVisible(false);
-                venue.marker.marker.setMap(null);
+        if (self.loggedIn()) {
+            for (var i = 0; i < len; i++) {
+                venue = self.venuesArray()[i];
+                if (venue.favorited()) {
+                    venue.marker.marker.setMap(self.map);
+                } else {
+                    venue.venueVisible(false);
+                    venue.marker.marker.setMap(null);
+                }
+                venue.venueExpanded(false);
             }
-            venue.venueExpanded(false);
+            self.map.fitBounds(self.mapBounds);
+        } else {
+            self.alertTitle('no favorites yet');
+            self.alertDetails('You must create a new user profile or be logged in to use this feature.');
+            self.toggleAlert('open');
         }
-        self.map.fitBounds(self.mapBounds);
     };
 
 
@@ -871,7 +888,8 @@ var viewModel = function() {
                 "lat": self.coordinates().lat,
                 "lng": self.coordinates().lng
             },
-            icon: 'img/target.svg',
+            icon: 'img/x.svg',
+            title: 'X marks the spot.',
             size: new google.maps.Size(3, 3),
         }));
 
@@ -894,14 +912,14 @@ var viewModel = function() {
      * Toggle dark/light mode of map
      */
     this.toggleMapMode = function() {
-        if (this.currentMode() === 'light') {
-            this.map.mapTypes.set('map_style', this.lightMode);
-            this.map.setMapTypeId('map_style');
-            this.currentMode('');
+        if (self.currentMode() === 'light') {
+            self.map.mapTypes.set('map_style', this.lightMode);
+            self.map.setMapTypeId('map_style');
+            self.currentMode('');
         } else {
-            this.map.mapTypes.set('map_style', this.darkMode);
-            this.map.setMapTypeId('map_style');
-            this.currentMode('light');
+            self.map.mapTypes.set('map_style', this.darkMode);
+            self.map.setMapTypeId('map_style');
+            self.currentMode('light');
         }
     };
 
@@ -989,7 +1007,7 @@ var viewModel = function() {
                     // creates a welcome back alert if login successful
                     self.alertTitle('welcome back, ' + user);
                     self.alertDetails('You are logged in. Please feel free to explore and favorite any locations you find enjoyable.');
-                    self.toggleAlert('open', 'temporary');
+                    self.toggleAlert('open');
                     self.importUserFavorites(user);
                 } else {
                     // if user doesn't exist create a new one
@@ -1002,12 +1020,12 @@ var viewModel = function() {
                         if (error) {
                             self.alertTitle('login error');
                             self.alertDetails('The user profile could not be created at this time. Please try again later.');
-                            self.toggleAlert('open', 'temporary');
+                            self.toggleAlert('open');
                         // else create a welcome alert
                         } else {
                             self.alertTitle('welcome, ' + user);
                             self.alertDetails('The user profile was successfully created. Please feel free to explore and favorite any locations around the world you find enjoyable');
-                            self.toggleAlert('open', 'temporary');
+                            self.toggleAlert('open');
                         }
                     });
 
@@ -1025,7 +1043,7 @@ var viewModel = function() {
             // if login/signin invalid, create error alert
             self.alertTitle('user error');
             self.alertDetails('Please use a valid name. Paths must be non-empty strings, not containing the following characters: ". # $ [ ]".');
-            self.toggleAlert('open', 'temporary');
+            self.toggleAlert('open');
         }
     };
 
@@ -1042,7 +1060,7 @@ var viewModel = function() {
             // if not logged in, alert user
             self.alertTitle('login required');
             self.alertDetails('Please login or create a user profile first.');
-            self.toggleAlert('open', 'temporary');
+            self.toggleAlert('open');
         }
     };
 
@@ -1153,7 +1171,7 @@ var viewModel = function() {
                                 if (error) {
                                     self.alertTitle('favorite error');
                                     self.alertDetails('There was an error in saving the user favorite. Please try again later.');
-                                    self.toggleAlert('open', 'temporary');
+                                    self.toggleAlert('open');
                                 }
                             });
                         }
@@ -1207,8 +1225,10 @@ var viewModel = function() {
 
 };
 
+app.viewModel = new ViewModel();
+
 
 // apply knockout bindings
 $(function() {
-    ko.applyBindings( new viewModel() );
+    ko.applyBindings(app.viewModel);
 }());

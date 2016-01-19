@@ -12,7 +12,7 @@
 <body data-bind="css: { dark: currentMode() }">
   <i class="fa fa-spinner loading" data-bind="visible: loading"></i>
   <!-- map -->
-  <div id="mapDiv" data-bind="css: { fade: alerting, fade: loading } "></div>
+  <div id="mapDiv" class="fade" data-bind="css: { fade: alerting, fade: loading } "></div>
 
   <!-- location search input -->
   <header class="ui-overlay">
@@ -78,6 +78,9 @@
         <section class="place-info" data-bind="visible: venue.venueExpanded">
           <!-- place details -->
           <div class="info-wrapper">
+            <!-- open status -->
+            <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
+            <!-- type of establishment -->
             <h5 class="place-type" data-bind="text: venue.categories[0].name"></h5>
 
             <!-- place contact info -->
@@ -96,14 +99,6 @@
               </h5>
             </div>
           </div>
-          <!-- open status -->
-          <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
-
-          <!-- foursquare logo link -->
-          <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } ">
-            <span class="foursquare-text">more on:</span>
-            <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
-          </a>
 
           <!-- venues picture -->
           <div class="info-pic-wrapper">
@@ -113,6 +108,12 @@
               <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
             </div>
           </div>
+
+          <!-- foursquare logo link -->
+          <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } ">
+            <span class="foursquare-text">more on:</span>
+            <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
+          </a>
 
           <!-- yelp review -->
           <div class="yelp-review-wrapper" data-bind="visible: venue.review">
@@ -164,12 +165,11 @@
 
   <!-- load scripts -->
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-  <script src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
   <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
   <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
-  <script src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places"></script>
+  <script async src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>
   <script src="js/app.min.js"></script>
-
   <script>
       var cb = function() {
         var l = document.createElement('link'); l.rel = 'stylesheet';
