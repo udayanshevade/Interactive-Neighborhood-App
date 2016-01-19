@@ -102,9 +102,11 @@
 
           <!-- venues picture -->
           <div class="info-pic-wrapper">
-            <div class="info-pic" data-bind="if: venue.photoURL">
+            <div class="info-pic-container" data-bind="if: venue.photoURL">
               <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }"></i>
-              <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="place-image">
+              <div class="info-pic-div">
+                <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
+              </div>
               <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }"></i>
             </div>
           </div>
@@ -164,12 +166,12 @@
   </aside>
 
   <!-- load scripts -->
-  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
-  <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places"></script>
-  <script async src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>
   <script src="js/app.min.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=initializeMap"></script>
+  <script async defer src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+  <script async defer src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>
   <script>
       var cb = function() {
         var l = document.createElement('link'); l.rel = 'stylesheet';

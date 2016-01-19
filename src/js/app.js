@@ -1,10 +1,90 @@
-// precludes a deprecated synchronous XMLHttpRequest
-$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
-    options.async = true;
-});
-
 var app = app || {};
 
+/**
+ * Global asynchronous callback function
+ */
+var initializeMap = function() {
+
+    // JSON for the 'day' style of the map
+    var lightStyle = [{"featureType":"water","elementType":"geometry","stylers":[{"color":"#e9e9e9"},{"lightness":17}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":20}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#ffffff"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#ffffff"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":16}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":21}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#dedede"},{"lightness":21}]},{"elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"},{"lightness":16}]},{"elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#333333"},{"lightness":40}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#f2f2f2"},{"lightness":19}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#fefefe"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#fefefe"},{"lightness":17},{"weight":1.2}]}];
+
+    // JSON for the 'night' style of the map
+    var darkStyle = [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#707070"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#424242"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"lightness":17},{"color":"#484848"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"lightness":29},{"weight":0.2},{"color":"#ff0000"},{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}];
+
+    // save the light and dark modes for switching
+    app.viewModel.lightMode = new google.maps.StyledMapType(lightStyle,
+        {name: "Light Mode"});
+    app.viewModel.darkMode = new google.maps.StyledMapType(darkStyle,
+        {name: "Dark Mode"});
+
+    // if browser has navigator geolocation
+    if (navigator.geolocation) {
+        // assign the current location
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            // binds the coordinates
+            app.viewModel.coordinates(pos);
+
+            // initialize Google Maps geocoder for reuse
+            app.viewModel.geocoder = new google.maps.Geocoder();
+            // resize and recenter map on window resize
+            google.maps.event.addDomListener(window, 'resize', function() {
+                var center = app.viewModel.map.getCenter();
+                google.maps.event.trigger(app.viewModel.map, 'resize');
+                app.viewModel.map.setCenter(center);
+            });
+            // define the map options
+            app.viewModel.mapOptions = {
+                center: pos,
+                disableDefaultUI: true,
+                mapTypeControlOptions: {
+                    mapTypeIds: [
+                    google.maps.MapTypeId.ROADMAP, 'map_style'
+                ]}
+            };
+            app.viewModel.map = new google.maps.Map(document.getElementById('mapDiv'), app.viewModel.mapOptions);
+
+            // define the time of day for the map style
+            app.viewModel.initializeTime();
+
+            // initialize a blank infoWindow for later use
+            app.viewModel.infoWindow = new google.maps.InfoWindow();
+
+            // listens for infowindow closing
+            google.maps.event.addListener(app.viewModel.infoWindow, 'closeclick', function() {
+                app.viewModel.toggleMarkerBounce();
+            });
+
+            // handles chromium bug
+            // if chrome geolocation does not work, please try
+            // again in a different tab or browser
+            if (pos.lat === pos.lng === 0) {
+                app.viewModel.handleLocationError();
+            } else {
+                // enable the map using the geolocated coordinates
+                app.viewModel.geoLocate(pos.lat, pos.lng);
+            }
+
+        }, function() {
+            // handle the geolocation error
+            app.viewModel.handleLocationError();
+        }, {timeout: 7500});
+
+    } else {
+        // fallback in case browser doesn't support geolocation
+        app.viewModel.handleLocationError();
+    }
+
+    app.viewModel.mapBounds = new google.maps.LatLngBounds();
+};
+
+/**
+ * ViewModel
+ */
 var ViewModel = function() {
 
     // alias reference to this
@@ -32,9 +112,6 @@ var ViewModel = function() {
         this.yelp_key_secret = "EbOO2hHGytkLpd1lycWv7K-faa4";
         this.yelp_token_secret = "oZEPYCr8TQ2cNaqrDN7_G0ISsis";
 
-        // initialize Google Maps geocoder for reuse
-        this.geocoder = new google.maps.Geocoder();
-
         // Initialize observables
 
         // binds search term, e.g. 'popular', ''
@@ -61,7 +138,6 @@ var ViewModel = function() {
         this.anchorMarker = ko.observable();
 
 
-
         // binds array of returned venues
         this.venuesArray = ko.observableArray();
 
@@ -71,15 +147,6 @@ var ViewModel = function() {
         // binds current day/night mode of map
         this.currentMode = ko.observable('');
 
-        // initialize map on window load
-        this.initializeMap();
-
-        // resize and recenter map on window resize
-        google.maps.event.addDomListener(window, 'resize', function() {
-            var center = self.map.getCenter();
-            google.maps.event.trigger(self.map, 'resize');
-            self.map.setCenter(center);
-        });
 
         // binds logged in user
         this.user = ko.observable('');
@@ -88,6 +155,9 @@ var ViewModel = function() {
 
         // binds whether the login interface is visible
         this.loginExpanded = ko.observable(false);
+
+        // initial search
+        this.initialSearch = true;
     };
 
 
@@ -97,12 +167,12 @@ var ViewModel = function() {
     this.getLocalUser = function() {
         var user = localStorage.user;
         if (user) {
-            this.user(user);
-            this.login();
+            self.user(user);
+            self.login();
         } else {
-            this.alertTitle('welcome!');
-            this.alertDetails('Feel free to explore the map, create a user profile, and favorite locations.');
-            this.toggleAlert('open');
+            self.alertTitle('welcome!');
+            self.alertDetails('Feel free to explore the map, create a user profile, and favorite locations.');
+            self.toggleAlert('open');
         }
     };
 
@@ -231,80 +301,6 @@ var ViewModel = function() {
 
 
     /**
-     * Initialize the Google Map
-     */
-    this.initializeMap = function() {
-
-        // JSON for the 'day' style of the map
-        var lightStyle = [{"featureType":"water","elementType":"geometry","stylers":[{"color":"#e9e9e9"},{"lightness":17}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":20}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#ffffff"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#ffffff"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":16}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":21}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#dedede"},{"lightness":21}]},{"elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"},{"lightness":16}]},{"elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#333333"},{"lightness":40}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#f2f2f2"},{"lightness":19}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#fefefe"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#fefefe"},{"lightness":17},{"weight":1.2}]}];
-
-        // JSON for the 'night' style of the map
-        var darkStyle = [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#707070"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#424242"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"lightness":17},{"color":"#484848"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"lightness":29},{"weight":0.2},{"color":"#ff0000"},{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}];
-
-        // save the light and dark modes for switching
-        self.lightMode = new google.maps.StyledMapType(lightStyle,
-            {name: "Light Mode"});
-        self.darkMode = new google.maps.StyledMapType(darkStyle,
-            {name: "Dark Mode"});
-
-        // if browser has navigator geolocation
-        if (navigator.geolocation) {
-            // assign the current location
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-
-                // binds the coordinates
-                self.coordinates(pos);
-
-                // define the map options
-                self.mapOptions = {
-                    center: pos,
-                    disableDefaultUI: true,
-                    mapTypeControlOptions: {
-                        mapTypeIds: [
-                        google.maps.MapTypeId.ROADMAP, 'map_style'
-                    ]}
-                };
-
-                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
-
-                // define the time of day for the map style
-                self.initializeTime();
-
-                // initialize a blank infoWindow for later use
-                self.infoWindow = new google.maps.InfoWindow();
-
-                // listens for infowindow closing
-                google.maps.event.addListener(self.infoWindow, 'closeclick', function() {
-                    self.toggleMarkerBounce();
-                });
-
-                if (pos.lat === pos.lng === 0) {
-                    self.handleLocationError();
-                } else {
-                    // enable the map using the geolocated coordinates
-                    self.geoLocate(pos.lat, pos.lng);
-                }
-
-            }, function() {
-                // handle the geolocation error
-                self.handleLocationError();
-            }, {timeout: 7500});
-
-        } else {
-            // fallback in case browser doesn't support geolocation
-            self.handleLocationError();
-        }
-
-        self.mapBounds = new google.maps.LatLngBounds();
-    };
-
-
-
-    /**
      * Handles geolocation error or absence
      */
     self.handleLocationError = function() {
@@ -361,6 +357,7 @@ var ViewModel = function() {
         self.toggleMapMode();
 
     };
+
 
 
     /**
@@ -530,27 +527,26 @@ var ViewModel = function() {
                     // push the venue to the venues array
                     self.venuesArray.push(venue);
                 }
+            // prevents deprecated Firebase synchronous XMLHttpRequest
+            $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+                options.async = true;
+            });
             // after the api requests are processed
             setTimeout(function() {
 
                 // order the venues
                 self.orderVenues();
 
-                // get additional Flickr photos for each venue
-                self.venuesArray().forEach(function(venue) {
-                    self.getPhotos(venue);
-                });
+                if (!self.loggedIn() && self.initialSearch) {
 
-                self.loading(false);
+                    // initialize reference to Firebase database
+                    self.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
+                    // create reference to 'users' category in database
+                    self.usersRef = self.myDataRef.child('users');
+                    // TODO: set up a reference to 'venues' category in database
+                    self.venuesRef = self.myDataRef.child('venues');
 
-                // initialize reference to Firebase database
-                self.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
-                // create reference to 'users' category in database
-                self.usersRef = self.myDataRef.child('users');
-                // TODO: set up a reference to 'venues' category in database
-                self.venuesRef = self.myDataRef.child('venues');
 
-                if (!self.loggedIn()) {
                     // harvest persistent user from localStorage
                     if (typeof(Storage)) {
                         self.localStorageAvailable = true;
@@ -558,7 +554,28 @@ var ViewModel = function() {
                     } else {
                         self.localStorageAvailable = false;
                     }
+                    // set initial search setting to false
+                    // user/app interaction is settled
+                    self.initialSearch = false;
+
+                } else {
+                    self.importUserFavorites(self.user());
                 }
+
+
+                // get additional yelp and flickr data for each venue
+                var venue, phone, venues = self.venuesArray();
+                for (var i = 0, len = venues.length; i < len; i++) {
+                    venue = venues[i];
+                    phone = venue.contact.phone;
+                    self.getPhotos(venue);
+                    if (phone && phone.length > 9 && phone.length < 13) {
+                        self.getYelpData(venue);
+                    }
+                }
+
+                self.loading(false);
+
             }, 500);
         }).error(function(data) {
             // toggle alert if the foursquare response fails
@@ -574,10 +591,6 @@ var ViewModel = function() {
      * Order the venues according to the ratings
      */
     this.orderVenues = function() {
-        // if logged in, import favorites
-        if (self.loggedIn()) {
-            self.importUserFavorites(self.user());
-        }
         var venuesArray = self.venuesArray();
         // sort venues in descending order by rating
         var orderedVenues = venuesArray.sort(function(a, b) {
@@ -589,16 +602,6 @@ var ViewModel = function() {
         });
         // save the ordered venues
         self.venuesArray(orderedVenues);
-
-        var venue, phone;
-        // get yelp data for each venue
-        for (var i = 0, len = orderedVenues.length; i < len; i++) {
-            venue = orderedVenues[i];
-            phone = venue.contact.phone;
-            if (phone && phone.length > 9 && phone.length < 9) {
-                self.getYelpData(venue);
-            }
-        }
 
     };
 
@@ -643,7 +646,7 @@ var ViewModel = function() {
 
             } else {
                 // log which images were unavailable
-                console.log('Flickr images for ' + place.name + ' are not provided.');
+                //console.log('Flickr images for ' + place.name + ' are not provided.');
             }
         }).fail(function(data) {
             // if Flickr fails, display alert modal
@@ -1006,7 +1009,7 @@ var ViewModel = function() {
                 if (result) {
                     // creates a welcome back alert if login successful
                     self.alertTitle('welcome back, ' + user);
-                    self.alertDetails('You are logged in. Please feel free to explore and favorite any locations you find enjoyable.');
+                    self.alertDetails('You are logged in. Feel free to explore and favorite any locations you find enjoyable.');
                     self.toggleAlert('open');
                     self.importUserFavorites(user);
                 } else {
@@ -1024,7 +1027,7 @@ var ViewModel = function() {
                         // else create a welcome alert
                         } else {
                             self.alertTitle('welcome, ' + user);
-                            self.alertDetails('The user profile was successfully created. Please feel free to explore and favorite any locations around the world you find enjoyable');
+                            self.alertDetails('The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.');
                             self.toggleAlert('open');
                         }
                     });
@@ -1106,7 +1109,8 @@ var ViewModel = function() {
 
             if (userFavoritesLen) {
                 // for each location id in the user favorites
-                snapshot.forEach(function(childSnapshot) {
+                // assign returned true match to result
+                result = snapshot.forEach(function(childSnapshot) {
                     favorite = childSnapshot.val();
                     firebaseID = childSnapshot.key();
 
@@ -1122,7 +1126,7 @@ var ViewModel = function() {
                                     mode,
                                     firebaseID,
                                     userFavoritesLen);
-                        return true;
+                        return result;
                     }
                 });
 
@@ -1151,48 +1155,50 @@ var ViewModel = function() {
         var user = self.user();
         // switch based on the mode
         switch (mode) {
-                // if user is favoriting/unfavoriting
-                case ('favorite'):
-                    // and if there is an existing match
-                    if (result) {
-                        var node = user + '/' + fID;
-                        // if there are multiple user favorites already
-                        if (len > 1) {
-                            // remove the database match
-                            self.usersRef.child(node).remove();
-                            // unfavorite the location
-                            current.favorited(false);
-                        } else {
-                            var users = {};
-                            // set user favorites to placehodler string
-                            users[user] = 'No favorites yet.';
-                            self.usersRef.update(users, function(error) {
-                                // if there is an error, alert user
-                                if (error) {
-                                    self.alertTitle('favorite error');
-                                    self.alertDetails('There was an error in saving the user favorite. Please try again later.');
-                                    self.toggleAlert('open');
-                                }
-                            });
-                        }
-                        // unfavorite current location
+            // if user is favoriting/unfavoriting
+            case ('favorite'):
+                // and if there is an existing match
+                if (result) {
+                    var node = user + '/' + fID;
+                    // if there are multiple user favorites already
+                    if (len > 1) {
+                        // remove the database match
+                        self.usersRef.child(node).remove();
+                        // unfavorite the location
                         current.favorited(false);
                     } else {
-                        // otherwise favorite the venue
-                        self.favoriteVenue(result, current);
-                        // set the venue status to favorited
-                        current.favorited(true);
+                        var users = {};
+                        // set user favorites to placehodler string
+                        users[user] = 'No favorites yet.';
+                        self.usersRef.update(users, function(error) {
+                            // if there is an error, alert user
+                            if (error) {
+                                self.alertTitle('favorite error');
+                                self.alertDetails('There was an error in saving the user favorite. Please try again later.');
+                                self.toggleAlert('open');
+                            }
+                        });
                     }
-                    break;
-                // if the user is just importing the favorites
-                case ('import'):
-                    // set favorited status true if there is a match
-                    if (result) {
-                        current.favorited(true);
-                    } else {
-                        current.favorited(false);
-                    }
-                    break;
+                    // unfavorite current location
+                    current.favorited(false);
+                } else {
+                    // otherwise favorite the venue
+                    self.favoriteVenue(result, current);
+                    // set the venue status to favorited
+                    current.favorited(true);
+                }
+                break;
+            // if the user is just importing the favorites
+            case ('import'):
+                var logged = current.name + ', ' + current.favorited();
+                // set favorited status true if there is a match
+                if (result) {
+                    current.favorited(true);
+                } else {
+                    current.favorited(false);
+                }
+                console.log(logged + ', ' + current.favorited());
+                break;
         }
     };
 
@@ -1202,11 +1208,13 @@ var ViewModel = function() {
      * Imports user favorites if any
      */
     this.importUserFavorites = function(user) {
+        var venue, venues = self.venuesArray();
         // for each location in the current venue array
-        self.venuesArray().forEach(function(venue) {
+        for (var i = 0, len = venues.length; i < len; i++) {
+            venue = venues[i];
             // import the locations
             self.checkUserFavorites(user, venue, 'import');
-        });
+        };
     };
 
 
@@ -1229,6 +1237,4 @@ app.viewModel = new ViewModel();
 
 
 // apply knockout bindings
-$(function() {
-    ko.applyBindings(app.viewModel);
-}());
+ko.applyBindings(app.viewModel);

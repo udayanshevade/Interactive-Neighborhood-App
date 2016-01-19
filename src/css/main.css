@@ -402,7 +402,7 @@ html {
           justify-content: center;
 }
 
-.info-pic {
+.info-pic-container {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -411,24 +411,30 @@ html {
           justify-content: space-around;
 }
 
-.place-image {
-  max-width: 80%;
-  height: 150px;
+.info-pic-div {
+  width: 80%;
+  max-height: 150px;
 }
 
-.info-pic .fa {
+.info-pic {
+  display: block;
+  margin: 0 auto;
+  max-height: 150px;
+}
+
+.info-pic-container .fa {
   padding: 1rem;
   -ms-flex-item-align: center;
       -webkit-align-self: center;
           align-self: center;
 }
 
-.info-pic .fa:before {
+.info-pic-container .fa:before {
   opacity: 0.3;
   transition: opacity 0.2s ease-in-out;
 }
 
-.info-pic .fa:hover:before {
+.info-pic-container .fa:hover:before {
   opacity: 1;
 }
 
