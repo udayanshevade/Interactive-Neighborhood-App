@@ -87,7 +87,7 @@
             <!-- open status -->
             <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
             <!-- type of establishment -->
-            <h5 class="place-type" data-bind="text: venue.categories[0].name"></h5>
+            <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
 
             <!-- place contact info -->
             <div class="contact">

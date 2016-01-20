@@ -517,6 +517,12 @@ var ViewModel = function() {
 
                         venue.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
 
+                        if (!venue.categories || !venue.categories.length) {
+                            venue.categories = [{
+                                name:'Miscellaneous'
+                            }];
+                        }
+
                         // if no venue hours are provided
                         if (!venue.hours) {
                             // create a default hours object
@@ -731,7 +737,7 @@ var ViewModel = function() {
         // encapsulate title
         this.name = place.name;
 
-        if (place && place.categories) {
+        if (place && place.categories && place.categories[0] && place.categories[0].icon) {
             // encapsulate icon properties
             this.icon = place.categories[0].icon;
             var bg = 'bg_';
@@ -742,7 +748,7 @@ var ViewModel = function() {
             // use custom icon if defined or default marker icon as a fallback
             this.iconImage = (img + bg + this.size + ext);
         } else {
-            this.iconImage = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+            this.iconImage = 'img/question.svg';
         }
 
         // create new Google Maps marker
