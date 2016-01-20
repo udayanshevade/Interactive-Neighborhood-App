@@ -37,7 +37,7 @@ Coming soon!
 - Interactive Google Map
   - with a bonus day/night mode
 - Dynamic filter/list & map markers
-- Venue information, rating and review
+- Venue information: photos, rating and review
 - User login and 'favorite' option
 - Persisting user data
 - Responsiveness & friendly UI
@@ -52,7 +52,9 @@ Coming soon!
   * Import Popular Venues and link to more Foursquare info
 4. [Yelp API](https://www.yelp.com/developers/documentation/v2/overview)
   * Import a Yelp Review and link to more Yelp info
-5. [Firebase](https://www.firebase.com)
+5. [Flickr API](https://www.flickr.com/services/api/)
+  * Import a set of user-submitted public photos relevant to the venue
+6. [Firebase](https://www.firebase.com)
   * Import user profile and add/remove favorites
 
 ## To Do Options:
