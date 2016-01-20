@@ -614,7 +614,7 @@ var ViewModel = function() {
                     self.initialSearch(false);
 
                 } else if (self.loggedIn()) {
-                    self.importUserFavorites(self.user());
+                    self.importUserFavorites(self.loggedInUser);
                 }
 
 
@@ -906,29 +906,10 @@ var ViewModel = function() {
         // if coordinates have already been passed in, skip the geolocation
         if (typeof lat === 'number' && typeof lng === 'number') {
             latlng = new google.maps.LatLng(lat, lng);
-            self.geocoder.geocode({'latLng': latlng}, function(results, status) {
-                if (status == google.maps.GeocoderStatus.OK) {
-                    self.getLocations(results);
-                } else {
-                    self.constructAlert({
-                        title: 'google maps error',
-                        details: 'There was an issue while discovering the specified location. Please try again.'
-                    });
-                    self.toggleAlert('open');
-                }
-            });
-        } else {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            if (self.geocoder) {
                 self.geocoder.geocode({'latLng': latlng}, function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
-                        self.poi(results[0].address_components[2].long_name);
-                        self.coordinates({
-                            'lat': latlng.lat(),
-                            'lng': latlng.lng()
-                        });
-                        self.loading(true);
-                        self.updateLatLng('', status);
+                        self.getLocations(results);
                     } else {
                         self.constructAlert({
                             title: 'google maps error',
@@ -937,6 +918,41 @@ var ViewModel = function() {
                         self.toggleAlert('open');
                     }
                 });
+            } else {
+                self.constructAlert({
+                    title: 'google maps error',
+                    details: 'There was an error with the map. Please refresh the page and try again.'
+                });
+                self.toggleAlert('open');
+            }
+        } else {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                if (self.geocoder) {
+                    self.geocoder.geocode({'latLng': latlng}, function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            self.poi(results[0].address_components[2].long_name);
+                            self.coordinates({
+                                'lat': latlng.lat(),
+                                'lng': latlng.lng()
+                            });
+                            self.loading(true);
+                            self.updateLatLng('', status);
+                        } else {
+                            self.constructAlert({
+                                title: 'google maps error',
+                                details: 'There was an issue while discovering the specified location. Please try again.'
+                            });
+                            self.toggleAlert('open');
+                        }
+                    });
+                }  else {
+                    self.constructAlert({
+                        title: 'google maps error',
+                        details: 'There was an error with the map. Please refresh the page and try again.'
+                    });
+                    self.toggleAlert('open');
+                }
             }, self.handleLocationError);
         }
     };
@@ -1119,6 +1135,7 @@ var ViewModel = function() {
 
                 // set logged in status as true
                 self.loggedIn(true);
+                self.loggedInUser = self.user();
 
                 // if localStorage is available, persist user
                 if (self.localStorageAvailable) {
@@ -1151,7 +1168,7 @@ var ViewModel = function() {
     this.toggleVenueFavorite = function(current) {
         if (self.loggedIn()) {
             // check if current item is already favorited
-            self.checkUserFavorites(self.user(), current, 'favorite');
+            self.checkUserFavorites(self.loggedInUser, current, 'favorite');
         } else {
             // if not logged in, alert user
             self.constructAlert({
@@ -1168,7 +1185,7 @@ var ViewModel = function() {
      * Add venue to user favorites in database
      */
     this.favoriteVenue = function(result, current) {
-        var user = self.user();
+        var user = self.loggedInUser;
         if (!result) {
             var location = {};
             // save location id in database
@@ -1257,7 +1274,7 @@ var ViewModel = function() {
      */
     this.userAction = function(result, current, mode, fID, len) {
         // cache user
-        var user = self.user();
+        var user = self.loggedInUser;
         // switch based on the mode
         switch (mode) {
             // if user is favoriting/unfavoriting
