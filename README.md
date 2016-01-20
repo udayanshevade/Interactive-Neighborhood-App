@@ -1,8 +1,8 @@
 # Neighborhood Map Project
 
-### Find popular venues near a specified location
+#### Find popular venues near a specified location
 
-**Search** for various *types of venues* across the world in this **interactive map**. You can find places near you or any place you specify. Browse a **dynamic list** of locations *ranked by popularity*. Each venue comes with **relevant information**, **images**, as well as a brief **review excerpt**. The app contains rudimentary **user profile** functionality, which allows a user to create a profile with a unique handle & **favorite locations**.
+**Search** for *various types* of *venues* across the world in this **interactive map**. You can find places **near you** or **any place** you specify. Browse a **dynamic list** of locations *ranked by popularity*. Each venue comes with **relevant information**, **images**, as well as a brief **review excerpt**. The app contains rudimentary **user profile** functionality, which allows a user to **create a profile** with a unique handle & **favorite locations**.
 
 ## Live Site:
 
@@ -14,7 +14,7 @@ Coming soon!
 2. Navigate to the dist/ folder.
 3. Open command line.
 4. Host a simple server.
-  * execute `python.exe -m SimpleHTTPServer 8000` (or any port of your choice)
+  * execute `python.exe -m SimpleHTTPServer 8000` (or on any port of your choice)
 5. Open index.html and enjoy!
 
 ## In-app Instructions:
@@ -40,7 +40,7 @@ Coming soon!
 - Venue information, rating and review
 - User login and 'favorite' option
 - Persisting user data
-- Mobile responsiveness & intuitive UI
+- Responsiveness & friendly UI
 
 ## 3rd Party APIs & Services used:
 
