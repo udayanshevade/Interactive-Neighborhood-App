@@ -481,64 +481,72 @@ var ViewModel = function() {
                 var venue;
                 // access list of returned venues in the JSON response
                 var venues = data.response.groups[0].items;
-                // iterate over the returned venues
-                for (var v = 0, len = venues.length; v < len; v++) {
-                    // for each venue
-                    venue = venues[v].venue;
 
-                    venue.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
+                if (venues.length) {
+                    // iterate over the returned venues
+                    for (var v = 0, len = venues.length; v < len; v++) {
+                        // for each venue
+                        venue = venues[v].venue;
 
-                    // if no venue hours are provided
-                    if (!venue.hours) {
-                        // create a default hours object
-                        venue.hours = {
-                            isOpen: false,
-                            status: "Not Available"
-                        };
+                        venue.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
+
+                        // if no venue hours are provided
+                        if (!venue.hours) {
+                            // create a default hours object
+                            venue.hours = {
+                                isOpen: false,
+                                status: "Not Available"
+                            };
+                        }
+                        // format venue rating as a decimal value
+                        venue.rating = parseFloat(venue.rating).toFixed(1);
+                        // if no rating, mark as unavailable
+                        if (venue.rating === 'NaN') {
+                            venue.rating = '--';
+                        }
+                        // if no price, mark price tier as empty
+                        if (!venue.price) {
+                            venue.price = {
+                                'tier': 0
+                            };
+                        }
+
+                        // current picture displayed
+                        venue.currentPic = 0;
+
+                        // define photos
+                        var photos = venue.featuredPhotos;
+                        // if photos are available
+                        if (photos && photos.items.length) {
+                            var initialPhoto = photos.items[venue.currentPic];
+                            initialPhoto.size = '250x100';
+                            // define current photoURL
+                            venue.photoURL = ko.observable(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
+                            // define infoWindow picture
+                            venue.infowindowPic = venue.photoURL();
+                        }
+
+                        // by default all venues are initially visible
+                        venue.venueVisible = ko.observable(true);
+                        // no venues are expanded
+                        venue.venueExpanded = ko.observable(false);
+                        // no venues are favorited
+                        venue.favorited = ko.observable(false);
+
+                        // bind empty observables for Yelp data
+                        venue.review = ko.observable('No Yelp review available.');
+                        venue.yelpURL = ko.observable();
+
+                        // create a new marker object
+                        venue.marker = new self.Marker(venue);
+                        // push the venue to the venues array
+                        self.venuesArray.push(venue);
                     }
-                    // format venue rating as a decimal value
-                    venue.rating = parseFloat(venue.rating).toFixed(1);
-                    // if no rating, mark as unavailable
-                    if (venue.rating === 'NaN') {
-                        venue.rating = '--';
-                    }
-                    // if no price, mark price tier as empty
-                    if (!venue.price) {
-                        venue.price = {
-                            'tier': 0
-                        };
-                    }
-
-                    // current picture displayed
-                    venue.currentPic = 0;
-
-                    // define photos
-                    var photos = venue.featuredPhotos;
-                    // if photos are available
-                    if (photos && photos.items.length) {
-                        var initialPhoto = photos.items[venue.currentPic];
-                        initialPhoto.size = '250x100';
-                        // define current photoURL
-                        venue.photoURL = ko.observable(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
-                        // define infoWindow picture
-                        venue.infowindowPic = venue.photoURL();
-                    }
-
-                    // by default all venues are initially visible
-                    venue.venueVisible = ko.observable(true);
-                    // no venues are expanded
-                    venue.venueExpanded = ko.observable(false);
-                    // no venues are favorited
-                    venue.favorited = ko.observable(false);
-
-                    // bind empty observables for Yelp data
-                    venue.review = ko.observable('No Yelp review available.');
-                    venue.yelpURL = ko.observable();
-
-                    // create a new marker object
-                    venue.marker = new self.Marker(venue);
-                    // push the venue to the venues array
-                    self.venuesArray.push(venue);
+                } else {
+                    self.alertTitle('try another search');
+                    self.alertDetails('Just as with the meaning of life, this search provided no concrete results. Please try a valid search with a specific location for accurate results.');
+                    self.toggleAlert('open');
+                    self.loading(false);
                 }
             // prevents deprecated Firebase synchronous XMLHttpRequest
             $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
