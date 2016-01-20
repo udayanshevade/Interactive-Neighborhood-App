@@ -130,7 +130,7 @@ html {
   transition: all 0.3s ease-in-out;
 }
 
-.search-around {
+.search-near {
   font: small-caps 1.35rem "Roboto", sans-serif;
   padding: 0 0.5rem;
 }
@@ -727,7 +727,7 @@ html {
     padding-left: 0.5rem;
   }
 
-  .search-around {
+  .search-near {
     font-size: 1.5rem;
     padding: 0 1rem;
   }
