@@ -1092,7 +1092,7 @@ var ViewModel = function() {
         } else {
             // if not logged in, alert user
             self.alertTitle('login required');
-            self.alertDetails('Please login or create a user profile first.');
+            self.alertDetails('Please login or create a user profile first, and try again.');
             self.toggleAlert('open');
         }
     };
