@@ -84,12 +84,12 @@ var initializeMap = function() {
         // fallback in case browser doesn't support geolocation
         app.viewModel.handleLocationError();
     }
-
+    // initialize mapBounds
     app.viewModel.mapBounds = new google.maps.LatLngBounds();
 };
 
 /**
- * ViewModel
+ * ViewModel for Knockout bindings
  */
 var ViewModel = function() {
 
@@ -205,7 +205,7 @@ var ViewModel = function() {
             baseVenueURL: "https://foursquare.com/v/",
             version: "20140601",
             defaultQuery: ko.observable('topPicks'),
-            radius: ko.observable(5000)
+            radius: ko.observable(4500)
         };
     };
 
@@ -368,15 +368,21 @@ var ViewModel = function() {
      * User update of search
      */
     this.updateSearch = function() {
-        self.loading(true);
-        // enable Google Maps API Places Service
-        var service = new google.maps.places.PlacesService(self.map);
-        // define search query with user point of interest
-        var request = {
-            "query": self.poi()
-        };
-        // perform Google Maps API text search
-        service.textSearch(request, self.updateLatLng);
+        if (self.poi()) {
+            self.loading(true);
+            // enable Google Maps API Places Service
+            var service = new google.maps.places.PlacesService(self.map);
+            // define search query with user point of interest
+            var request = {
+                "query": self.poi()
+            };
+            // perform Google Maps API text search
+            service.textSearch(request, self.updateLatLng);
+        } else {
+            self.alertTitle('invalid search');
+            self.alertDetails('Please enter a valid location. Specific locations yield accurate results.');
+            self.toggleAlert('open');
+        }
     };
 
 
@@ -393,6 +399,10 @@ var ViewModel = function() {
                 lat: loc.lat(),
                 lng: loc.lng()
             });
+        }  else {
+            self.alertTitle('google maps error');
+            self.alertDetails('There was an issue while discovering the specified location. Please try again.');
+            self.toggleAlert('open');
         }
         // hide markers
         self.hideMarkers();
@@ -411,7 +421,7 @@ var ViewModel = function() {
             },
             icon: 'img/target.svg',
             size: new google.maps.Size(3, 3),
-            title: 'X marks the spot.',
+            title: 'Showing locations near:',
             animation: google.maps.Animation.DROP
         }));
 
@@ -855,6 +865,10 @@ var ViewModel = function() {
             self.geocoder.geocode({'latLng': latlng}, function(results, status) {
                 if (status == google.maps.GeocoderStatus.OK) {
                     self.getLocations(results);
+                } else {
+                    self.alertTitle('Google Maps Error');
+                    self.alertDetails('There was an issue while discovering the specified location. Please try again.');
+                    self.toggleAlert('open');
                 }
             });
         } else {
@@ -869,6 +883,10 @@ var ViewModel = function() {
                         });
                         self.loading(true);
                         self.updateLatLng();
+                    } else {
+                        self.alertTitle('Google Maps Error');
+                        self.alertDetails('There was an issue while discovering the specified location. Please try again.');
+                        self.toggleAlert('open');
                     }
                 });
             }, self.handleLocationError);
@@ -897,7 +915,7 @@ var ViewModel = function() {
                 "lng": self.coordinates().lng
             },
             icon: 'img/target.svg',
-            title: 'X marks the spot.',
+            title: 'Showing locations near:',
             size: new google.maps.Size(3, 3),
         }));
 

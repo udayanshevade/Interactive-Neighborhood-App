@@ -14,6 +14,8 @@
 
 <!-- body -->
 <body data-bind="css: { dark: currentMode() }">
+
+  <div id="mapFallback" class="map-fallback" data-bind="visible: !self.map"></div>
   <i class="fa fa-spinner loading" data-bind="visible: loading"></i>
   <!-- map -->
   <div id="mapDiv" class="fade" data-bind="css: { fade: alerting, fade: loading } "></div>

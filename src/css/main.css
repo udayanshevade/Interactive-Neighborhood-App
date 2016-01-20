@@ -12,10 +12,16 @@ html {
 
 html,
 body,
+#mapFallback,
 #mapDiv {
   margin: 0;
   width: 100%;
   height: 100%;
+}
+
+.map-fallback {
+  z-index: -1;
+  background-color: #ccc;
 }
 
 html {
@@ -170,8 +176,10 @@ html {
 }
 
 .expandIcon {
-  -webkit-transform: scaleY(-1);
-          transform: scaleY(-1);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
+  -webkit-transform: scale(1, -1);
+  -ms-transform: scale(1, -1);
+  transform: scaleY(1, -1);
 }
 
 .ui-filter-form {
