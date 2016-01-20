@@ -392,14 +392,16 @@ var ViewModel = function() {
      */
     this.updateLatLng = function(results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
-            // find coordinates of places service result
-            var loc = results[0].geometry.location;
-            // save the coordinates associated with new location
-            self.coordinates({
-                lat: loc.lat(),
-                lng: loc.lng()
-            });
-        }  else {
+            if (results) {
+                // find coordinates of places service result
+                var loc = results[0].geometry.location;
+                // save the coordinates associated with new location
+                self.coordinates({
+                    lat: loc.lat(),
+                    lng: loc.lng()
+                });
+            }
+        } else {
             self.alertTitle('google maps error');
             self.alertDetails('There was an issue while discovering the specified location. Please try again.');
             self.toggleAlert('open');
@@ -469,6 +471,7 @@ var ViewModel = function() {
             filter = '&query=' + self.searchTerm().split(' ').join('&');
         } else {
             // otherwise use a default query
+            self.searchTerm('Popular');
             filter = '&section=' + self.Foursquare.defaultQuery();
         }
 
@@ -673,7 +676,6 @@ var ViewModel = function() {
 
             } else {
                 // log which images were unavailable
-                //console.log('Flickr images for ' + place.name + ' are not provided.');
             }
         }).fail(function(data) {
             // if Flickr fails, display alert modal
@@ -868,13 +870,14 @@ var ViewModel = function() {
      */
     this.geoLocate = function(lat, lng) {
         var latlng;
+        // if coordinates have already been passed in, skip the geolocation
         if (typeof lat === 'number' && typeof lng === 'number') {
             latlng = new google.maps.LatLng(lat, lng);
             self.geocoder.geocode({'latLng': latlng}, function(results, status) {
                 if (status == google.maps.GeocoderStatus.OK) {
                     self.getLocations(results);
                 } else {
-                    self.alertTitle('Google Maps Error');
+                    self.alertTitle('google maps error');
                     self.alertDetails('There was an issue while discovering the specified location. Please try again.');
                     self.toggleAlert('open');
                 }
@@ -890,9 +893,9 @@ var ViewModel = function() {
                             'lng': latlng.lng()
                         });
                         self.loading(true);
-                        self.updateLatLng();
+                        self.updateLatLng('', status);
                     } else {
-                        self.alertTitle('Google Maps Error');
+                        self.alertTitle('google maps error');
                         self.alertDetails('There was an issue while discovering the specified location. Please try again.');
                         self.toggleAlert('open');
                     }
