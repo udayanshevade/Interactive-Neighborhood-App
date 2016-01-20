@@ -174,8 +174,10 @@ var ViewModel = function() {
             self.user(user);
             self.login();
         } else {
-            self.alertTitle('welcome!');
-            self.alertDetails('Feel free to explore the map, create a user profile, and favorite locations.');
+            self.constructAlert({
+                title: 'welcome!',
+                details: 'Feel free to explore the map, create a user profile, and favorite locations.'
+            });
             self.toggleAlert('open');
         }
     };
@@ -270,8 +272,10 @@ var ViewModel = function() {
                 }
             },
             error: function() {
-                self.alertTitle('Yelp error');
-                self.alertDetails('There was an error with the Yelp API. Some or all data may be unavailable. Please try again.');
+                self.constructAlert({
+                    title: 'Yelp error',
+                    details: 'There was an error with the Yelp API. Some or all data may be unavailable. Please try again.'
+                });
                 self.toggleAlert('open');
             }
         };
@@ -300,6 +304,16 @@ var ViewModel = function() {
         if (mode === 'open') { this.alerting(true); }
         // closes the alert modal
         else { this.alerting(false); }
+    };
+
+
+
+    /**
+     * Constructs the alert message
+     */
+    this.constructAlert = function(obj) {
+        self.alertTitle(obj.title);
+        self.alertDetails(obj.details);
     };
 
 
@@ -336,8 +350,10 @@ var ViewModel = function() {
                 self.initializeTime();
             }).error(function(result) {
                 self.poi('Rome');
-                self.alertTitle('geolocation failed');
-                self.alertDetails('All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.');
+                self.constructAlert({
+                    title: 'geolocation failed',
+                    details: 'All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.'
+                });
                 self.toggleAlert('open');
                 self.updateSearch();
             });
@@ -379,8 +395,10 @@ var ViewModel = function() {
             // perform Google Maps API text search
             service.textSearch(request, self.updateLatLng);
         } else {
-            self.alertTitle('invalid search');
-            self.alertDetails('Please enter a valid location. Specific locations yield accurate results.');
+            self.constructAlert({
+                title: 'invalid search',
+                details: 'Please enter a valid location. Specific locations yield accurate results.'
+            });
             self.toggleAlert('open');
         }
     };
@@ -402,8 +420,10 @@ var ViewModel = function() {
                 });
             }
         } else {
-            self.alertTitle('google maps error');
-            self.alertDetails('There was an issue while discovering the specified location. Please try again.');
+            self.constructAlert({
+                title: 'google maps error',
+                details: 'There was an issue while discovering the specified location. Please try again.'
+            });
             self.toggleAlert('open');
         }
         var lat = self.coordinates().lat;
@@ -550,8 +570,10 @@ var ViewModel = function() {
                         self.venuesArray.push(venue);
                     }
                 } else {
-                    self.alertTitle('try another search');
-                    self.alertDetails('Just as with the meaning of life, this search provided no concrete results. Please try a valid search with a specific location for accurate results.');
+                    self.constructAlert({
+                        title: 'try another search',
+                        details: 'Just as with the meaning of life, this search provided no concrete results. Please try a valid search with a specific location for accurate results.'
+                    });
                     self.toggleAlert('open');
                     self.loading(false);
                 }
@@ -614,8 +636,10 @@ var ViewModel = function() {
             }, 500);
         }).error(function(data) {
             // toggle alert if the foursquare response fails
-            self.alertTitle('foursquare error');
-            self.alertDetails('There was an error with the Foursquare query. Please try again momentarily, or refine the query.');
+            self.constructAlert({
+                this: 'foursquare error',
+                details: 'There was an error with the Foursquare query. Please try again momentarily, or refine the query.'
+            });
             self.toggleAlert('open');
         });
     };
@@ -683,8 +707,10 @@ var ViewModel = function() {
             }
         }).fail(function(data) {
             // if Flickr fails, display alert modal
-            self.alertTitle('flickr error');
-            self.alertDetails('There was a problem harvesting Flickr photos for the venues. Please try again later.');
+            self.toggleAlert({
+                title: 'flickr error',
+                details: 'There was a problem harvesting Flickr photos for the venues. Please try again later.'
+            });
             self.toggleAlert('open');
         });
     };
@@ -725,6 +751,7 @@ var ViewModel = function() {
             position: this.pos,
             icon: this.iconImage,
             size: new google.maps.Size(5, 5),
+            title: this.name,
             animation: google.maps.Animation.DROP
         });
 
@@ -861,8 +888,10 @@ var ViewModel = function() {
             }
             self.map.fitBounds(self.mapBounds);
         } else {
-            self.alertTitle('no favorites yet');
-            self.alertDetails('You must create a new user profile or be logged in to use this feature.');
+            self.constructAlert({
+                title: 'no favorites yet',
+                details: 'You must create a new user profile or be logged in to use this feature.'
+            });
             self.toggleAlert('open');
         }
     };
@@ -881,8 +910,10 @@ var ViewModel = function() {
                 if (status == google.maps.GeocoderStatus.OK) {
                     self.getLocations(results);
                 } else {
-                    self.alertTitle('google maps error');
-                    self.alertDetails('There was an issue while discovering the specified location. Please try again.');
+                    self.constructAlert({
+                        title: 'google maps error',
+                        details: 'There was an issue while discovering the specified location. Please try again.'
+                    });
                     self.toggleAlert('open');
                 }
             });
@@ -899,8 +930,10 @@ var ViewModel = function() {
                         self.loading(true);
                         self.updateLatLng('', status);
                     } else {
-                        self.alertTitle('google maps error');
-                        self.alertDetails('There was an issue while discovering the specified location. Please try again.');
+                        self.constructAlert({
+                            title: 'google maps error',
+                            details: 'There was an issue while discovering the specified location. Please try again.'
+                        });
                         self.toggleAlert('open');
                     }
                 });
@@ -1052,8 +1085,10 @@ var ViewModel = function() {
 
                 if (result) {
                     // creates a welcome back alert if login successful
-                    self.alertTitle('welcome back, ' + user);
-                    self.alertDetails('You are logged in. Feel free to explore and favorite any locations you find enjoyable.');
+                    self.constructAlert({
+                        title: 'welcome back, ' + user,
+                        details: 'You are logged in. Feel free to explore and favorite any locations you find enjoyable.'
+                    });
                     self.toggleAlert('open');
                     self.importUserFavorites(user);
                 } else {
@@ -1065,13 +1100,17 @@ var ViewModel = function() {
                     self.usersRef.update(users, function(error) {
                         // if user creation fails, display an error alert
                         if (error) {
-                            self.alertTitle('login error');
-                            self.alertDetails('The user profile could not be created at this time. Please try again later.');
+                            self.constructAlert({
+                                title: 'login error',
+                                details: 'The user profile could not be created at this time. Please try again later.'
+                            });
                             self.toggleAlert('open');
                         // else create a welcome alert
                         } else {
-                            self.alertTitle('welcome, ' + user);
-                            self.alertDetails('The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.');
+                            self.constructAlert({
+                                title: 'welcome, ' + user,
+                                details: 'The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.'
+                            });
                             self.toggleAlert('open');
                         }
                     });
@@ -1087,15 +1126,19 @@ var ViewModel = function() {
                 }
             }, function(err) {
                 if (err) {
-                    self.alertTitle('database error');
-                    self.alertDetails('There was an error contacting the database. Please check the connection and try again.');
+                    self.constructAlert({
+                        title: 'database error',
+                        details: 'There was an error contacting the database. Please check the connection and try again.'
+                    });
                     self.toggleAlert('open');
                 }
             });
         } else {
             // if login/signin invalid, create error alert
-            self.alertTitle('user error');
-            self.alertDetails('Please use a valid name. Paths must be non-empty strings, not containing the following characters: ". # $ [ ]".');
+            self.constructAlert({
+                title: 'user error',
+                details: 'Please use a valid name. Paths must be non-empty strings, not containing the following characters: ". # $ [ ]".'
+            });
             self.toggleAlert('open');
         }
     };
@@ -1111,8 +1154,10 @@ var ViewModel = function() {
             self.checkUserFavorites(self.user(), current, 'favorite');
         } else {
             // if not logged in, alert user
-            self.alertTitle('login required');
-            self.alertDetails('Please login or create a user profile first, and try again.');
+            self.constructAlert({
+                title: 'login required',
+                details: 'Please login or create a user profile first, and try again.'
+            });
             self.toggleAlert('open');
         }
     };
@@ -1131,8 +1176,10 @@ var ViewModel = function() {
             self.usersRef.child(user).push().update(location, function(error) {
                 // if update error, alert user
                 if (error) {
-                    self.alertTitle('database error');
-                    self.alertDetails('There was an error while handling user favorites. Please try again later.');
+                    self.constructAlertTitle({
+                        title: 'database error',
+                        details: 'There was an error while handling user favorites. Please try again later.'
+                    });
                     self.toggleAlert();
                 } else {
                     // otherwise toggle live 'favorited' status
@@ -1194,8 +1241,10 @@ var ViewModel = function() {
 
         }, function(err) {
             if (err) {
-                self.alertTitle('database error');
-                self.alertDetails('There was an error contacting the database. Please check the connection and try again.');
+                self.constructAlert({
+                    title: 'database error',
+                    details: 'There was an error contacting the database. Please check the connection and try again.'
+                });
                 self.toggleAlert('open');
             }
         });
@@ -1221,8 +1270,10 @@ var ViewModel = function() {
                         // remove the database match
                         self.usersRef.child(node).remove(function(error) {
                             if (error) {
-                                self.alertTitle('database error');
-                                self.alertDetails('There was an error contacting the database. Please check the connection and try again.');
+                                self.constructAlert({
+                                    title: 'database error',
+                                    details: 'There was an error contacting the database. Please check the connection and try again.'
+                                });
                                 self.toggleAlert('open');
                             }
                         });
@@ -1235,8 +1286,10 @@ var ViewModel = function() {
                         self.usersRef.update(users, function(error) {
                             // if there is an error, alert user
                             if (error) {
-                                self.alertTitle('favorite error');
-                                self.alertDetails('There was an error in saving the user favorite. Please try again later.');
+                                self.constructAlert({
+                                    title: 'favorite error',
+                                    details: 'There was an error in saving the user favorite. Please try again later.'
+                                });
                                 self.toggleAlert('open');
                             }
                         });
@@ -1293,6 +1346,7 @@ var ViewModel = function() {
 
 };
 
+// initialize knockout viewModel
 app.viewModel = new ViewModel();
 
 

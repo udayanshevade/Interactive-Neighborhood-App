@@ -35,7 +35,7 @@ Coming soon!
 ## Features:
 
 - Interactive Google Map
-  - with a bonus day/night mode
+  - with a bonus day/night mode (courtesy of [Snazzy maps](https://snazzymaps.com))
 - Dynamic filter/list & map markers
 - Venue information: photos, rating and review
 - User login and 'favorite' option
@@ -52,9 +52,11 @@ Coming soon!
   * Import Popular Venues and link to more Foursquare info
 4. [Yelp API](https://www.yelp.com/developers/documentation/v2/overview)
   * Import a Yelp Review and link to more Yelp info
-5. [Flickr API](https://www.flickr.com/services/api/)
+5. [JS OAuth Signature Generator](https://github.com/bettiolo/oauth-signature-js)
+  * Generate the OAuth signature call for Yelp
+6. [Flickr API](https://www.flickr.com/services/api/)
   * Import a set of user-submitted public photos relevant to the venue
-6. [Firebase](https://www.firebase.com)
+7. [Firebase](https://www.firebase.com)
   * Import user profile and add/remove favorites
 
 ## To Do Options:
@@ -63,6 +65,15 @@ Coming soon!
 - expand user functionality (add verification)
 - add weather updates
 - add twitter updates
+
+## References:
+
+- Knockout documentation
+- Google Maps API documentation
+- Foursquare API documentation
+- Flickr API documentation
+- Yelp API documentation
+- Firebase documentation
 
 ## Contact:
 
