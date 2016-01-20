@@ -6,7 +6,7 @@
 
 ## Live Site:
 
-Coming soon!
+[Check it out](http://udayanshevade.github.io/Interactive-Neighborhood-App/)!
 
 ## Installation:
 

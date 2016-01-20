@@ -130,8 +130,8 @@ html {
   transition: all 0.3s ease-in-out;
 }
 
-.search-in {
-  font: small-caps 1.45rem "Roboto", sans-serif;
+.search-around {
+  font: small-caps 1.35rem "Roboto", sans-serif;
   padding: 0 0.5rem;
 }
 
@@ -727,8 +727,8 @@ html {
     padding-left: 0.5rem;
   }
 
-  .search-in {
-    font-size: 1.75rem;
+  .search-around {
+    font-size: 1.5rem;
     padding: 0 1rem;
   }
 
