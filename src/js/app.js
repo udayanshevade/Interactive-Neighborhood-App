@@ -744,13 +744,11 @@ var ViewModel = function() {
             this.size = '32';
             var img = this.icon.prefix;
             var ext = this.icon.suffix;
-            this.size = new google.maps.Size(5, 5);
 
             // use custom icon if defined or default marker icon as a fallback
             this.iconImage = (img + bg + this.size + ext);
         } else {
             this.iconImage = 'img/question.svg';
-            this.size = new google.maps.Size(3, 3);
         }
 
         // create new Google Maps marker
@@ -758,7 +756,7 @@ var ViewModel = function() {
             map: self.map,
             position: this.pos,
             icon: this.iconImage,
-            size: this.size,
+            size: new google.maps.Size(5, 5),
             title: this.name,
             animation: google.maps.Animation.DROP
         });
