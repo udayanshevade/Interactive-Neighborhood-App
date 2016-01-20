@@ -101,8 +101,8 @@ html {
 
 /* icon styles */
 .icon {
-  font-size: 1.35rem;
-  padding: 1.35rem;
+  font-size: 1.25rem;
+  padding: 1.25rem;
 }
 
 /* geolocate icon */
@@ -704,8 +704,8 @@ html {
   }
 
   .icon {
-    font-size: 2rem;
-    padding: 1.75rem;
+    font-size: 1.8rem;
+    padding: 1.6rem;
   }
 
   .ui-overlay {
