@@ -1,7 +1,7 @@
 var app = app || {};
 
 /**
- * Global asynchronous callback function
+ * Global asynchronous map callback function
  */
 var initializeMap = function() {
 
@@ -21,6 +21,8 @@ var initializeMap = function() {
     if (navigator.geolocation) {
         // assign the current location
         navigator.geolocation.getCurrentPosition(function(position) {
+
+            //
             var pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
@@ -31,12 +33,14 @@ var initializeMap = function() {
 
             // initialize Google Maps geocoder for reuse
             app.viewModel.geocoder = new google.maps.Geocoder();
+
             // resize and recenter map on window resize
             google.maps.event.addDomListener(window, 'resize', function() {
                 var center = app.viewModel.map.getCenter();
                 google.maps.event.trigger(app.viewModel.map, 'resize');
                 app.viewModel.map.setCenter(center);
             });
+
             // define the map options
             app.viewModel.mapOptions = {
                 center: pos,
@@ -46,6 +50,8 @@ var initializeMap = function() {
                     google.maps.MapTypeId.ROADMAP, 'map_style'
                 ]}
             };
+
+            // map
             app.viewModel.map = new google.maps.Map(document.getElementById('mapDiv'), app.viewModel.mapOptions);
 
             // define the time of day for the map style
@@ -92,9 +98,10 @@ var ViewModel = function() {
 
     // sets loading state of app
     this.loading = ko.observable(true);
-
     // binds whether the alert modal is visible
     this.alerting = ko.observable(true);
+    // initial search
+    this.initialSearch = ko.observable(true);
     // alert on geolocation
     this.alertTitle = ko.observable('geolocation note');
     this.alertDetails = ko.observable('For best results enable browser geolocation, or attempt a new search.');
@@ -155,9 +162,6 @@ var ViewModel = function() {
 
         // binds whether the login interface is visible
         this.loginExpanded = ko.observable(false);
-
-        // initial search
-        this.initialSearch = true;
     };
 
 
@@ -250,7 +254,7 @@ var ViewModel = function() {
         // assign encoded signature
         parameters.oauth_signature = encodedSignature;
 
-        // define the settings to pass into the ajax request
+        // define the settings to pass into the Yelp ajax request
         var settings = {
             url: baseURL,
             data: parameters,
@@ -405,7 +409,7 @@ var ViewModel = function() {
                 "lat": self.coordinates().lat,
                 "lng": self.coordinates().lng
             },
-            icon: 'img/x.svg',
+            icon: 'img/target.svg',
             size: new google.maps.Size(3, 3),
             title: 'X marks the spot.',
             animation: google.maps.Animation.DROP
@@ -416,6 +420,7 @@ var ViewModel = function() {
                 infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                 infoWindow.open(self.map, this);
                 self.map.panTo(marker.getPosition());
+                self.map.setZoom(14);
             };
         })(self.anchorMarker(), self.infoWindow));
         // get new venue data
@@ -473,8 +478,6 @@ var ViewModel = function() {
 
                     venue.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
 
-                    var photo;
-
                     // if no venue hours are provided
                     if (!venue.hours) {
                         // create a default hours object
@@ -519,7 +522,7 @@ var ViewModel = function() {
                     venue.favorited = ko.observable(false);
 
                     // bind empty observables for Yelp data
-                    venue.review = ko.observable();
+                    venue.review = ko.observable('No Yelp review available.');
                     venue.yelpURL = ko.observable();
 
                     // create a new marker object
@@ -534,10 +537,15 @@ var ViewModel = function() {
             // after the api requests are processed
             setTimeout(function() {
 
+                // fit the map to the expanded bounds
+                self.map.fitBounds(self.mapBounds);
+                // center the map
+                self.map.setCenter(self.mapBounds.getCenter());
+
                 // order the venues
                 self.orderVenues();
 
-                if (!self.loggedIn() && self.initialSearch) {
+                if (!self.loggedIn() && self.initialSearch()) {
 
                     // initialize reference to Firebase database
                     self.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
@@ -556,14 +564,15 @@ var ViewModel = function() {
                     }
                     // set initial search setting to false
                     // user/app interaction is settled
-                    self.initialSearch = false;
+                    self.initialSearch(false);
 
-                } else {
+                } else if (self.loggedIn()) {
                     self.importUserFavorites(self.user());
                 }
 
 
                 // get additional yelp and flickr data for each venue
+                // loads async in the background since it is non-critical
                 var venue, phone, venues = self.venuesArray();
                 for (var i = 0, len = venues.length; i < len; i++) {
                     venue = venues[i];
@@ -574,6 +583,7 @@ var ViewModel = function() {
                     }
                 }
 
+                // give user feel of completed loading
                 self.loading(false);
 
             }, 500);
@@ -611,7 +621,6 @@ var ViewModel = function() {
      * Get additional Flickr photos if any
      */
     this.getPhotos = function(place) {
-        var images;
         var lat = place.location.lat;
         var lng = place.location.lng;
 
@@ -721,10 +730,6 @@ var ViewModel = function() {
 
         // extend map bounds to include coordinates
         self.mapBounds.extend(new google.maps.LatLng(that.lat, that.lng));
-        // fit the map to the expanded bounds
-        self.map.fitBounds(self.mapBounds);
-        // center the map
-        self.map.setCenter(self.mapBounds.getCenter());
     };
 
 
@@ -891,7 +896,7 @@ var ViewModel = function() {
                 "lat": self.coordinates().lat,
                 "lng": self.coordinates().lng
             },
-            icon: 'img/x.svg',
+            icon: 'img/target.svg',
             title: 'X marks the spot.',
             size: new google.maps.Size(3, 3),
         }));
@@ -901,6 +906,7 @@ var ViewModel = function() {
                 infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                 infoWindow.open(self.map, this);
                 self.map.panTo(marker.getPosition());
+                self.map.setZoom(14);
             };
         })(self.anchorMarker(), self.infoWindow));
 
@@ -1044,7 +1050,7 @@ var ViewModel = function() {
             }, function(err) {
                 if (err) {
                     self.alertTitle('database error');
-                    self.alertDetails('There was an error contacting the database. Please check the connection and try again.')
+                    self.alertDetails('There was an error contacting the database. Please check the connection and try again.');
                     self.toggleAlert('open');
                 }
             });
@@ -1151,7 +1157,7 @@ var ViewModel = function() {
         }, function(err) {
             if (err) {
                 self.alertTitle('database error');
-                self.alertDetails('There was an error contacting the database. Please check the connection and try again.')
+                self.alertDetails('There was an error contacting the database. Please check the connection and try again.');
                 self.toggleAlert('open');
             }
         });
@@ -1178,7 +1184,7 @@ var ViewModel = function() {
                         self.usersRef.child(node).remove(function(error) {
                             if (error) {
                                 self.alertTitle('database error');
-                                self.alertDetails('There was an error contacting the database. Please check the connection and try again.')
+                                self.alertDetails('There was an error contacting the database. Please check the connection and try again.');
                                 self.toggleAlert('open');
                             }
                         });
@@ -1208,7 +1214,6 @@ var ViewModel = function() {
                 break;
             // if the user is just importing the favorites
             case ('import'):
-                var logged = current.name + ', ' + current.favorited();
                 // set favorited status true if there is a match
                 if (result) {
                     current.favorited(true);
@@ -1231,7 +1236,7 @@ var ViewModel = function() {
             venue = venues[i];
             // import the locations
             self.checkUserFavorites(user, venue, 'import');
-        };
+        }
     };
 
 

@@ -5,7 +5,6 @@
   <title>Neighborhood Map</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/main.min.css">
 </head>
 
 <!-- body -->
@@ -30,7 +29,7 @@
 
     </form>
     <!-- expand venues -->
-    <i class="icon places-icon fa fa-caret-down" data-bind="visible: venuesArray, click: expandPlaces, css: { expandIcon: placesExpanded() }" title="See Places"></i>
+    <i class="icon places-icon fa fa-bars" data-bind="visible: venuesArray().length, click: expandPlaces, css: { expandIcon: placesExpanded() }" title="See Places"></i>
   </header>
 
   <!-- places section -->
@@ -113,7 +112,7 @@
 
           <!-- foursquare logo link -->
           <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
-            <span class="foursquare-text">more on:</span>
+            <i class="fa fa-share contact-icon icon-text"></i>
             <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
           </a>
 
@@ -121,8 +120,8 @@
           <div class="yelp-review-wrapper" data-bind="visible: venue.review">
             <h6 class="yelp-title">Yelp Review:</h6>
             <p class="yelp-review" data-bind="text: venue.review"></p>
-            <a class="yelp-link" data-bind="attr: { href: venue.yelpURL }" title="Visit Yelp">
-              <i class="fa fa-share contact-icon"></i>
+            <a class="yelp-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
+              <i class="fa fa-share contact-icon icon-text"></i>
               <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
             </a>
           </div>
@@ -137,7 +136,7 @@
       <i class="fa fa-user mode-option login-icon" title="Login"></i>
     </button>
     <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
-      <button type="submit" class="login-button" data-bind="click: login">
+      <button type="submit" class="login-button" data-bind="visible: loginExpanded, click: login">
         <i class="fa fa-sign-in login-icon" title="Login"></i>
       </button>
       <!-- login input -->
@@ -157,7 +156,7 @@
   </aside>
 
   <!-- alert modal -->
-  <aside class="alert-modal" data-bind="css: { alert: alerting } ">
+  <aside class="alert-modal alert" data-bind="style: { top: alerting() ? 'calc(50% - 100px)' : 'calc(-300px)' } ">
     <div class="modal-body">
       <i class="alert-close fa fa-times" data-bind="click: toggleAlert"></i>
       <h3 class="alert-title" data-bind="text: alertTitle"></h3>
@@ -166,24 +165,25 @@
   </aside>
 
   <!-- load scripts -->
+  <script>
+    var cb = function() {
+      var l = document.createElement('link');
+      var n = document.createElement('link');
+      l.rel = n.rel = 'stylesheet';
+      l.href = 'css/main.min.css';
+      n.href = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
+      var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(n, h); h.parentNode.insertBefore(l, h);
+    };
+    var raf = requestAnimationFrame || mozRequestAnimationFrame ||
+        webkitRequestAnimationFrame || msRequestAnimationFrame;
+    if (raf) raf(cb);
+    else window.addEventListener('load', cb);
+  </script>
   <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
   <script src="js/app.min.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=initializeMap"></script>
   <script async defer src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
   <script async defer src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>
-  <script>
-      var cb = function() {
-        var l = document.createElement('link'); l.rel = 'stylesheet';
-        var m = document.createElement('link'); m.rel = 'stylesheet';
-        l.href = 'https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700';
-        l.href = 'https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css';
-        var h = document.getElementsByTagName('head')[0]; h.parentNode.insertBefore(l, h); h.parentNode.insertBefore(m, h);
-      };
-      var raf = requestAnimationFrame || mozRequestAnimationFrame ||
-          webkitRequestAnimationFrame || msRequestAnimationFrame;
-      if (raf) raf(cb);
-      else window.addEventListener('load', cb);
-  </script>
 </body>
 </html>
