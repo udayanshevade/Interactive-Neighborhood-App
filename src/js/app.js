@@ -406,6 +406,8 @@ var ViewModel = function() {
             self.alertDetails('There was an issue while discovering the specified location. Please try again.');
             self.toggleAlert('open');
         }
+        var lat = self.coordinates().lat;
+        var lng = self.coordinates().lng;
         // hide markers
         self.hideMarkers();
         // empty current array of venues
@@ -418,8 +420,8 @@ var ViewModel = function() {
         self.anchorMarker(new google.maps.Marker({
             map: self.map,
             position: {
-                "lat": self.coordinates().lat,
-                "lng": self.coordinates().lng
+                "lat": lat,
+                "lng": lng
             },
             icon: 'img/target.svg',
             size: new google.maps.Size(3, 3),
@@ -435,6 +437,8 @@ var ViewModel = function() {
                 self.map.setZoom(14);
             };
         })(self.anchorMarker(), self.infoWindow));
+        // extend map bounds to include coordinates
+        self.mapBounds.extend(new google.maps.LatLng(lat, lng));
         // get new venue data
         self.getVenuesData();
     };
@@ -914,6 +918,9 @@ var ViewModel = function() {
     this.getLocations = function(result) {
         self.hideMarkers();
 
+        var lat = self.coordinates().lat;
+        var lng = self.coordinates().lng;
+
         if (self.anchorMarker()) {
             self.anchorMarker().setMap(null);
             self.anchorMarker('');
@@ -922,8 +929,8 @@ var ViewModel = function() {
         self.anchorMarker(new google.maps.Marker({
             map: self.map,
             position: {
-                "lat": self.coordinates().lat,
-                "lng": self.coordinates().lng
+                "lat": lat,
+                "lng": lng
             },
             icon: 'img/target.svg',
             title: 'Showing locations near:',
@@ -940,6 +947,8 @@ var ViewModel = function() {
         })(self.anchorMarker(), self.infoWindow));
 
         self.mapBounds = new google.maps.LatLngBounds();
+        // extend map bounds to include coordinates
+        self.mapBounds.extend(new google.maps.LatLng(lat, lng));
         self.poi(result[0].address_components[2].long_name);
         self.getVenuesData();
     };
