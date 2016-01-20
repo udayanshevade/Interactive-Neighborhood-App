@@ -207,7 +207,7 @@ var ViewModel = function() {
             baseVenueURL: "https://foursquare.com/v/",
             version: "20140601",
             defaultQuery: ko.observable('topPicks'),
-            radius: ko.observable(4500)
+            radius: ko.observable(10000)
         };
     };
 

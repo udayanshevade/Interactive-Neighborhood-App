@@ -657,6 +657,7 @@ html {
 
 .alert-modal {
   position: absolute;
+  z-index: 8;
   width: 300px;
   min-height: 200px;
   background-color: #fff;
