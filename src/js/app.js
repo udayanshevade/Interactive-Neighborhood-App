@@ -126,6 +126,9 @@ var ViewModel = function() {
         // binds location
         this.poi = ko.observable('');
 
+        // binds range options visibility
+        this.rangeVisible = ko.observable(false);
+
         // binds coordinates object for search
         this.coordinates = ko.observable({
             lat: '',
@@ -292,6 +295,15 @@ var ViewModel = function() {
      */
     this.expandPlaces = function() {
         self.placesExpanded(!self.placesExpanded());
+    };
+
+
+
+    /**
+     * Expands the radio options for range of query
+     */
+    this.expandRangeOptions = function() {
+        self.rangeVisible(!self.rangeVisible());
     };
 
 

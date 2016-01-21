@@ -23,6 +23,7 @@
 2. Or enter a unique search:
   - specify a valid type of desired venue in the first text box
   - specify the geographical location in the second text box
+  - (optional) specify a radius
 3. Find targeted venues near you with the navigation arrow.
 4. Or find specific searches with the magnifying glass.
 5. Browse an expanded list of locations via the list icon.
