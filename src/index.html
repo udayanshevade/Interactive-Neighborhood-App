@@ -31,6 +31,12 @@
       <!-- search a location -->
       <input class="ui-search ui-location" type="text" data-bind="textInput: poi">
 
+      <!-- search button -->
+      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon" title="Search"></i></button>
+
+      <!-- geo location -->
+      <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate" title="Search near you"></i>
+
       <!-- expand range icon -->
       <i class="icon fa fa-arrows range-icon" data-bind="click: expandRangeOptions, css: { rangeVisible: rangeVisible }" title="Define range"></i>
 
@@ -57,12 +63,6 @@
           <label class="range-label" for="50000">50km</label>
         </div>
       </div>
-
-      <!-- search button -->
-      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon" title="Search"></i></button>
-
-      <!-- geo location -->
-      <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate" title="Search near you"></i>
 
     </form>
     <!-- expand venues -->
@@ -216,7 +216,7 @@
   </script>
   <script src="http://knockoutjs.com/downloads/knockout-3.4.0.js"></script>
   <script src="js/app.min.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=initializeMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=initializeMap" onerror="mapFallback()"></script>
   <script async defer src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
   <script async defer src="bower_components/oauth-signature/dist/oauth-signature.min.js"></script>

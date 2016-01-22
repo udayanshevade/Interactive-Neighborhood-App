@@ -6,10 +6,10 @@ var app = app || {};
 var initializeMap = function() {
 
     // JSON for the 'day' style of the map
-    var lightStyle = [{"featureType":"water","elementType":"geometry","stylers":[{"color":"#e9e9e9"},{"lightness":17}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":20}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#ffffff"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#ffffff"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":16}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":21}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#dedede"},{"lightness":21}]},{"elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"},{"lightness":16}]},{"elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#333333"},{"lightness":40}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#f2f2f2"},{"lightness":19}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#fefefe"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#fefefe"},{"lightness":17},{"weight":1.2}]}];
+    var lightStyle = [{"featureType":"administrative.locality","elementType":"all","stylers":[{"hue":"#2c2e33"},{"saturation":7},{"lightness":19},{"visibility":"on"}]},{"featureType":"landscape","elementType":"all","stylers":[{"hue":"#ffffff"},{"saturation":-100},{"lightness":100},{"visibility":"simplified"}]},{"featureType":"poi","elementType":"all","stylers":[{"hue":"#ffffff"},{"saturation":-100},{"lightness":100},{"visibility":"off"}]},{"featureType":"road","elementType":"geometry","stylers":[{"hue":"#bbc0c4"},{"saturation":-93},{"lightness":31},{"visibility":"simplified"}]},{"featureType":"road","elementType":"labels","stylers":[{"hue":"#bbc0c4"},{"saturation":-93},{"lightness":31},{"visibility":"on"}]},{"featureType":"road.arterial","elementType":"labels","stylers":[{"hue":"#bbc0c4"},{"saturation":-93},{"lightness":-2},{"visibility":"simplified"}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"hue":"#e9ebed"},{"saturation":-90},{"lightness":-8},{"visibility":"simplified"}]},{"featureType":"transit","elementType":"all","stylers":[{"hue":"#e9ebed"},{"saturation":10},{"lightness":69},{"visibility":"on"}]},{"featureType":"water","elementType":"all","stylers":[{"hue":"#e9ebed"},{"saturation":-78},{"lightness":67},{"visibility":"simplified"}]}];
 
     // JSON for the 'night' style of the map
-    var darkStyle = [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#707070"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#424242"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"lightness":17},{"color":"#484848"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"lightness":29},{"weight":0.2},{"color":"#ff0000"},{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}];
+    var darkStyle = [{"featureType":"all","elementType":"all","stylers":[{"hue":"#ff0000"},{"saturation":-100},{"lightness":-30}]},{"featureType":"all","elementType":"labels.text.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"color":"#353535"}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#656565"}]},{"featureType":"poi","elementType":"geometry.fill","stylers":[{"color":"#505050"}]},{"featureType":"poi","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"featureType":"road","elementType":"all","stylers":[{"color":"#454545"}]},{"featureType":"transit","elementType":"labels","stylers":[{"hue":"#000000"},{"saturation":100},{"lightness":-40},{"invert_lightness":true},{"gamma":1.5}]}];
 
     // save the light and dark modes for switching
     app.viewModel.lightMode = new google.maps.StyledMapType(lightStyle,
@@ -17,12 +17,36 @@ var initializeMap = function() {
     app.viewModel.darkMode = new google.maps.StyledMapType(darkStyle,
         {name: "Dark Mode"});
 
+    // initialize Google Maps geocoder for reuse
+    app.viewModel.geocoder = new google.maps.Geocoder();
+
+    // define the map options
+    app.viewModel.mapOptions = {
+        center: {
+            lat: 41.90278349999999,
+            lng: 12.496365500000024
+        },
+        disableDefaultUI: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [
+            google.maps.MapTypeId.ROADMAP, 'map_style'
+        ]}
+    };
+
+    // initialize a blank infoWindow for later use
+    app.viewModel.infoWindow = new google.maps.InfoWindow();
+
+    // listens for infowindow closing
+    google.maps.event.addListener(app.viewModel.infoWindow, 'closeclick', function() {
+        app.viewModel.toggleMarkerBounce();
+    });
+
     // if browser has navigator geolocation
     if (navigator.geolocation) {
         // assign the current location
         navigator.geolocation.getCurrentPosition(function(position) {
 
-            //
+            // define coordinates object
             var pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
@@ -31,8 +55,11 @@ var initializeMap = function() {
             // binds the coordinates
             app.viewModel.coordinates(pos);
 
-            // initialize Google Maps geocoder for reuse
-            app.viewModel.geocoder = new google.maps.Geocoder();
+            // define the map options position
+            app.viewModel.mapOptions.center = pos;
+
+            // map
+            app.viewModel.map = new google.maps.Map(document.getElementById('mapDiv'), app.viewModel.mapOptions);
 
             // resize and recenter map on window resize
             google.maps.event.addDomListener(window, 'resize', function() {
@@ -41,29 +68,8 @@ var initializeMap = function() {
                 app.viewModel.map.setCenter(center);
             });
 
-            // define the map options
-            app.viewModel.mapOptions = {
-                center: pos,
-                disableDefaultUI: true,
-                mapTypeControlOptions: {
-                    mapTypeIds: [
-                    google.maps.MapTypeId.ROADMAP, 'map_style'
-                ]}
-            };
-
-            // map
-            app.viewModel.map = new google.maps.Map(document.getElementById('mapDiv'), app.viewModel.mapOptions);
-
             // define the time of day for the map style
             app.viewModel.initializeTime();
-
-            // initialize a blank infoWindow for later use
-            app.viewModel.infoWindow = new google.maps.InfoWindow();
-
-            // listens for infowindow closing
-            google.maps.event.addListener(app.viewModel.infoWindow, 'closeclick', function() {
-                app.viewModel.toggleMarkerBounce();
-            });
 
             // handles chromium bug
             // if chrome geolocation does not work, please try
@@ -86,6 +92,14 @@ var initializeMap = function() {
     }
     // initialize mapBounds
     app.viewModel.mapBounds = new google.maps.LatLngBounds();
+};
+
+var mapFallback = function() {
+    app.viewModel.constructAlert({
+        title: 'google maps error',
+        details: 'There was an error loading the map. Please refresh the page and try again.'
+    });
+    app.viewModel.loading(false);
 };
 
 /**
@@ -166,6 +180,69 @@ var ViewModel = function() {
         // binds whether the login interface is visible
         this.loginExpanded = ko.observable(false);
     };
+
+
+
+    /**
+     * Handles geolocation error or absence
+     */
+    this.handleLocationError = function() {
+        // use third-party geolocation api for approximate geolocation
+        $.getJSON('http://freegeoip.net/json/')
+            .done(function(result) {
+                var pos = {
+                    lat: result.latitude,
+                    lng: result.longitude
+                };
+
+                self.coordinates(pos);
+
+                self.mapOptions.center = pos;
+
+                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+
+                google.maps.event.addDomListener(window, 'resize', function() {
+                    var center = self.map.getCenter();
+                    google.maps.event.trigger(self.map, 'resize');
+                    self.map.setCenter(center);
+                });
+
+                // define the time of day for the map style
+                self.initializeTime();
+
+                self.geoLocate(pos.lat, pos.lng);
+
+            }).fail(function(result) {
+                // set default place to Rome
+                self.poi('Rome');
+                // Rome hardcoded if all else fails
+                self.coordinates({
+                    lat: 41.90278349999999,
+                    lng: 12.496365500000024
+                });
+
+                self.mapOptions.pos = self.coordinates();
+
+                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+
+                self.initializeTime();
+
+                google.maps.event.addDomListener(window, 'resize', function() {
+                    var center = self.map.getCenter();
+                    google.maps.event.trigger(self.map, 'resize');
+                    self.map.setCenter(center);
+                });
+
+                self.constructAlert({
+                    title: 'geolocation failed',
+                    details: 'All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.'
+                });
+                self.toggleAlert('open');
+                // default search
+                self.updateSearch();
+            });
+    };
+
 
 
     /**
@@ -277,7 +354,7 @@ var ViewModel = function() {
             error: function() {
                 self.constructAlert({
                     title: 'Yelp error',
-                    details: 'There was an error with the Yelp API. Some or all data may be unavailable. Please try again.'
+                    details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
                 });
                 self.toggleAlert('open');
             }
@@ -326,49 +403,6 @@ var ViewModel = function() {
     this.constructAlert = function(obj) {
         self.alertTitle(obj.title);
         self.alertDetails(obj.details);
-    };
-
-
-
-    /**
-     * Handles geolocation error or absence
-     */
-    self.handleLocationError = function() {
-        // use third-party geolocation api for approximate geolocation
-        $.getJSON('http://freegeoip.net/json/')
-            .success(function(result) {
-                var pos = {
-                    lat: result.latitude,
-                    lng: result.longitude
-                };
-
-                self.coordinates(pos);
-
-                self.mapOptions = {
-                    center: pos,
-                    disableDefaultUI: true,
-                    mapTypeControlOptions: {
-                        mapTypeIds: [
-                        google.maps.MapTypeId.ROADMAP, 'map_style'
-                    ]}
-                };
-
-                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
-
-                self.infoWindow = new google.maps.InfoWindow();
-
-                self.geoLocate(pos.lat, pos.lng);
-
-                self.initializeTime();
-            }).error(function(result) {
-                self.poi('Rome');
-                self.constructAlert({
-                    title: 'geolocation failed',
-                    details: 'All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.'
-                });
-                self.toggleAlert('open');
-                self.updateSearch();
-            });
     };
 
 
@@ -643,7 +677,7 @@ var ViewModel = function() {
                     venue = venues[i];
                     phone = venue.contact.phone;
                     self.getPhotos(venue);
-                    if (phone && phone.length > 9 && phone.length < 13) {
+                    if (phone && phone.length > 9) {
                         self.getYelpData(venue);
                     }
                 }

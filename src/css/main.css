@@ -174,7 +174,7 @@ html {
   background-color: #fff;
   box-shadow: 1px 2px 6px rgba(0,0,0,0.2);
   position: absolute;
-  z-index: 2;
+  z-index: 9;
   left: 0;
   top: 3.5rem;
   width: 100%;
