@@ -59,6 +59,9 @@
   * Import a set of user-submitted public photos relevant to the venue
 7. [Firebase](https://www.firebase.com)
   * Import user profile and add/remove favorites
+8. [Snazzy Maps](https://snazzymaps.com/)
+  * [Light](https://snazzymaps.com/style/29/light-monochrome)
+  * [Dark](https://snazzymaps.com/style/35661/dark-with-better-contrast)
 
 ## To Do Options:
 

@@ -165,9 +165,9 @@ html {
 }
 
 .rangeVisible {
-  transform: rotate(90deg);
-  -webkit-transform: rotate(90deg);
-  -ms-transform: rotate(90deg);
+  transform: translateY(0.5rem);
+  -webkit-transform: translateY(0.5rem);
+  -ms-transform: translateY(0.5rem);
 }
 
 .search-range {
@@ -765,6 +765,10 @@ html {
   .search-near {
     font-size: 1.5rem;
     padding: 0 0.75rem;
+  }
+
+  .range-icon:hover {
+    cursor: pointer;
   }
 
   .search-range {
