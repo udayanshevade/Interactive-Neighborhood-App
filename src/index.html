@@ -32,24 +32,24 @@
       <input class="ui-search ui-location" type="text" data-bind="textInput: poi">
 
       <!-- expand range icon -->
-      <i class="icon fa fa-arrows range-icon" data-bind="click: expandRangeOptions, css: { rangeVisible: rangeVisible }"></i>
+      <i class="icon fa fa-arrows range-icon" data-bind="click: expandRangeOptions, css: { rangeVisible: rangeVisible }" title="Define range"></i>
 
       <!-- range options -->
       <div class="search-range" data-bind="visible: rangeVisible" style="display:none">
         <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="1000" id="1000"data-bind="checked: Foursquare.radius">
+          <input class="range-input" type="radio" name="range" value="1000" id="1000" data-bind="checked: Foursquare.radius">
           <label class="range-label" for="1000">1km</label>
         </div>
         <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="5000" id="5000"data-bind="checked: Foursquare.radius">
+          <input class="range-input" type="radio" name="range" value="5000" id="5000" data-bind="checked: Foursquare.radius">
           <label class="range-label" for="5000">5km</label>
         </div>
         <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="10000" id="10000"data-bind="checked: Foursquare.radius">
+          <input class="range-input" type="radio" name="range" value="10000" id="10000" data-bind="checked: Foursquare.radius">
           <label class="range-label" for="10000">10km</label>
         </div>
         <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="25000" id="25000"data-bind="checked: Foursquare.radius">
+          <input class="range-input" type="radio" name="range" value="25000" id="25000" data-bind="checked: Foursquare.radius">
           <label class="range-label" for="25000">25km</label>
         </div>
         <div class="range-option">
