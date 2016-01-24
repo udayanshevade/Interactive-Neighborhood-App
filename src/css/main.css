@@ -24,7 +24,21 @@ body,
   left: 0;
   top: 0;
   z-index: -1;
-  background-color: #ccc;
+  background-image: url(img/background/day.jpg);
+  background-size: cover;
+}
+
+.dark .map-fallback {
+  background-image: url(img/background/night.jpg);
+}
+
+.background-title {
+  text-align: center;
+  margin-top: 8rem;
+  font: 700 3.5rem "Roboto", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  color: #fff;
 }
 
 html {
@@ -78,7 +92,7 @@ html {
 
 /* fade during alert */
 .fade {
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 /* major user-interface */
@@ -727,6 +741,12 @@ html {
  * PC styles
  */
 @media screen and (min-width: 600px) {
+
+  .background-title {
+    margin-top: 12rem;
+    font-size: 5rem;
+    letter-spacing: 0.2rem;
+  }
 
   .map-marker-hover {
     opacity: 1;

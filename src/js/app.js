@@ -342,7 +342,7 @@ var ViewModel = function() {
             data: parameters,
             cache: true,
             dataType: "jsonp",
-            success: function(results) {
+            done: function(results) {
                 var business = results.businesses[0];
                 if (business) {
                     // bind venue review
@@ -351,7 +351,7 @@ var ViewModel = function() {
                     place.yelpURL(business.url);
                 }
             },
-            error: function() {
+            fail: function() {
                 self.constructAlert({
                     title: 'Yelp error',
                     details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
@@ -550,7 +550,7 @@ var ViewModel = function() {
 
         // Get Foursquare API query response
         $.getJSON(url)
-            .success(function(data) {
+            .done(function(data) {
                 var venue;
                 // access list of returned venues in the JSON response
                 var venues = data.response.groups[0].items;
@@ -686,7 +686,7 @@ var ViewModel = function() {
                 self.loading(false);
 
             }, 500);
-        }).error(function(data) {
+        }).fail(function(data) {
             // toggle alert if the foursquare response fails
             self.constructAlert({
                 this: 'foursquare error',
@@ -728,7 +728,7 @@ var ViewModel = function() {
         // define url for Flickr query
         var url = self.Flickr.APIbaseURL + self.Flickr.key + self.Flickr.method + self.Flickr.sort + self.Flickr.mode + '&lat=' + lat + '&lon=' + lng + '&text=' + place.name;
 
-        $.getJSON(url).success(function(data) {
+        $.getJSON(url).done(function(data) {
             var photos = data.photos.photo;
             if (photos.length) {
                 var imagePrefix, imageSuffix;
