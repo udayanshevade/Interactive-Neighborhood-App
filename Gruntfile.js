@@ -51,9 +51,20 @@ module.exports = function(grunt) {
                     "ext": '.min.js'
                 }]
             }
+        },
+        "imagemin": {
+            "dynamic": {
+                "files": [{
+                    "expand": true,
+                    "cwd": "src/img/background",
+                    "src": ["*.jpg"],
+                    "dest": "dist/img/background"
+                }]
+            }
         }
     });
 
     grunt.registerTask('default', ['postcss', 'cssmin', 'htmlmin', 'uglify']);
+    grunt.registerTask('img', ['imagemin']);
 
 };
