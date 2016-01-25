@@ -302,7 +302,7 @@ var ViewModel = function() {
             method: "&method=flickr.photos.search",
             APIbaseURL: "https://api.flickr.com/services/rest/?format=json",
             sort: "&sort=interestingness-desc",
-            mode: "&nojsoncallback=1"
+            mode: "&jsoncallback=?"
         };
     };
 
