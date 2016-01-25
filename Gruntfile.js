@@ -3,22 +3,6 @@ module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
     grunt.initConfig({
-        "postcss": {
-            "options": {
-                "map": {
-                    "inline": false,
-                    "annotation": 'dist/css/maps/'
-                },
-                "processors": [
-                    require('autoprefixer')({
-                        browsers: ['last 2 versions']
-                    }),
-                ]
-            },
-            "dist": {
-                "src": '*.css'
-            }
-        },
         "cssmin": {
             "target": {
                 "files": [{
@@ -64,7 +48,9 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['postcss', 'cssmin', 'htmlmin', 'uglify']);
+    grunt.loadNpmTasks('grunt-usemin');
+
+    grunt.registerTask('default', ['cssmin', 'htmlmin', 'uglify']);
     grunt.registerTask('img', ['imagemin']);
 
 };
