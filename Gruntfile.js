@@ -45,12 +45,17 @@ module.exports = function(grunt) {
                     "dest": "dist/img/background"
                 }]
             }
+        },
+        "processhtml": {
+            "dist": {
+                "files": {
+                    'dist/index.html': ['src/index.html']
+                }
+            }
         }
     });
 
-    grunt.loadNpmTasks('grunt-usemin');
-
-    grunt.registerTask('default', ['cssmin', 'htmlmin', 'uglify']);
+    grunt.registerTask('default', ['cssmin', 'htmlmin', 'uglify', 'processhtml']);
     grunt.registerTask('img', ['imagemin']);
 
 };
