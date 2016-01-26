@@ -300,7 +300,7 @@ var ViewModel = function() {
             key: "&api_key=e3ce05cd3fe0a8e29946f1afa5afc492",
             secret: "1c5a3dd9614db005",
             method: "&method=flickr.photos.search",
-            APIbaseURL: "https://api.flickr.com/services/rst/?format=json",
+            APIbaseURL: "https://api.flickr.com/services/rest/?format=json",
             sort: "&sort=interestingness-desc",
             mode: "&jsoncallback=?"
         };
