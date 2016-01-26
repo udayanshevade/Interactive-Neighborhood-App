@@ -312,7 +312,7 @@ var ViewModel = function() {
      * Get Yelp data
      */
     this.getYelpData = function(place) {
-        var baseURL = 'http://api.yelp.com/v/phone_search';
+        var baseURL = 'http://api.yelp.com/v2/phone_search';
 
         // define Yelp parameters
         var parameters = {
