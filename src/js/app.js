@@ -350,6 +350,7 @@ var ViewModel = function() {
                     // bind venue URL
                     place.yelpURL(business.url);
                 }
+                clearTimeout(yelpRequestTimeout);
             },
             fail: function() {
                 self.constructAlert({
@@ -359,6 +360,14 @@ var ViewModel = function() {
                 self.toggleAlert('open');
             }
         };
+
+        var yelpRequestTimeout = setTimeout(function() {
+            self.constructAlert({
+                    title: 'Yelp error',
+                    details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
+                });
+            self.toggleAlert('open');
+        }, 8000);
 
         // make Yelp API query
         $.ajax(settings);
