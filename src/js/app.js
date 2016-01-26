@@ -358,7 +358,7 @@ var ViewModel = function() {
                         details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
                     });
                     self.toggleAlert('open');
-                }, 4000);
+                }, 3000);
             }
         };
 
