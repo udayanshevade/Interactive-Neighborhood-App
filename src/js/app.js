@@ -352,13 +352,12 @@ var ViewModel = function() {
                 }
             },
             error: function() {
-                setTimeout(function() {
-                    self.constructAlert({
-                        title: 'Yelp error',
-                        details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
-                    });
-                    self.toggleAlert('open');
-                }, 3000);
+                self.constructAlert({
+                    title: 'Yelp error',
+                    details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.',
+                    delay: 3000
+                });
+                self.toggleAlert('open');
             }
         };
 
@@ -403,8 +402,11 @@ var ViewModel = function() {
      * Constructs the alert message
      */
     this.constructAlert = function(obj) {
-        self.alertTitle(obj.title);
-        self.alertDetails(obj.details);
+        var delay = obj.delay || 0;
+        setTimeout(function() {
+            self.alertTitle(obj.title);
+            self.alertDetails(obj.details);
+        }, delay);
     };
 
 
@@ -760,14 +762,13 @@ var ViewModel = function() {
                 // log which images were unavailable
             }
         }).fail(function(data) {
-            setTimeout(function() {
-                // if Flickr fails, display alert modal
-                self.constructAlert({
-                    title: 'flickr error',
-                    details: 'There was a problem harvesting Flickr photos for the venues. Please try again later.'
-                });
-                self.toggleAlert('open');
-            }, 4000);
+            // if Flickr fails, display alert modal
+            self.constructAlert({
+                title: 'flickr error',
+                details: 'There was a problem harvesting Flickr photos for the venues. Please try again later.',
+                delay: 4000
+            });
+            self.toggleAlert('open');
         });
     };
 
@@ -1159,7 +1160,8 @@ var ViewModel = function() {
                     // creates a welcome back alert if login successful
                     self.constructAlert({
                         title: 'welcome back, ' + user,
-                        details: 'You are logged in. Feel free to explore and favorite any locations you find enjoyable.'
+                        details: 'You are logged in. Feel free to explore and favorite any locations you find enjoyable.',
+                        delay: 5500
                     });
                     self.toggleAlert('open');
                     self.importUserFavorites(user);
@@ -1174,14 +1176,16 @@ var ViewModel = function() {
                         if (error) {
                             self.constructAlert({
                                 title: 'login error',
-                                details: 'The user profile could not be created at this time. Please try again later.'
+                                details: 'The user profile could not be created at this time. Please try again later.',
+                                delay: 5500
                             });
                             self.toggleAlert('open');
                         // else create a welcome alert
                         } else {
                             self.constructAlert({
                                 title: 'welcome, ' + user,
-                                details: 'The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.'
+                                details: 'The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.',
+                                delay: 5500
                             });
                             self.toggleAlert('open');
                         }
