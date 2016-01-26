@@ -11,11 +11,11 @@
 ## Installation:
 
 1. Download repository.
-2. Navigate to the dist/ folder.
-3. Open command line.
-4. Host a simple server.
-  * execute `python.exe -m SimpleHTTPServer 8000` (or on any port of your choice)
-5. Open index.html and enjoy!
+2. Install dependencies as specified in package.json: `npm install`
+3. Run the build process: `grunt`
+4. Navigate to the dist/ folder.
+5. Host a simple server: `python -m SimpleHTTPServer 8000`
+7. Open http://localhost:8000/ in your browser and enjoy!
 
 ## In-app Instructions:
 
@@ -42,6 +42,7 @@
 - User login and 'favorite' option
 - Persisting user data
 - Responsiveness & friendly UI
+- Error handling
 
 ## 3rd Party APIs & Services used:
 
@@ -66,6 +67,7 @@
 ## To Do Options:
 
 - a live touch-based/scrolling response of venues
+- directions
 - expand user functionality (add verification)
 - add weather updates
 - add twitter updates
