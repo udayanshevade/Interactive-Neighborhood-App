@@ -312,7 +312,7 @@ var ViewModel = function() {
      * Get Yelp data
      */
     this.getYelpData = function(place) {
-        var baseURL = 'http://api.yelp.com/v2/phone_search';
+        var baseURL = 'http://api.yelp.com/v/phone_search';
 
         // define Yelp parameters
         var parameters = {
@@ -342,7 +342,7 @@ var ViewModel = function() {
             data: parameters,
             cache: true,
             dataType: "jsonp",
-            done: function(results) {
+            success: function(results) {
                 var business = results.businesses[0];
                 if (business) {
                     // bind venue review
@@ -350,24 +350,17 @@ var ViewModel = function() {
                     // bind venue URL
                     place.yelpURL(business.url);
                 }
-                clearTimeout(yelpRequestTimeout);
             },
-            fail: function() {
-                self.constructAlert({
-                    title: 'Yelp error',
-                    details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
-                });
-                self.toggleAlert('open');
+            error: function() {
+                setTimeout(function() {
+                    self.constructAlert({
+                        title: 'Yelp error',
+                        details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
+                    });
+                    self.toggleAlert('open');
+                }, 4000);
             }
         };
-
-        var yelpRequestTimeout = setTimeout(function() {
-            self.constructAlert({
-                    title: 'Yelp error',
-                    details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.'
-                });
-            self.toggleAlert('open');
-        }, 8000);
 
         // make Yelp API query
         $.ajax(settings);
