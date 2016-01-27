@@ -323,7 +323,8 @@ var ViewModel = function() {
             oauth_signature_method: "HMAC-SHA1",
             oauth_version : "1.0",
             callback: "cb", // needed for jsonp implementation
-            phone: place.contact.phone
+            phone: place.contact.phone,
+            cc: place.location.cc
         };
 
         // generate encoded signature
