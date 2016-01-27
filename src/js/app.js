@@ -66,6 +66,9 @@ var initializeMap = function() {
                 var center = app.viewModel.map.getCenter();
                 google.maps.event.trigger(app.viewModel.map, 'resize');
                 app.viewModel.map.setCenter(center);
+                if (self.mapBounds) {
+                  app.viewModel.map.fitBounds(self.mapBounds);
+                }
             });
 
             // define the time of day for the map style
@@ -323,8 +326,7 @@ var ViewModel = function() {
             oauth_signature_method: "HMAC-SHA1",
             oauth_version : "1.0",
             callback: "cb", // needed for jsonp implementation
-            phone: place.contact.phone,
-            cc: place.location.cc
+            phone: place.contact.phone
         };
 
         // generate encoded signature
@@ -356,7 +358,7 @@ var ViewModel = function() {
                 self.constructAlert({
                     title: 'Yelp error',
                     details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.',
-                    delay: 3000
+                    delay: 2000
                 });
                 self.toggleAlert('open');
             }
@@ -556,7 +558,7 @@ var ViewModel = function() {
         // Get Foursquare API query response
         $.getJSON(url)
             .done(function(data) {
-                var venue;
+                var venue, phone;
                 // access list of returned venues in the JSON response
                 var venues = data.response.groups[0].items;
 
@@ -617,9 +619,12 @@ var ViewModel = function() {
                         // no venues are favorited
                         venue.favorited = ko.observable(false);
 
-                        // bind empty observables for Yelp data
-                        venue.review = ko.observable('No Yelp review available.');
-                        venue.yelpURL = ko.observable();
+                        phone = venue.contact.phone;
+                        if (phone && phone.length === 10) {
+                          // bind empty observables for Yelp data
+                          venue.review = ko.observable('No Yelp review available.');
+                          venue.yelpURL = ko.observable();
+                        }
 
                         // create a new marker object
                         venue.marker = new self.Marker(venue);
@@ -682,7 +687,7 @@ var ViewModel = function() {
                     venue = venues[i];
                     phone = venue.contact.phone;
                     self.getPhotos(venue);
-                    if (phone && phone.length > 9) {
+                    if (phone && phone.length === 10) {
                         self.getYelpData(venue);
                     }
                 }
@@ -767,7 +772,7 @@ var ViewModel = function() {
             self.constructAlert({
                 title: 'flickr error',
                 details: 'There was a problem harvesting Flickr photos for the venues. Please try again later.',
-                delay: 4000
+                delay: 3000
             });
             self.toggleAlert('open');
         });
@@ -1162,7 +1167,7 @@ var ViewModel = function() {
                     self.constructAlert({
                         title: 'welcome back, ' + user,
                         details: 'You are logged in. Feel free to explore and favorite any locations you find enjoyable.',
-                        delay: 5500
+                        delay: 4000
                     });
                     self.toggleAlert('open');
                     self.importUserFavorites(user);
@@ -1178,7 +1183,7 @@ var ViewModel = function() {
                             self.constructAlert({
                                 title: 'login error',
                                 details: 'The user profile could not be created at this time. Please try again later.',
-                                delay: 5500
+                                delay: 4000
                             });
                             self.toggleAlert('open');
                         // else create a welcome alert
@@ -1186,7 +1191,7 @@ var ViewModel = function() {
                             self.constructAlert({
                                 title: 'welcome, ' + user,
                                 details: 'The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.',
-                                delay: 5500
+                                delay: 4000
                             });
                             self.toggleAlert('open');
                         }
