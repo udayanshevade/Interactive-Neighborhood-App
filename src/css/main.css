@@ -390,6 +390,14 @@ html {
   font: small-caps 600 1.45rem "Roboto", sans-serif;
 }
 
+.contact {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .contact-text {
   display: inline-block;
   font: 1.45rem "Roboto", sans-serif;
@@ -432,6 +440,7 @@ html {
   justify-content: flex-end;
   text-decoration: none;
   color: #333;
+  margin: 0.5rem 0;
 }
 
 .icon-text {
