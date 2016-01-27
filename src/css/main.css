@@ -376,6 +376,7 @@ html {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  flex-flow: row wrap;
   border-top: 1px dashed #333;
   border-bottom: 1px dotted #ccc;
 }
