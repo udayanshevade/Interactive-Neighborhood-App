@@ -149,11 +149,11 @@
           <!-- venues picture -->
           <div class="info-pic-wrapper">
             <div class="info-pic-container" data-bind="if: venue.photoURL">
-              <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
+              <i class="icon fa fa-caret-left" data-bind="if: venue.multiPhotos, click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
               <div class="info-pic-div">
                 <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
               </div>
-              <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
+              <i class="icon fa fa-caret-right" data-bind="if: venue.multiPhotos, click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
             </div>
           </div>
 

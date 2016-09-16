@@ -1,7 +1,7 @@
 var app = app || {};
 
 /**
- * Global asynchronous map callback function
+ * Asynchronous map callback function
  */
 var initializeMap = function() {
 
@@ -105,6 +105,12 @@ var mapFallback = function() {
     app.viewModel.loading(false);
 };
 
+
+
+
+
+
+
 /**
  * ViewModel for Knockout bindings
  */
@@ -113,7 +119,8 @@ var ViewModel = function() {
     // alias reference to this
     var self = this;
 
-    // sets loading state of app
+    /* Early ViewModel observables */
+    // decides loading state of app
     this.loading = ko.observable(true);
     // binds whether the alert modal is visible
     this.alerting = ko.observable(true);
@@ -123,8 +130,124 @@ var ViewModel = function() {
     this.alertTitle = ko.observable('geolocation note');
     this.alertDetails = ko.observable('For best results enable browser geolocation, or attempt a new search.');
 
+    /*
+     * @description Contains venue data imported from Foursquare and Yelp
+     * @constructor Class Venue
+     * @params {object} location data
+     */
+    var Venue = function(venue) {
+        this.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
+        // sets the name of the venue
+        this.name = venue.name;
+        this.location = venue.location;
+        // gets the place's categories or sets it to misc.
+        this.setCategories(venue.categories);
+        // sets venue hours
+        this.setHours(venue.hours);
+        // sets venue rating
+        this.setRating(venue.rating);
+        // sets venue price
+        this.setPrice(venue.price);
+        // sets venue contact and phone
+        this.contact = venue.contact;
+        this.url = venue.url;
+        this.setPhone(this.contact.phone);
+        // define photos
+        this.setPhotos(venue.featuredPhotos);
+        // by default all venues are initially visible
+        this.venueVisible = ko.observable(true);
+        // no venues are expanded
+        this.venueExpanded = ko.observable(false);
+        // no venues are favorited
+        this.favorited = ko.observable(false);
+
+        // create a new marker object
+        this.marker = new self.Marker(this);
+    };
+
+    /*
+     * @description Gets the Categories for the venue
+     * or sets the class field to miscellaneous
+     * @param {array} Venue Type Categories
+     */
+    Venue.prototype.setCategories = function(categories) {
+        this.categories = (categories && categories.length) ? categories : [{ name: 'Miscellaneous '}];
+    };
+
+    /*
+     * @description Gets the Hours for the venue
+     * or sets the class field to 'Not available'
+     * @param {object} Venue Hours Info
+     */
+    Venue.prototype.setHours = function(hours) {
+        this.hours = hours ? hours :
+        { isOpen:false, status:'Not Available' };
+    };
+
+    /*
+     * @description Gets the Rating for the venue
+     * or sets the class field to empty
+     * @param {number} Venue Rating
+     */
+    Venue.prototype.setRating = function(rating) {
+        // format venue rating as a decimal value
+        rating = parseFloat(rating).toFixed(1);
+        // if no rating, mark as unavailable
+        this.rating = (rating === 'NaN') ? '--' : rating;
+    };
+
+
+    /*
+     * @description Gets the Price for the venue
+     * or sets the class field to empty
+     * @param {object} Venue Price
+     */
+    Venue.prototype.setPrice = function(price) {
+        // if no price, mark price tier as empty
+        this.price = price ? price : { 'tier': 0 };
+    };
+
+
+    /*
+     * @description Gets the Price for the venue
+     * or sets the class field to empty
+     * @param {object} Venue Price
+     */
+    Venue.prototype.setPhone = function(phone) {
+        if (phone && phone.length === 10) {
+          // bind empty observables for Yelp data
+          this.review = ko.observable('No Yelp review available.');
+          this.yelpURL = ko.observable();
+        }
+    };
+
+
+    /*
+     * @description Gets the Price for the venue
+     * or sets the class field to empty
+     * @param {object} Venue Price
+     */
+    Venue.prototype.setPhotos = function(photos) {
+        // current picture displayed
+        this.currentPic = 0;
+        var photosLen = photos.items.length;
+        // if photos are available
+        if (photos && photosLen) {
+            if (photosLen > 1) { this.multiPhotos = true; }
+            var initialPhoto = photos.items[this.currentPic];
+            initialPhoto.size = '250x100';
+            // define current photoURL
+            this.photoURL = ko.observable(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
+            // define infoWindow picture
+            this.infowindowPic = this.photoURL();
+        }
+    };
+
+
+
+
     /**
-     * Initialize app
+     * @description Callback to initialize app when map loads
      */
     this.init = function() {
 
@@ -137,21 +260,25 @@ var ViewModel = function() {
         this.yelp_token_secret = "oZEPYCr8TQ2cNaqrDN7_G0ISsis";
 
         // Initialize observables
+        this.initializeObservables();
 
+    };
+
+    /*
+     * @description Initializes Knockout observables
+     */
+    this.initializeObservables = function() {
         // binds search term, e.g. 'popular', ''
         this.searchTerm = ko.observable('Popular');
         // binds location
         this.poi = ko.observable('');
-
         // binds range options visibility
         this.rangeVisible = ko.observable(false);
-
         // binds coordinates object for search
         this.coordinates = ko.observable({
             lat: '',
             lng: ''
         });
-
         // binds a computed value for inserting into the API url
         // this is updated with the lat and lng
         this.latLng = ko.computed(function() {
@@ -164,22 +291,16 @@ var ViewModel = function() {
         // binds empty location of interest
         this.anchorMarker = ko.observable();
 
-
         // binds array of returned venues
         this.venuesArray = ko.observableArray();
-
         // binds whether list of venues is expanded
         this.placesExpanded = ko.observable(false);
-
         // binds current day/night mode of map
         this.currentMode = ko.observable('');
-
-
         // binds logged in user
         this.user = ko.observable('');
         // binds whether a user is successfully logged in
         this.loggedIn = ko.observable(false);
-
         // binds whether the login interface is visible
         this.loginExpanded = ko.observable(false);
     };
@@ -483,8 +604,6 @@ var ViewModel = function() {
         var lng = self.coordinates().lng;
         // hide markers
         self.hideMarkers();
-        // empty current array of venues
-        self.venuesArray([]);
 
         // define new map bounds
         self.mapBounds = new google.maps.LatLngBounds();
@@ -540,6 +659,8 @@ var ViewModel = function() {
      * Use a Foursquare based search to compile local venues
      */
     this.getVenuesData = function() {
+        // empty current array of venues
+        self.venuesArray([]);
         var filter;
         // for any unique non-generic user search term
         if (self.searchTerm() &&
@@ -558,7 +679,7 @@ var ViewModel = function() {
         // Get Foursquare API query response
         $.getJSON(url)
             .done(function(data) {
-                var venue, phone;
+                var venue;
                 // access list of returned venues in the JSON response
                 var venues = data.response.groups[0].items;
 
@@ -568,68 +689,8 @@ var ViewModel = function() {
                         // for each venue
                         venue = venues[v].venue;
 
-                        venue.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
-
-                        if (!venue.categories || !venue.categories.length) {
-                            venue.categories = [{
-                                name:'Miscellaneous'
-                            }];
-                        }
-
-                        // if no venue hours are provided
-                        if (!venue.hours) {
-                            // create a default hours object
-                            venue.hours = {
-                                isOpen: false,
-                                status: "Not Available"
-                            };
-                        }
-                        // format venue rating as a decimal value
-                        venue.rating = parseFloat(venue.rating).toFixed(1);
-                        // if no rating, mark as unavailable
-                        if (venue.rating === 'NaN') {
-                            venue.rating = '--';
-                        }
-                        // if no price, mark price tier as empty
-                        if (!venue.price) {
-                            venue.price = {
-                                'tier': 0
-                            };
-                        }
-
-                        // current picture displayed
-                        venue.currentPic = 0;
-
-                        // define photos
-                        var photos = venue.featuredPhotos;
-                        // if photos are available
-                        if (photos && photos.items.length) {
-                            var initialPhoto = photos.items[venue.currentPic];
-                            initialPhoto.size = '250x100';
-                            // define current photoURL
-                            venue.photoURL = ko.observable(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
-                            // define infoWindow picture
-                            venue.infowindowPic = venue.photoURL();
-                        }
-
-                        // by default all venues are initially visible
-                        venue.venueVisible = ko.observable(true);
-                        // no venues are expanded
-                        venue.venueExpanded = ko.observable(false);
-                        // no venues are favorited
-                        venue.favorited = ko.observable(false);
-
-                        phone = venue.contact.phone;
-                        if (phone && phone.length === 10) {
-                          // bind empty observables for Yelp data
-                          venue.review = ko.observable('No Yelp review available.');
-                          venue.yelpURL = ko.observable();
-                        }
-
-                        // create a new marker object
-                        venue.marker = new self.Marker(venue);
                         // push the venue to the venues array
-                        self.venuesArray.push(venue);
+                        self.venuesArray.push(new Venue(venue));
                     }
                 } else {
                     self.constructAlert({
@@ -966,6 +1027,7 @@ var ViewModel = function() {
      */
     this.geoLocate = function(lat, lng) {
         var latlng;
+        self.loading(true);
         // if coordinates have already been passed in, skip the geolocation
         if (typeof lat === 'number' && typeof lng === 'number') {
             latlng = new google.maps.LatLng(lat, lng);
