@@ -140,6 +140,7 @@ var ViewModel = function() {
         // sets the name of the venue
         this.name = venue.name;
         this.location = venue.location;
+        this.id = venue.id;
         // gets the place's categories or sets it to misc.
         this.setCategories(venue.categories);
         // sets venue hours
