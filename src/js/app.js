@@ -231,10 +231,9 @@ var ViewModel = function() {
     Venue.prototype.setPhotos = function(photos) {
         // current picture displayed
         this.currentPic = 0;
-        var photosLen = photos.items.length;
         // if photos are available
-        if (photos && photosLen) {
-            if (photosLen > 1) { this.multiPhotos = true; }
+        if (photos && photos.items.length) {
+            if (photos.items.length > 1) { this.multiPhotos = true; }
             var initialPhoto = photos.items[this.currentPic];
             initialPhoto.size = '250x100';
             // define current photoURL
