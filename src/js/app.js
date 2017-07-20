@@ -312,7 +312,7 @@ var ViewModel = function() {
      */
     this.handleLocationError = function() {
         // use third-party geolocation api for approximate geolocation
-        $.getJSON('http://freegeoip.net/json/')
+        $.getJSON('https://freegeoip.net/json/')
             .done(function(result) {
                 var pos = {
                     lat: result.latitude,
@@ -436,7 +436,7 @@ var ViewModel = function() {
      * Get Yelp data
      */
     this.getYelpData = function(place) {
-        var baseURL = 'http://api.yelp.com/v2/phone_search';
+        var baseURL = 'https://api.yelp.com/v2/phone_search';
 
         // define Yelp parameters
         var parameters = {
