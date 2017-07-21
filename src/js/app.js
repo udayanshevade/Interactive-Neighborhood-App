@@ -12,16 +12,16 @@ var initializeMap = function() {
     var darkStyle = [{featureType:"all",elementType:"labels",stylers:[{visibility:"on"}]},{featureType:"all",elementType:"labels.text.fill",stylers:[{saturation:36},{color:"#000000"},{lightness:40}]},{featureType:"all",elementType:"labels.text.stroke",stylers:[{visibility:"on"},{color:"#000000"},{lightness:16}]},{featureType:"all",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"geometry.fill",stylers:[{color:"#000000"},{lightness:20}]},{featureType:"administrative",elementType:"geometry.stroke",stylers:[{color:"#000000"},{lightness:17},{weight:1.2}]},{featureType:"administrative.country",elementType:"labels.text.fill",stylers:[{color:"#e5c163"}]},{featureType:"administrative.locality",elementType:"labels.text.fill",stylers:[{color:"#c4c4c4"}]},{featureType:"administrative.neighborhood",elementType:"labels.text.fill",stylers:[{color:"#e5c163"}]},{featureType:"landscape",elementType:"geometry",stylers:[{color:"#000000"},{lightness:20}]},{featureType:"poi",elementType:"geometry",stylers:[{color:"#000000"},{lightness:21},{visibility:"on"}]},{featureType:"poi.business",elementType:"geometry",stylers:[{visibility:"on"}]},{featureType:"road.highway",elementType:"geometry.fill",stylers:[{color:"#e5c163"},{lightness:"0"}]},{featureType:"road.highway",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road.highway",elementType:"labels.text.fill",stylers:[{color:"#ffffff"}]},{featureType:"road.highway",elementType:"labels.text.stroke",stylers:[{color:"#e5c163"}]},{featureType:"road.arterial",elementType:"geometry",stylers:[{color:"#000000"},{lightness:18}]},{featureType:"road.arterial",elementType:"geometry.fill",stylers:[{color:"#575757"}]},{featureType:"road.arterial",elementType:"labels.text.fill",stylers:[{color:"#ffffff"}]},{featureType:"road.arterial",elementType:"labels.text.stroke",stylers:[{color:"#2c2c2c"}]},{featureType:"road.local",elementType:"geometry",stylers:[{color:"#000000"},{lightness:16}]},{featureType:"road.local",elementType:"labels.text.fill",stylers:[{color:"#999999"}]},{featureType:"transit",elementType:"geometry",stylers:[{color:"#000000"},{lightness:19}]},{featureType:"water",elementType:"geometry",stylers:[{color:"#000000"},{lightness:17}]}];
 
     // save the light and dark modes for switching
-    app.viewModel.lightMode = new google.maps.StyledMapType(lightStyle,
+    app.lightMode = new google.maps.StyledMapType(lightStyle,
         {name: "Light Mode"});
-    app.viewModel.darkMode = new google.maps.StyledMapType(darkStyle,
+    app.darkMode = new google.maps.StyledMapType(darkStyle,
         {name: "Dark Mode"});
 
     // initialize Google Maps geocoder for reuse
-    app.viewModel.geocoder = new google.maps.Geocoder();
+    app.geocoder = new google.maps.Geocoder();
 
     // define the map options
-    app.viewModel.mapOptions = {
+    app.mapOptions = {
         center: {
             lat: 41.90278349999999,
             lng: 12.496365500000024
@@ -34,10 +34,10 @@ var initializeMap = function() {
     };
 
     // initialize a blank infoWindow for later use
-    app.viewModel.infoWindow = new google.maps.InfoWindow();
+    app.infoWindow = new google.maps.InfoWindow();
 
     // listens for infowindow closing
-    google.maps.event.addListener(app.viewModel.infoWindow, 'closeclick', function() {
+    google.maps.event.addListener(app.infoWindow, 'closeclick', function() {
         app.viewModel.toggleMarkerBounce();
     });
 
@@ -56,18 +56,18 @@ var initializeMap = function() {
             app.viewModel.coordinates(pos);
 
             // define the map options position
-            app.viewModel.mapOptions.center = pos;
+            app.mapOptions.center = pos;
 
             // map
-            app.viewModel.map = new google.maps.Map(document.getElementById('mapDiv'), app.viewModel.mapOptions);
+            app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
 
             // resize and recenter map on window resize
             google.maps.event.addDomListener(window, 'resize', function() {
-                var center = app.viewModel.map.getCenter();
-                google.maps.event.trigger(app.viewModel.map, 'resize');
-                app.viewModel.map.setCenter(center);
-                if (self.mapBounds) {
-                  app.viewModel.map.fitBounds(self.mapBounds);
+                var center = app.map.getCenter();
+                google.maps.event.trigger(app.map, 'resize');
+                app.map.setCenter(center);
+                if (app.mapBounds) {
+                  app.map.fitBounds(app.mapBounds);
                 }
             });
 
@@ -321,14 +321,14 @@ var ViewModel = function() {
 
                 self.coordinates(pos);
 
-                self.mapOptions.center = pos;
+                app.mapOptions.center = pos;
 
-                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+                app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
 
                 google.maps.event.addDomListener(window, 'resize', function() {
-                    var center = self.map.getCenter();
-                    google.maps.event.trigger(self.map, 'resize');
-                    self.map.setCenter(center);
+                    var center = app.map.getCenter();
+                    google.maps.event.trigger(app.map, 'resize');
+                    app.map.setCenter(center);
                 });
 
                 // define the time of day for the map style
@@ -345,16 +345,16 @@ var ViewModel = function() {
                     lng: 12.496365500000024
                 });
 
-                self.mapOptions.pos = self.coordinates();
+                app.mapOptions.pos = self.coordinates();
 
-                self.map = new google.maps.Map(document.getElementById('mapDiv'), self.mapOptions);
+                app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
 
                 self.initializeTime();
 
                 google.maps.event.addDomListener(window, 'resize', function() {
-                    var center = self.map.getCenter();
-                    google.maps.event.trigger(self.map, 'resize');
-                    self.map.setCenter(center);
+                    var center = app.map.getCenter();
+                    google.maps.event.trigger(app.map, 'resize');
+                    app.map.setCenter(center);
                 });
 
                 self.constructAlert({
@@ -561,7 +561,7 @@ var ViewModel = function() {
         if (self.poi()) {
             self.loading(true);
             // enable Google Maps API Places Service
-            var service = new google.maps.places.PlacesService(self.map);
+            var service = new google.maps.places.PlacesService(app.map);
             // define search query with user point of interest
             var request = {
                 "query": self.poi()
@@ -606,11 +606,11 @@ var ViewModel = function() {
         self.hideMarkers();
 
         // define new map bounds
-        self.mapBounds = new google.maps.LatLngBounds();
+        app.mapBounds = new google.maps.LatLngBounds();
 
         // define new central anchor marker
         self.anchorMarker(new google.maps.Marker({
-            map: self.map,
+            map: app.map,
             position: {
                 "lat": lat,
                 "lng": lng
@@ -624,13 +624,13 @@ var ViewModel = function() {
         google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
             return function() {
                 infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
-                infoWindow.open(self.map, this);
-                self.map.panTo(marker.getPosition());
-                self.map.setZoom(14);
+                infoWindow.open(app.map, this);
+                app.map.panTo(marker.getPosition());
+                app.map.setZoom(14);
             };
-        })(self.anchorMarker(), self.infoWindow));
+        })(self.anchorMarker(), app.infoWindow));
         // extend map bounds to include coordinates
-        self.mapBounds.extend(new google.maps.LatLng(lat, lng));
+        app.mapBounds.extend(new google.maps.LatLng(lat, lng));
         // get new venue data
         self.getVenuesData();
     };
@@ -708,9 +708,9 @@ var ViewModel = function() {
             setTimeout(function() {
 
                 // fit the map to the expanded bounds
-                self.map.fitBounds(self.mapBounds);
+                app.map.fitBounds(app.mapBounds);
                 // center the map
-                self.map.setCenter(self.mapBounds.getCenter());
+                app.map.setCenter(app.mapBounds.getCenter());
 
                 // order the venues
                 self.orderVenues();
@@ -871,7 +871,7 @@ var ViewModel = function() {
 
         // create new Google Maps marker
         this.marker = new google.maps.Marker({
-            map: self.map,
+            map: app.map,
             position: this.pos,
             icon: this.iconImage,
             size: new google.maps.Size(5, 5),
@@ -896,15 +896,15 @@ var ViewModel = function() {
         google.maps.event.addListener(this.marker, 'click', (function(content, marker, infoWindow, place){
             return function() {
                 infoWindow.setContent(marker.content);
-                infoWindow.open(self.map, this);
-                self.map.panTo(marker.getPosition());
+                infoWindow.open(app.map, this);
+                app.map.panTo(marker.getPosition());
                 self.toggleVenueExpand(place);
                 self.toggleMarkerBounce(true, marker);
             };
-        })(this.marker.content, this.marker, self.infoWindow, place));
+        })(this.marker.content, this.marker, app.infoWindow, place));
 
         // extend map bounds to include coordinates
-        self.mapBounds.extend(new google.maps.LatLng(that.lat, that.lng));
+        app.mapBounds.extend(new google.maps.LatLng(that.lat, that.lng));
     };
 
 
@@ -943,16 +943,16 @@ var ViewModel = function() {
             venue.venueExpanded(false);
         }
         // set marker map property if undefined
-        data.marker.marker.setMap(self.map);
+        data.marker.marker.setMap(app.map);
         // define specific content of infowindow
-        self.infoWindow.setContent(data.marker.marker.content);
+        app.infoWindow.setContent(data.marker.marker.content);
         // toggle marker animation
         self.toggleMarkerBounce(true, data.marker.marker);
         // open infowindow
-        self.infoWindow.open(self.map, data.marker.marker);
+        app.infoWindow.open(app.map, data.marker.marker);
         // zoom and pan
-        self.map.setZoom(14);
-        self.map.panTo(data.marker.marker.getPosition());
+        app.map.setZoom(14);
+        app.map.panTo(data.marker.marker.getPosition());
     };
 
 
@@ -978,16 +978,16 @@ var ViewModel = function() {
      * Show all venues
      */
     this.showAll = function(event) {
-        self.infoWindow.close();
+        app.infoWindow.close();
         var len = self.venuesArray().length;
         var venue;
         for (var i = 0; i < len; i++) {
             venue = self.venuesArray()[i];
             venue.venueVisible(true);
-            venue.marker.marker.setMap(self.map);
+            venue.marker.marker.setMap(app.map);
             venue.venueExpanded(false);
         }
-        self.map.fitBounds(self.mapBounds);
+        app.map.fitBounds(app.mapBounds);
     };
 
 
@@ -996,21 +996,21 @@ var ViewModel = function() {
      * Show only user favorites, if any
      */
     this.showFavorites = function(event) {
-        self.infoWindow.close();
+        app.infoWindow.close();
         var len = self.venuesArray().length;
         var venue;
         if (self.loggedIn()) {
             for (var i = 0; i < len; i++) {
                 venue = self.venuesArray()[i];
                 if (venue.favorited()) {
-                    venue.marker.marker.setMap(self.map);
+                    venue.marker.marker.setMap(app.map);
                 } else {
                     venue.venueVisible(false);
                     venue.marker.marker.setMap(null);
                 }
                 venue.venueExpanded(false);
             }
-            self.map.fitBounds(self.mapBounds);
+            app.map.fitBounds(app.mapBounds);
         } else {
             self.constructAlert({
                 title: 'no favorites yet',
@@ -1031,8 +1031,8 @@ var ViewModel = function() {
         // if coordinates have already been passed in, skip the geolocation
         if (typeof lat === 'number' && typeof lng === 'number') {
             latlng = new google.maps.LatLng(lat, lng);
-            if (self.geocoder) {
-                self.geocoder.geocode({'latLng': latlng}, function(results, status) {
+            if (app.geocoder) {
+                app.geocoder.geocode({'latLng': latlng}, function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
                         self.getLocations(results);
                     } else {
@@ -1053,8 +1053,8 @@ var ViewModel = function() {
         } else {
             navigator.geolocation.getCurrentPosition(function(position) {
                 latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                if (self.geocoder) {
-                    self.geocoder.geocode({'latLng': latlng}, function(results, status) {
+                if (app.geocoder) {
+                    app.geocoder.geocode({'latLng': latlng}, function(results, status) {
                         if (status == google.maps.GeocoderStatus.OK) {
                             self.poi(results[0].address_components[2].long_name);
                             self.coordinates({
@@ -1101,7 +1101,7 @@ var ViewModel = function() {
         }
 
         self.anchorMarker(new google.maps.Marker({
-            map: self.map,
+            map: app.map,
             position: {
                 "lat": lat,
                 "lng": lng
@@ -1114,15 +1114,15 @@ var ViewModel = function() {
         google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
             return function() {
                 infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
-                infoWindow.open(self.map, this);
-                self.map.panTo(marker.getPosition());
-                self.map.setZoom(14);
+                infoWindow.open(app.map, this);
+                app.map.panTo(marker.getPosition());
+                app.map.setZoom(14);
             };
-        })(self.anchorMarker(), self.infoWindow));
+        })(self.anchorMarker(), app.infoWindow));
 
-        self.mapBounds = new google.maps.LatLngBounds();
+        app.mapBounds = new google.maps.LatLngBounds();
         // extend map bounds to include coordinates
-        self.mapBounds.extend(new google.maps.LatLng(lat, lng));
+        app.mapBounds.extend(new google.maps.LatLng(lat, lng));
         self.poi(result[0].address_components[2].long_name);
         self.getVenuesData();
     };
@@ -1134,12 +1134,12 @@ var ViewModel = function() {
      */
     this.toggleMapMode = function() {
         if (self.currentMode() === 'light') {
-            self.map.mapTypes.set('map_style', this.lightMode);
-            self.map.setMapTypeId('map_style');
+            app.map.mapTypes.set('map_style', app.lightMode);
+            app.map.setMapTypeId('map_style');
             self.currentMode('');
         } else {
-            self.map.mapTypes.set('map_style', this.darkMode);
-            self.map.setMapTypeId('map_style');
+            app.map.mapTypes.set('map_style', app.darkMode);
+            app.map.setMapTypeId('map_style');
             self.currentMode('light');
         }
     };
@@ -1158,7 +1158,7 @@ var ViewModel = function() {
             venueName = venue.name.toLowerCase();
             if (venueName.indexOf(search) >= 0) {
                 venue.venueVisible(true);
-                venue.marker.marker.setMap(self.map);
+                venue.marker.marker.setMap(app.map);
             } else {
                 venue.venueVisible(false);
                 venue.marker.marker.setMap(null);
@@ -1181,7 +1181,7 @@ var ViewModel = function() {
             }
             self.chooseVenue($data, event);
         } else {
-            self.infoWindow.close();
+            app.infoWindow.close();
             self.toggleMarkerBounce();
         }
         $data.venueExpanded(!$data.venueExpanded());
