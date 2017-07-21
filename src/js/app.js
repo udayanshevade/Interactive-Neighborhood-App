@@ -294,7 +294,7 @@ var app = app || {};
          * Configure default Foursquare terms
          */
         this.configFoursquare = function() {
-            this.Foursquare = {
+            Venue.prototype.Foursquare = {
                 cID: "AHMKTGNPJOKRI5HSWIQ4GZVRFDXUA2UD4T4ZRBIYRN413QL5",
                 cSecret: "S3D4Y0R1430KP33VNL3MZW320ZFV22YQ2VT02SUX2XCTAD5R",
                 APIbaseURL: "https://api.foursquare.com/",
@@ -310,7 +310,7 @@ var app = app || {};
          * Configure default Flickr terms
          */
         this.configFlickr = function() {
-            this.Flickr = {
+            Venue.prototype.Flickr = {
                 key: "&api_key=e3ce05cd3fe0a8e29946f1afa5afc492",
                 secret: "1c5a3dd9614db005",
                 method: "&method=flickr.photos.search",
@@ -321,6 +321,22 @@ var app = app || {};
         };
 
 
+        /**
+         * Configure default Yelp parameters
+         */
+        this.getFlickrParams = function(phone) {
+            return {
+                oauth_consumer_key: "cNPz9LqhgDj8zRplQ9P_FQ",
+                oauth_token: "CtUW644wLDpJK0flWMnh2aaZI1outOUw",
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_version : "1.0",
+                callback: "cb", // needed for jsonp implementation
+                oauth_nonce: nonce_generate(),
+                oauth_timestamp: Math.floor(Date.now()/1000),
+                phone: place.contact.phone
+            };
+        };
+
 
         /*
          * Get Yelp data
@@ -329,16 +345,7 @@ var app = app || {};
             var baseURL = 'https://api.yelp.com/v2/phone_search';
 
             // define Yelp parameters
-            var parameters = {
-                oauth_consumer_key: "cNPz9LqhgDj8zRplQ9P_FQ",
-                oauth_token: "CtUW644wLDpJK0flWMnh2aaZI1outOUw",
-                oauth_nonce: nonce_generate(),
-                oauth_timestamp: Math.floor(Date.now()/1000),
-                oauth_signature_method: "HMAC-SHA1",
-                oauth_version : "1.0",
-                callback: "cb", // needed for jsonp implementation
-                phone: place.contact.phone
-            };
+            var parameters = this.getFlickrParams(place.contact.phone);
 
             // generate encoded signature
             var encodedSignature = oauthSignature.generate('GET',
@@ -377,7 +384,6 @@ var app = app || {};
 
             // make Yelp API query
             $.ajax(settings);
-
         };
 
 
