@@ -155,6 +155,7 @@ var ViewModel = function() {
         this.setPhone(this.contact.phone);
         // define photos
         this.setPhotos(venue.featuredPhotos);
+        this.multiPhotos = ko.observable(false);
         // by default all venues are initially visible
         this.venueVisible = ko.observable(true);
         // no venues are expanded
@@ -233,7 +234,6 @@ var ViewModel = function() {
         this.currentPic = 0;
         // if photos are available
         if (photos && photos.items.length) {
-            if (photos.items.length > 1) { this.multiPhotos = true; }
             var initialPhoto = photos.items[this.currentPic];
             initialPhoto.size = '250x100';
             // define current photoURL
@@ -824,7 +824,7 @@ var ViewModel = function() {
                         size: ''
                     });
                 });
-
+                place.multiPhotos(place.featuredPhotos.items.length > 1);
             } else {
                 // log which images were unavailable
             }
@@ -1151,6 +1151,7 @@ var ViewModel = function() {
      */
     this.filterVenues = function() {
         var venueName;
+        console.log(this.venuesArray());
         var len = this.venuesArray().length;
         var search = this.filterQuery().toLowerCase();
         for (var i = 0; i < len; i++) {
