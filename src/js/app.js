@@ -1151,7 +1151,6 @@ var ViewModel = function() {
      */
     this.filterVenues = function() {
         var venueName;
-        console.log(this.venuesArray());
         var len = this.venuesArray().length;
         var search = this.filterQuery().toLowerCase();
         for (var i = 0; i < len; i++) {
