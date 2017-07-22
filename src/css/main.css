@@ -289,7 +289,7 @@ html {
 .place-list-item {
   list-style: none;
   padding: 0 0 0 2rem;
-  border-bottom: 1px dashed #777;
+  border-bottom: 1px solid #efefef;
 }
 
 .place-list-item:hover,
@@ -369,7 +369,7 @@ html {
 
 /* Venue info */
 
-.info-wrapper {
+.foursquare-info-wrapper {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -377,8 +377,7 @@ html {
       -ms-flex-pack: justify;
           justify-content: space-between;
   flex-flow: row wrap;
-  border-top: 1px dashed #333;
-  border-bottom: 1px dotted #ccc;
+  border-top: 1px solid #dedede;
 }
 
 .open-status {
@@ -434,20 +433,17 @@ html {
   padding-right: 0;
 }
 
-.foursquare-link {
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  justify-content: flex-end;
+.api-link {
+  position: relative;
+  float: right;
   text-decoration: none;
   color: #333;
-  margin: 0.5rem 0;
 }
 
-.icon-text {
-  -ms-flex-item-align: center;
-      -webkit-align-self: center;
-          align-self: center;
+.api-icon-text {
+  position: absolute;
+  top: 1rem;
+  left: -2rem;
 }
 
 .foursquare-logo {
@@ -507,7 +503,6 @@ html {
 }
 
 .yelp-review-wrapper {
-  border-top: 1px dotted #ccc;
   padding: 1rem 0;
 }
 
@@ -526,13 +521,13 @@ html {
   background-color: #fff;
 }
 
-.yelp-link {
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  justify-content: flex-end;
-  color: #333;
-  text-decoration: none;
+.info-wrapper:after,
+.yelp-review-wrapper:after {
+  content: " ";
+  visibility: hidden;
+  display: block;
+  height: 0;
+  clear: both;
 }
 
 .yelp-logo {

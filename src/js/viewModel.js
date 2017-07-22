@@ -73,7 +73,7 @@ var app = app || {};
          */
         Venue.prototype.setHours = function(hours) {
             this.hours = hours ? hours :
-            { isOpen:false, status:'Not Available' };
+            { isOpen:false, status:'Hours not available' };
         };
 
         /*

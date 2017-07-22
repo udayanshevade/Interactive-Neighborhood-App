@@ -101,7 +101,7 @@
       <!-- each venue -->
       <li class="place-list-item" data-bind="visible: venue.venueVisible, css: {placeListItemExpanded: venue.venueExpanded}">
 
-        <header class="place-header" data-bind="click: $parent.toggleVenueExpand">
+        <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: name.toLowerCase().split(' ').join('-') }">
 
           <div class="place-name-wrapper">
             <!-- venues rating -->
@@ -123,55 +123,56 @@
         <section class="place-info" data-bind="visible: venue.venueExpanded">
           <!-- place details -->
           <div class="info-wrapper">
-            <!-- open status -->
-            <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
-            <!-- type of establishment -->
-            <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
-
-            <!-- place contact info -->
-            <div class="contact">
-              <!-- venue phone -->
-              <h5 class="contact-text" data-bind="if: venue.contact.formattedPhone">
-                <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
-                  <i class="fa fa-phone contact-icon" title="Call"></i>
-                </a>
-              </h5>
-              <!-- venue link -->
-              <h5 class="contact-text" data-bind="if: venue.url">
-                <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
-                  <i class="fa fa-link contact-icon website-icon" title="Website"></i>
-                </a>
-              </h5>
-            </div>
-          </div>
-
-          <!-- venues picture -->
-          <div class="info-pic-wrapper">
-            <div class="info-pic-container" data-bind="if: venue.photoURL">
-              <span data-bind="if: venue.multiPhotos">
-                <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
-              </span>
-              <div class="info-pic-div">
-                <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
+            <div class="foursquare-info-wrapper">
+              <!-- type of establishment -->
+              <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
+              <!-- open status -->
+              <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
+              <!-- place contact info -->
+              <div class="contact" data-bind="if: venue.contact.formattedPhone && venue.url, visible: venue.contact.formattedPhone && venue.url">
+                <!-- venue phone -->
+                <h5 class="contact-text" data-bind="if: venue.contact.formattedPhone, visible: venue.contact.formattedPhone">
+                  <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
+                    <i class="fa fa-phone contact-icon" title="Call"></i>
+                  </a>
+                </h5>
+                <!-- venue link -->
+                <h5 class="contact-text" data-bind="if: venue.url, visible: venue.contact.formattedPhone">
+                  <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
+                    <i class="fa fa-link contact-icon website-icon" title="Website"></i>
+                  </a>
+                </h5>
               </div>
-              <span data-bind="if: venue.multiPhotos">
-                <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
-              </span>
             </div>
-          </div>
 
-          <!-- foursquare logo link -->
-          <a class="foursquare-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
-            <i class="fa fa-share contact-icon icon-text"></i>
-            <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
-          </a>
+            <!-- venues picture -->
+            <div class="info-pic-wrapper">
+              <div class="info-pic-container" data-bind="if: venue.photoURL">
+                <span data-bind="if: venue.multiPhotos">
+                  <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
+                </span>
+                <div class="info-pic-div">
+                  <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
+                </div>
+                <span data-bind="if: venue.multiPhotos">
+                  <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
+                </span>
+              </div>
+            </div>
+
+            <!-- foursquare logo link -->
+            <a class="api-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
+              <i class="fa fa-share contact-icon api-icon-text"></i>
+              <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
+            </a>
+          </div>
 
           <!-- yelp review -->
           <div class="yelp-review-wrapper" data-bind="visible: venue.review">
             <h6 class="yelp-title">Yelp Review:</h6>
             <p class="yelp-review" data-bind="text: venue.review"></p>
-            <a class="yelp-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
-              <i class="fa fa-share contact-icon icon-text"></i>
+            <a class="api-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
+              <i class="fa fa-share contact-icon api-icon-text"></i>
               <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
             </a>
           </div>
