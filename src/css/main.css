@@ -24,12 +24,12 @@ body,
   left: 0;
   top: 0;
   z-index: -1;
-  background-image: url(img/background/day.jpg);
+  background-image: url(../img/background/day.jpg);
   background-size: cover;
 }
 
 .dark .map-fallback {
-  background-image: url(img/background/night.jpg);
+  background-image: url(../img/background/night.jpg);
 }
 
 .background-title {
