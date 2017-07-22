@@ -294,7 +294,7 @@ var app = app || {};
          * Configure default Foursquare terms
          */
         this.configFoursquare = function() {
-            Venue.prototype.Foursquare = {
+            this.Foursquare = {
                 cID: "AHMKTGNPJOKRI5HSWIQ4GZVRFDXUA2UD4T4ZRBIYRN413QL5",
                 cSecret: "S3D4Y0R1430KP33VNL3MZW320ZFV22YQ2VT02SUX2XCTAD5R",
                 APIbaseURL: "https://api.foursquare.com/",
@@ -310,7 +310,7 @@ var app = app || {};
          * Configure default Flickr terms
          */
         this.configFlickr = function() {
-            Venue.prototype.Flickr = {
+            this.Flickr = {
                 key: "&api_key=e3ce05cd3fe0a8e29946f1afa5afc492",
                 secret: "1c5a3dd9614db005",
                 method: "&method=flickr.photos.search",
@@ -333,7 +333,7 @@ var app = app || {};
                 callback: "cb", // needed for jsonp implementation
                 oauth_nonce: nonce_generate(),
                 oauth_timestamp: Math.floor(Date.now()/1000),
-                phone: place.contact.phone
+                phone: phone
             };
         };
 

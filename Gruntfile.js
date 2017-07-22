@@ -26,13 +26,10 @@ module.exports = function(grunt) {
             }
         },
         "uglify": {
-            "all": {
+            "min": {
                 "files": [{
-                    "expand": true,
-                    "cwd": 'src/',
-                    "src": ['js/*.js'],
-                    "dest": 'dist/',
-                    "ext": '.min.js'
+                    "src": ['src/js/*.js'],
+                    "dest": 'dist/js/app.min.js',
                 }]
             }
         },
