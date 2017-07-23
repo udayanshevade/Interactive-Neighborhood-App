@@ -205,8 +205,8 @@ var app = app || {};
          */
         this.handleLocationError = function() {
             // use third-party geolocation api for approximate geolocation
-            $.getJSON('https://freegeoip.net/json/')
-                .done(function(result) {
+            getJSON('https://freegeoip.net/json/')
+                .then(function(result) {
                     var pos = {
                         lat: result.latitude,
                         lng: result.longitude
@@ -229,7 +229,7 @@ var app = app || {};
 
                     self.geoLocate(pos.lat, pos.lng);
 
-                }).fail(function(result) {
+                }).catch(function(result) {
                     // set default place to Rome
                     self.poi('Rome');
                     // Rome hardcoded if all else fails
@@ -319,7 +319,7 @@ var app = app || {};
                 method: "&method=flickr.photos.search",
                 APIbaseURL: "https://api.flickr.com/services/rest/?format=json",
                 sort: "&sort=interestingness-desc",
-                mode: "&jsoncallback=?"
+                mode: '&nojsoncallback=1',
             };
         };
 
@@ -327,13 +327,13 @@ var app = app || {};
         /**
          * Configure default Yelp parameters
          */
-        this.getFlickrParams = function(phone) {
+        this.getYelpParams = function(phone) {
             return {
-                oauth_consumer_key: "cNPz9LqhgDj8zRplQ9P_FQ",
-                oauth_token: "CtUW644wLDpJK0flWMnh2aaZI1outOUw",
-                oauth_signature_method: "HMAC-SHA1",
-                oauth_version : "1.0",
-                callback: "cb", // needed for jsonp implementation
+                oauth_consumer_key: 'cNPz9LqhgDj8zRplQ9P_FQ',
+                oauth_token: 'CtUW644wLDpJK0flWMnh2aaZI1outOUw',
+                oauth_signature_method: 'HMAC-SHA1',
+                oauth_version : '1.0',
+                callback: 'cb', // needed for jsonp implementation
                 oauth_nonce: nonceGenerate(),
                 oauth_timestamp: Math.floor(Date.now()/1000),
                 phone: phone
@@ -345,14 +345,14 @@ var app = app || {};
          * Get Yelp data
          */
         this.getYelpData = function(place) {
-            var baseURL = 'https://api.yelp.com/v2/phone_search';
+            var baseUrl = 'https://api.yelp.com/v2/phone_search';
 
             // define Yelp parameters
-            var parameters = this.getFlickrParams(place.contact.phone);
+            var parameters = this.getYelpParams(place.contact.phone);
 
             // generate encoded signature
             var encodedSignature = oauthSignature.generate('GET',
-                baseURL,
+                baseUrl,
                 parameters,
                 self.yelpKeySecret,
                 self.yelpTokenSecret);
@@ -362,11 +362,15 @@ var app = app || {};
 
             // define the settings to pass into the Yelp ajax request
             var settings = {
-                url: baseURL,
+                url: baseUrl,
                 data: parameters,
                 cache: true,
                 dataType: "jsonp",
-                success: function(results) {
+            };
+
+            // make Yelp API query
+            $.ajax(settings)
+                .done(function(results) {
                     var business = results.businesses[0];
                     if (business) {
                         // bind venue review
@@ -375,19 +379,15 @@ var app = app || {};
                         // bind venue URL
                         place.yelpURL(business.url);
                     }
-                },
-                error: function() {
+                })
+                .fail(function(err) {
                     self.constructAlert({
                         title: 'Yelp error',
-                        details: 'There was an error with the Yelp API. Some or all of the requested data may be unavailable. Please try again.',
+                        details: 'There was an error with the Yelp API. Some requested data may be unavailable at this time. Please try again.',
                         delay: 2000
                     });
                     self.toggleAlert('open');
-                }
-            };
-
-            // make Yelp API query
-            $.ajax(settings);
+                });
         };
 
 
@@ -578,11 +578,18 @@ var app = app || {};
             }
 
             // define the URL for the Foursquare API query
-            var url = self.Foursquare.APIbaseURL + 'v2/venues/explore?' + 'client_id=' + self.Foursquare.cID + '&client_secret=' + self.Foursquare.cSecret + '&v=' + self.Foursquare.version + filter + '&radius=' + self.Foursquare.radius() + '&ll=' + self.latLng() + '&time=any&day=any&limit=35&venuePhotos=1';
+            var url = self.Foursquare.APIbaseURL + 'v2/venues/explore?' +
+                'client_id=' + self.Foursquare.cID +
+                '&client_secret=' + self.Foursquare.cSecret +
+                '&v=' + self.Foursquare.version +
+                filter +
+                '&radius=' + self.Foursquare.radius() +
+                '&ll=' + self.latLng() +
+                '&time=any&day=any&limit=35&venuePhotos=1';
 
             // Get Foursquare API query response
-            $.getJSON(url)
-                .done(function(data) {
+            getJSON(url)
+                .then(function(data) {
                     var venue;
                     // access list of returned venues in the JSON response
                     var venues = data.response.groups[0].items;
@@ -604,10 +611,6 @@ var app = app || {};
                         self.toggleAlert('open');
                         self.loading(false);
                     }
-                // prevents deprecated Firebase synchronous XMLHttpRequest
-                $.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
-                    options.async = true;
-                });
                 // after the api requests are processed
                 setTimeout(function() {
 
@@ -661,7 +664,7 @@ var app = app || {};
                     self.loading(false);
 
                 }, 500);
-            }).fail(function(data) {
+            }).catch(function(err) {
                 // toggle alert if the foursquare response fails
                 self.constructAlert({
                     this: 'foursquare error',
@@ -701,38 +704,43 @@ var app = app || {};
             var lng = place.location.lng;
 
             // define url for Flickr query
-            var url = self.Flickr.APIbaseURL + self.Flickr.key + self.Flickr.method + self.Flickr.sort + self.Flickr.mode + '&lat=' + lat + '&lon=' + lng + '&text=' + place.name;
+            var url = self.Flickr.APIbaseURL +
+                self.Flickr.key +
+                self.Flickr.method +
+                self.Flickr.mode +
+                self.Flickr.sort +
+                '&lat=' + lat +
+                '&lon=' + lng +
+                '&text=' + place.name;
 
-            $.getJSON(url).done(function(data) {
+            getJSON(url).then(function(data) {
                 var photos = data.photos.photo;
-                if (photos.length) {
-                    var imagePrefix, imageSuffix;
+                if (!photos.length) return;
+                var imagePrefix, imageSuffix;
 
-                    // assign image objects to venue
-                    photos.forEach(function(photoData) {
-                        // define prefix and suffix format
-                        imagePrefix = 'https://farm' + photoData.farm + '.staticflickr.com/';
-                        imageSuffix = photoData.server + '/' + photoData.id + '_' + photoData.secret + '.jpg';
-                        // if no featuredPhotos property exists create one
-                        if (!place.featuredPhotos) {
-                            place.featuredPhotos = {
-                                'items': []
-                            };
-                        }
-                        // push the prefix and suffix fragments
-                        // to be rendered as the user cycles through the
-                        // available images in list view
-                        place.featuredPhotos.items.push({
-                            prefix: imagePrefix,
-                            suffix: imageSuffix,
-                            size: ''
-                        });
+                // assign image objects to venue
+                photos.forEach(function(photoData) {
+                    // define prefix and suffix format
+                    imagePrefix = 'https://farm' + photoData.farm + '.staticflickr.com/';
+                    imageSuffix = photoData.server + '/' + photoData.id + '_' + photoData.secret + '.jpg';
+                    // if no featuredPhotos property exists create one
+                    if (!place.featuredPhotos) {
+                        place.featuredPhotos = {
+                            'items': []
+                        };
+                    }
+                    // push the prefix and suffix fragments
+                    // to be rendered as the user cycles through the
+                    // available images in list view
+                    place.featuredPhotos.items.push({
+                        prefix: imagePrefix,
+                        suffix: imageSuffix,
+                        size: ''
                     });
-                    place.multiPhotos(place.featuredPhotos.items.length > 1);
-                } else {
-                    // log which images were unavailable
-                }
-            }).fail(function(data) {
+                });
+                place.multiPhotos(place.featuredPhotos.items.length > 1);
+            }).catch(function(err) {
+                console.log(err);
                 // if Flickr fails, display alert modal
                 self.constructAlert({
                     title: 'flickr error',
@@ -794,7 +802,9 @@ var app = app || {};
             } else { this.placeImage = placePhoto; }
 
             // encapsulate marker content
-            this.marker.content = '<div class="infowindow"><h3 class="infowindow-title">' + this.name + '</h3><div class="infowindow-pic">' + this.placeImage + '</div><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div>';
+            this.marker.content = '<div class="infowindow"><div class="infowindow-pic">' + this.placeImage +
+                '<h3 class="infowindow-title">' + this.name +
+                '</h3></div><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div>';
 
             // add click event to marker for opening infowindow
             google.maps.event.addListener(this.marker, 'click', (function(content, marker, infoWindow, place){
@@ -1487,6 +1497,22 @@ var app = app || {};
          */
         function nonceGenerate() {
           return (Math.floor(Math.random() * 1e12).toString());
+        }
+
+        // Adapts fetch/jsonp result into usable data
+        function getJSON(url, headers, options) {
+            var fetchPromise;
+            if (options && options.jsonp) {
+                var jsonpOpts = {};
+                Object.keys(options).forEach(function(opt) {
+                    if (opt === 'jsonp') return;
+                    jsonpOpts[opt] = options[opt];
+                });
+                fetchPromise = fetchJsonp(url, jsonpOpts);
+            } else {
+                fetchPromise = fetch(url);
+            }
+            return fetchPromise.then(function(res) { return res.json(); });
         }
 
 

@@ -673,12 +673,19 @@ html {
   padding-left: 0;
 }
 
+.gm-style-iw {
+  width: 305px !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
 .infowindow {
-  max-width: 100%;
+  width: 100%;
 }
 
 .infowindow-title {
   font: 600 small-caps 1.5rem "Roboto", sans-serif;
+  text-align: center;
 }
 
 .infowindow-info {

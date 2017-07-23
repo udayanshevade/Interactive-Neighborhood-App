@@ -34,14 +34,21 @@ var app = app || {};
             ]}
         };
 
-        // initialize a blank infoWindow for later use
-        app.infoWindow = new google.maps.InfoWindow();
-
-        // listens for infowindow closing
-        google.maps.event.addListener(app.infoWindow, 'closeclick', function() {
-            var selected = app.viewModel.selected();
-            app.viewModel.toggleVenueExpand(selected);
-        });
+        // Load styled infowindow plugin
+        fetch('../bower_components/snazzy-info-window/dist/snazzy-info-window.min.js')
+            .then(function() {
+                // initialize a blank infoWindow for later use
+                app.infoWindow = new SnazzyInfoWindow();
+            }).catch(function(e) {
+                // otherwise open regular infowindow
+                app.infoWindow = new google.maps.InfoWindow();
+            }).then(function() {
+                // listens for infowindow closing
+                google.maps.event.addListener(app.infoWindow, 'closeclick', function() {
+                    var selected = app.viewModel.selected();
+                    app.viewModel.toggleVenueExpand(selected);
+                });
+            });
 
         // if browser has navigator geolocation
         if (navigator.geolocation) {
