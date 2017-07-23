@@ -25,7 +25,7 @@
     </picture>
     <h1 class="background-title">Find Good Stuff</h1>
   </div>
-  <i class="fa fa-spinner loading" data-bind="visible: loading"></i>
+  <i class="fa fa-spinner main-loading-spinner loading" data-bind="visible: loading"></i>
   <!-- map -->
   <div id="mapDiv" class="fade" data-bind="css: { fade: alerting, fade: loading } "></div>
 
@@ -75,7 +75,13 @@
 
     </form>
     <!-- expand venues -->
-    <i class="icon places-icon fa fa-bars" data-bind="visible: venuesArray().length, click: expandPlaces, css: { expandIcon: placesExpanded() }" title="See Places"></i>
+    <span>
+      <!-- ko if: venuesArray().length -->
+      <i class="icon places-icon fa fa-bars" data-bind="click: expandPlaces, css: { expandIcon: placesExpanded() }" title="See Places"></i>
+      <!-- /ko -->
+      <!-- ko if: loading && !venuesArray().length -->
+      <i class="icon places-icon fa fa-spinner loading"></i>
+      <!-- /ko -->
   </header>
 
   <!-- places section -->
@@ -96,12 +102,12 @@
     </div>
 
     <!-- venues list -->
-    <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
+    <ul id="places-list" class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
 
       <!-- each venue -->
       <li class="place-list-item" data-bind="visible: venue.venueVisible, css: {placeListItemExpanded: venue.venueExpanded}">
 
-        <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: name.toLowerCase().split(' ').join('-') }">
+        <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: domID }">
 
           <div class="place-name-wrapper">
             <!-- venues rating -->

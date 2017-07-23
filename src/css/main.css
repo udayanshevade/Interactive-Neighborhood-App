@@ -45,12 +45,16 @@ html {
   font-size: 65%;
 }
 
-.fa-spinner {
+.main-loading-spinner {
   font-size: 4rem;
   position: absolute;
   z-index: 10;
   top: calc(50% - 2rem);
   left: calc(50% - 2rem);
+}
+
+.dark .main-loading-spinner {
+  color: white;
 }
 
 @-webkit-keyframes spinning {

@@ -29,6 +29,7 @@ var app = app || {};
             this.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
             // sets the name of the venue
             this.name = venue.name;
+            this.domID = venue.name.toLowerCase().split(' ').join('-').replace(/[^a-zA-Z0-9-]/g, '');
             this.location = venue.location;
             this.id = venue.id;
             // gets the place's categories or sets it to misc.
@@ -193,6 +194,8 @@ var app = app || {};
             this.loggedIn = ko.observable(false);
             // binds whether the login interface is visible
             this.loginExpanded = ko.observable(false);
+            this.selected = ko.observable(null);
+            this.shouldScroll = ko.observable(false);
         };
 
 
@@ -392,7 +395,11 @@ var app = app || {};
          * Toggle expansion of the venues list
          */
         this.expandPlaces = function() {
-            self.placesExpanded(!self.placesExpanded());
+            this.placesExpanded(!this.placesExpanded());
+            if (this.shouldScroll()) {
+                this.shouldScroll(false);
+                this.scrollToLocation(this.selected().domID);
+            }
         };
 
 
@@ -832,10 +839,16 @@ var app = app || {};
          * Select and focus on venue from list or map
          */
         this.chooseVenue = function(data, event) {
-            var len = self.venuesArray().length;
+            if (!this.placesExpanded()) {
+                this.shouldScroll(true);
+            } else {
+                this.scrollToLocation(data.domID);
+            }
+            this.selected(data);
+            var len = this.venuesArray().length;
             var venue;
             for (var i = 0; i < len; i++) {
-                venue = self.venuesArray()[i];
+                venue = this.venuesArray()[i];
                 venue.venueExpanded(false);
             }
             // set marker map property if undefined
@@ -843,7 +856,7 @@ var app = app || {};
             // define specific content of infowindow
             app.infoWindow.setContent(data.marker.marker.content);
             // toggle marker animation
-            self.toggleMarkerBounce(true, data.marker.marker);
+            this.toggleMarkerBounce(true, data.marker.marker);
             // open infowindow
             app.infoWindow.open(app.map, data.marker.marker);
             // zoom and pan
@@ -858,9 +871,9 @@ var app = app || {};
          */
         this.toggleMarkerBounce = function(state, marker) {
             // or end all marker animations
-            var venue, venues = self.venuesArray();
+            var venue, venues = this.venuesArray();
             for (var i = 0, len = venues.length; i < len; i++) {
-                venue = self.venuesArray()[i];
+                venue = this.venuesArray()[i];
                 venue.marker.marker.setAnimation(null);
             }
             // toggle specific marker to bounce
@@ -875,10 +888,10 @@ var app = app || {};
          */
         this.showAll = function(event) {
             app.infoWindow.close();
-            var len = self.venuesArray().length;
+            var len = this.venuesArray().length;
             var venue;
             for (var i = 0; i < len; i++) {
-                venue = self.venuesArray()[i];
+                venue = this.venuesArray()[i];
                 venue.venueVisible(true);
                 venue.marker.marker.setMap(app.map);
                 venue.venueExpanded(false);
@@ -893,11 +906,11 @@ var app = app || {};
          */
         this.showFavorites = function(event) {
             app.infoWindow.close();
-            var len = self.venuesArray().length;
+            var len = this.venuesArray().length;
             var venue;
-            if (self.loggedIn()) {
+            if (this.loggedIn()) {
                 for (var i = 0; i < len; i++) {
-                    venue = self.venuesArray()[i];
+                    venue = this.venuesArray()[i];
                     if (venue.favorited()) {
                         venue.marker.marker.setMap(app.map);
                     } else {
@@ -908,11 +921,11 @@ var app = app || {};
                 }
                 app.map.fitBounds(app.mapBounds);
             } else {
-                self.constructAlert({
+                this.constructAlert({
                     title: 'no favorites yet',
                     details: 'You must create a new user profile or be logged in to use this feature.'
                 });
-                self.toggleAlert('open');
+                this.toggleAlert('open');
             }
         };
 
@@ -923,7 +936,7 @@ var app = app || {};
          */
         this.geoLocate = function(lat, lng) {
             var latlng;
-            self.loading(true);
+            this.loading(true);
             // if coordinates have already been passed in, skip the geolocation
             if (typeof lat === 'number' && typeof lng === 'number') {
                 latlng = new google.maps.LatLng(lat, lng);
@@ -986,17 +999,17 @@ var app = app || {};
          * Fetch new venues data
          */
         this.getLocations = function(result) {
-            self.hideMarkers();
+            this.hideMarkers();
 
-            var lat = self.coordinates().lat;
-            var lng = self.coordinates().lng;
+            var lat = this.coordinates().lat;
+            var lng = this.coordinates().lng;
 
-            if (self.anchorMarker()) {
-                self.anchorMarker().setMap(null);
-                self.anchorMarker('');
+            if (this.anchorMarker()) {
+                this.anchorMarker().setMap(null);
+                this.anchorMarker('');
             }
 
-            self.anchorMarker(new google.maps.Marker({
+            this.anchorMarker(new google.maps.Marker({
                 map: app.map,
                 position: {
                     "lat": lat,
@@ -1007,20 +1020,20 @@ var app = app || {};
                 size: new google.maps.Size(3, 3),
             }));
 
-            google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
+            google.maps.event.addListener(this.anchorMarker(), 'click', (function(marker, infoWindow){
                 return function() {
                     infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                     infoWindow.open(app.map, this);
                     app.map.panTo(marker.getPosition());
                     app.map.setZoom(14);
                 };
-            })(self.anchorMarker(), app.infoWindow));
+            })(this.anchorMarker(), app.infoWindow));
 
             app.mapBounds = new google.maps.LatLngBounds();
             // extend map bounds to include coordinates
             app.mapBounds.extend(new google.maps.LatLng(lat, lng));
-            self.poi(result[0].address_components[2].long_name);
-            self.getVenuesData();
+            this.poi(result[0].address_components[2].long_name);
+            this.getVenuesData();
         };
 
 
@@ -1029,14 +1042,14 @@ var app = app || {};
          * Toggle dark/light mode of map
          */
         this.toggleMapMode = function() {
-            if (self.currentMode() === 'light') {
+            if (this.currentMode() === 'light') {
                 app.map.mapTypes.set('map_style', app.lightMode);
                 app.map.setMapTypeId('map_style');
-                self.currentMode('');
+                this.currentMode('');
             } else {
                 app.map.mapTypes.set('map_style', app.darkMode);
                 app.map.setMapTypeId('map_style');
-                self.currentMode('light');
+                this.currentMode('light');
             }
         };
 
@@ -1073,16 +1086,112 @@ var app = app || {};
             if (!$data.venueExpanded()) {
                 for (var i = 0; i < len; i++) {
                     venue = self.venuesArray()[i];
-                    venue.venueExpanded(false);
+                    if (venue.venueExpanded()) venue.venueExpanded(false);
                 }
                 self.chooseVenue($data, event);
             } else {
                 app.infoWindow.close();
                 self.toggleMarkerBounce();
+                self.scrollToLocation();
+                self.selected(null);
+                self.shouldScroll(false);
             }
             $data.venueExpanded(!$data.venueExpanded());
         };
 
+
+        /**
+         * Scrolls to the selected venue's list item
+         */
+        this.scrollToLocation = function(id, speed) {
+            var placesListEl = document.getElementById('places-list');
+            var height = placesListEl.offsetHeight;
+            var maxDuration = 1000;
+            var navOffset = 135;
+            var scrollTo = id ? document.getElementById(id).offsetTop - navOffset : 0;
+            var offsetDiff = Math.abs(scrollTo - placesListEl.scrollTop);
+            var duration = Math.round((offsetDiff / height) * maxDuration);
+            if (scrollTo < 0) scrollTo = 0;
+            smooth_scroll_to(placesListEl, scrollTo, duration);
+        };
+
+
+        /**
+            Smooth scrolling plugin courtesy of:
+            https://coderwall.com/p/hujlhg/smooth-scrolling-without-jquery
+            Smoothly scroll element to the given target (element.scrollTop)
+            for the given duration
+
+            Returns a promise that's fulfilled when done, or rejected if
+            interrupted
+         */
+        var smooth_scroll_to = function(element, target, duration) {
+            target = Math.round(target);
+            duration = Math.round(duration);
+            if (duration < 0) {
+                return Promise.reject("bad duration");
+            }
+            if (duration === 0) {
+                element.scrollTop = target;
+                return Promise.resolve();
+            }
+
+            var start_time = Date.now();
+            var end_time = start_time + duration;
+
+            var start_top = element.scrollTop;
+            var distance = target - start_top;
+
+            // based on http://en.wikipedia.org/wiki/Smoothstep
+            var smooth_step = function(start, end, point) {
+                if(point <= start) { return 0; }
+                if(point >= end) { return 1; }
+                var x = (point - start) / (end - start); // interpolation
+                return x*x*(3 - 2*x);
+            }
+
+            return new Promise(function(resolve, reject) {
+                // This is to keep track of where the element's scrollTop is
+                // supposed to be, based on what we're doing
+                var previous_top = element.scrollTop;
+
+                // This is like a think function from a game loop
+                var scroll_frame = function() {
+                    if(element.scrollTop != previous_top) {
+                        reject("interrupted");
+                        return;
+                    }
+
+                    // set the scrollTop for this frame
+                    var now = Date.now();
+                    var point = smooth_step(start_time, end_time, now);
+                    var frameTop = Math.round(start_top + (distance * point));
+                    element.scrollTop = frameTop;
+
+                    // check if we're done!
+                    if(now >= end_time) {
+                        resolve();
+                        return;
+                    }
+
+                    // If we were supposed to scroll but didn't, then we
+                    // probably hit the limit, so consider it done; not
+                    // interrupted.
+                    if(element.scrollTop === previous_top
+                        && element.scrollTop !== frameTop) {
+                        resolve();
+                        return;
+                    }
+                    previous_top = element.scrollTop;
+
+                    // schedule next frame for execution
+                    setTimeout(scroll_frame, 0);
+                }
+
+                // boostrap the animation process
+                setTimeout(scroll_frame, 0);
+            });
+        }
 
 
         /**
@@ -1113,9 +1222,9 @@ var app = app || {};
          * Log in the user via external app database
          */
         this.login = function() {
-            var loginPath = 'users/' + self.user();
-            var user = self.user();
-            if (user && !self.contains(user, ' .#$[]')) {
+            var loginPath = 'users/' + this.user();
+            var user = this.user();
+            if (user && !this.contains(user, ' .#$[]')) {
                 this.myDataRef.child(loginPath).once('value', function(snapshot) {
 
                     var result = snapshot.val();
@@ -1190,16 +1299,16 @@ var app = app || {};
          * User initiates favoriting
          */
         this.toggleVenueFavorite = function(current) {
-            if (self.loggedIn()) {
+            if (this.loggedIn()) {
                 // check if current item is already favorited
-                self.checkUserFavorites(self.loggedInUser, current, 'favorite');
+                this.checkUserFavorites(this.loggedInUser, current, 'favorite');
             } else {
                 // if not logged in, alert user
-                self.constructAlert({
+                this.constructAlert({
                     title: 'login required',
                     details: 'Please login or create a user profile first, and try again.'
                 });
-                self.toggleAlert('open');
+                this.toggleAlert('open');
             }
         };
 
@@ -1209,12 +1318,12 @@ var app = app || {};
          * Add venue to user favorites in database
          */
         this.favoriteVenue = function(result, current) {
-            var user = self.loggedInUser;
+            var user = this.loggedInUser;
             if (!result) {
                 var location = {};
                 // save location id in database
                 location.id = current.id;
-                self.usersRef.child(user).push().update(location, function(error) {
+                this.usersRef.child(user).push().update(location, function(error) {
                     // if update error, alert user
                     if (error) {
                         self.constructAlertTitle({
@@ -1298,7 +1407,7 @@ var app = app || {};
          */
         this.userAction = function(result, current, mode, fID, len) {
             // cache user
-            var user = self.loggedInUser;
+            var user = this.loggedInUser;
             // switch based on the mode
             switch (mode) {
                 // if user is favoriting/unfavoriting
@@ -1309,7 +1418,7 @@ var app = app || {};
                         // if there are multiple user favorites already
                         if (len > 1) {
                             // remove the database match
-                            self.usersRef.child(node).remove(function(error) {
+                            this.usersRef.child(node).remove(function(error) {
                                 if (error) {
                                     self.constructAlert({
                                         title: 'database error',
@@ -1339,7 +1448,7 @@ var app = app || {};
                         current.favorited(false);
                     } else {
                         // otherwise favorite the venue
-                        self.favoriteVenue(result, current);
+                        this.favoriteVenue(result, current);
                         // set the venue status to favorited
                         current.favorited(true);
                     }
@@ -1362,12 +1471,12 @@ var app = app || {};
          * Imports user favorites if any
          */
         this.importUserFavorites = function(user) {
-            var venue, venues = self.venuesArray();
+            var venue, venues = this.venuesArray();
             // for each location in the current venue array
             for (var i = 0, len = venues.length; i < len; i++) {
                 venue = venues[i];
                 // import the locations
-                self.checkUserFavorites(user, venue, 'import');
+                this.checkUserFavorites(user, venue, 'import');
             }
         };
 

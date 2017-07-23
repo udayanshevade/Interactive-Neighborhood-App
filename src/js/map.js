@@ -39,7 +39,8 @@ var app = app || {};
 
         // listens for infowindow closing
         google.maps.event.addListener(app.infoWindow, 'closeclick', function() {
-            app.viewModel.toggleMarkerBounce();
+            var selected = app.viewModel.selected();
+            app.viewModel.toggleVenueExpand(selected);
         });
 
         // if browser has navigator geolocation
