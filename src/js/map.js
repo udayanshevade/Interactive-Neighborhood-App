@@ -96,7 +96,7 @@ var app = app || {};
             app.viewModel.handleLocationError();
         }
         // initialize mapBounds
-        app.viewModel.mapBounds = new google.maps.LatLngBounds();
+        app.mapBounds = new google.maps.LatLngBounds();
     };
 
     app.mapFallback = function() {

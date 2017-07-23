@@ -109,7 +109,7 @@ var app = app || {};
         Venue.prototype.setPhone = function(phone) {
             if (phone && phone.length === 10) {
               // bind empty observables for Yelp data
-              this.review = ko.observable('No Yelp review available.');
+              this.review = ko.observable('Loading Yelp review');
               this.yelpURL = ko.observable();
             }
         };
@@ -147,8 +147,8 @@ var app = app || {};
             this.configFlickr();
 
             // configure yelp secrets
-            this.yelp_key_secret = "EbOO2hHGytkLpd1lycWv7K-faa4";
-            this.yelp_token_secret = "oZEPYCr8TQ2cNaqrDN7_G0ISsis";
+            this.yelpKeySecret = "EbOO2hHGytkLpd1lycWv7K-faa4";
+            this.yelpTokenSecret = "oZEPYCr8TQ2cNaqrDN7_G0ISsis";
 
             // Initialize observables
             this.initializeObservables();
@@ -334,7 +334,7 @@ var app = app || {};
                 oauth_signature_method: "HMAC-SHA1",
                 oauth_version : "1.0",
                 callback: "cb", // needed for jsonp implementation
-                oauth_nonce: nonce_generate(),
+                oauth_nonce: nonceGenerate(),
                 oauth_timestamp: Math.floor(Date.now()/1000),
                 phone: phone
             };
@@ -354,8 +354,8 @@ var app = app || {};
             var encodedSignature = oauthSignature.generate('GET',
                 baseURL,
                 parameters,
-                self.yelp_key_secret,
-                self.yelp_token_secret);
+                self.yelpKeySecret,
+                self.yelpTokenSecret);
 
             // assign encoded signature
             parameters.oauth_signature = encodedSignature;
@@ -370,7 +370,8 @@ var app = app || {};
                     var business = results.businesses[0];
                     if (business) {
                         // bind venue review
-                        place.review(business.snippet_text);
+                        var review = business.snippet_text || 'No Yelp review available.';
+                        place.review(review);
                         // bind venue URL
                         place.yelpURL(business.url);
                     }
@@ -1105,14 +1106,11 @@ var app = app || {};
          */
         this.scrollToLocation = function(id, speed) {
             var placesListEl = document.getElementById('places-list');
-            var height = placesListEl.offsetHeight;
-            var maxDuration = 1000;
             var navOffset = 135;
             var scrollTo = id ? document.getElementById(id).offsetTop - navOffset : 0;
-            var offsetDiff = Math.abs(scrollTo - placesListEl.scrollTop);
-            var duration = Math.round((offsetDiff / height) * maxDuration);
+            var duration = 1000;
             if (scrollTo < 0) scrollTo = 0;
-            smooth_scroll_to(placesListEl, scrollTo, duration);
+            smoothScrollTo(placesListEl, scrollTo, duration);
         };
 
 
@@ -1125,51 +1123,49 @@ var app = app || {};
             Returns a promise that's fulfilled when done, or rejected if
             interrupted
          */
-        var smooth_scroll_to = function(element, target, duration) {
+        var smoothScrollTo = function(element, target, duration) {
             target = Math.round(target);
             duration = Math.round(duration);
-            if (duration < 0) {
-                return Promise.reject("bad duration");
-            }
+            if (duration < 0) return Promise.reject("bad duration");
             if (duration === 0) {
                 element.scrollTop = target;
                 return Promise.resolve();
             }
 
-            var start_time = Date.now();
-            var end_time = start_time + duration;
+            var startTime = Date.now();
+            var endTime = startTime + duration;
 
-            var start_top = element.scrollTop;
-            var distance = target - start_top;
+            var startTop = element.scrollTop;
+            var distance = target - startTop;
 
             // based on http://en.wikipedia.org/wiki/Smoothstep
-            var smooth_step = function(start, end, point) {
-                if(point <= start) { return 0; }
-                if(point >= end) { return 1; }
+            var smoothStep = function(start, end, point) {
+                if (point <= start) return 0;
+                if (point >= end) return 1;
                 var x = (point - start) / (end - start); // interpolation
-                return x*x*(3 - 2*x);
+                return x * x * (3 - (2 * x));
             }
 
             return new Promise(function(resolve, reject) {
                 // This is to keep track of where the element's scrollTop is
                 // supposed to be, based on what we're doing
-                var previous_top = element.scrollTop;
+                var previousTop = element.scrollTop;
 
                 // This is like a think function from a game loop
-                var scroll_frame = function() {
-                    if(element.scrollTop != previous_top) {
-                        reject("interrupted");
+                var scrollFrame = function() {
+                    if (element.scrollTop != previousTop) {
+                        reject({ el: element, target: target });
                         return;
                     }
 
                     // set the scrollTop for this frame
                     var now = Date.now();
-                    var point = smooth_step(start_time, end_time, now);
-                    var frameTop = Math.round(start_top + (distance * point));
+                    var point = smoothStep(startTime, endTime, now);
+                    var frameTop = Math.round(startTop + (distance * point));
                     element.scrollTop = frameTop;
 
                     // check if we're done!
-                    if(now >= end_time) {
+                    if (now >= endTime) {
                         resolve();
                         return;
                     }
@@ -1177,19 +1173,22 @@ var app = app || {};
                     // If we were supposed to scroll but didn't, then we
                     // probably hit the limit, so consider it done; not
                     // interrupted.
-                    if(element.scrollTop === previous_top
+                    if (element.scrollTop === previousTop
                         && element.scrollTop !== frameTop) {
                         resolve();
                         return;
                     }
-                    previous_top = element.scrollTop;
+                    previousTop = element.scrollTop;
 
                     // schedule next frame for execution
-                    setTimeout(scroll_frame, 0);
+                    requestAnimationFrame(scrollFrame);
                 }
 
                 // boostrap the animation process
-                setTimeout(scroll_frame, 0);
+                requestAnimationFrame(scrollFrame);
+            }).catch(function(result) {
+                // scroll list straight to target
+                result.el.scrollTop = result.target;
             });
         }
 
@@ -1299,16 +1298,16 @@ var app = app || {};
          * User initiates favoriting
          */
         this.toggleVenueFavorite = function(current) {
-            if (this.loggedIn()) {
+            if (self.loggedIn()) {
                 // check if current item is already favorited
-                this.checkUserFavorites(this.loggedInUser, current, 'favorite');
+                self.checkUserFavorites(self.loggedInUser, current, 'favorite');
             } else {
                 // if not logged in, alert user
-                this.constructAlert({
+                self.constructAlert({
                     title: 'login required',
                     details: 'Please login or create a user profile first, and try again.'
                 });
-                this.toggleAlert('open');
+                self.toggleAlert('open');
             }
         };
 
@@ -1486,7 +1485,7 @@ var app = app || {};
          * Generates a random number and returns it as a string for OAuthentication
          * @return {string}
          */
-        function nonce_generate() {
+        function nonceGenerate() {
           return (Math.floor(Math.random() * 1e12).toString());
         }
 

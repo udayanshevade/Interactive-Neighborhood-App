@@ -118,9 +118,9 @@
 
           <div class="place-options">
             <!-- favorite option -->
-            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, css: { favorited: venue.favorited }" title="Favorite"></i>
+            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: venue.favorited }" title="Favorite"></i>
             <!-- marker icon -->
-            <i class="icon fa fa-map-marker place-icon marker-icon" data-bind="click: $parent.chooseVenue" title="Locate"></i>
+            <i class="icon fa fa-map-marker place-icon marker-icon" data-bind="click: $parent.chooseVenue, clickBubble: false" title="Locate"></i>
           </div>
 
         </header>
