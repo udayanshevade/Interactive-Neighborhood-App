@@ -74,7 +74,7 @@ var app = app || {};
          */
         Venue.prototype.setHours = function(hours) {
             this.hours = hours ? hours :
-            { isOpen:false, status:'Hours not available' };
+            { isOpen: null, status:'Hours not available' };
         };
 
         /*
@@ -1037,7 +1037,7 @@ var app = app || {};
                         self.closeInfoWindow();
                     }, 3000)
                     app.map.panTo(marker.getPosition());
-                    map.panBy(0, -75);
+                    app.map.panBy(0, -75);
                     app.map.setZoom(12);
                 };
             })(this.anchorMarker(), app.infoWindow));

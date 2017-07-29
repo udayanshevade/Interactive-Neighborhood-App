@@ -120,6 +120,11 @@ html {
   transition: all 0.3s ease-in-out;
 }
 
+.dark .ui-overlay {
+  background: rgb(50, 50, 50);
+  color: #fff;
+}
+
 /* icon styles */
 .icon {
   font-size: 1.25rem;
@@ -144,9 +149,14 @@ html {
   letter-spacing: 0.1rem;
   border: 0;
   border-bottom: 1px solid #333;
-  color: #333;
-  opacity: 0.2;
+  opacity: 0.3;
   transition: all 0.3s ease-in-out;
+}
+
+.dark .ui-search {
+  border-bottom-color: #ccc;
+  background-color: rgb(50, 50, 50);
+  color: white;
 }
 
 .ui-term {
@@ -171,6 +181,14 @@ html {
   background-color: #fff;
   border: 0;
   transition: all 0.4s ease-in-out;
+}
+
+.dark .search-button {
+  background-color: rgb(50, 50, 50);
+}
+
+.dark .icon {
+  color: #fefefe;
 }
 
 .search-button:focus {
@@ -220,6 +238,11 @@ html {
   box-shadow: 0 5px 2px -2px rgba(0, 0, 0, 0.2);
 }
 
+.dark .places {
+  background-color: rgb(40, 40, 40);
+  color: white;
+}
+
 .places-icon {
   padding: 1.25rem 0.75rem;
   transition: -webkit-transform 0.2s;
@@ -248,13 +271,19 @@ html {
 
 /* Filter the available venues */
 .ui-filter {
-  font: small-caps 1.6rem "Roboto";
+  font: small-caps 2rem "Roboto";
   width: 200px;
-  opacity: 0.1;
+  opacity: 0.3;
   border: 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #cecece;
   color: #333;
   transition: all 0.3s ease-in-out;
+}
+
+.dark .ui-filter {
+  border-bottom-color: #eee;
+  background-color: rgb(50, 50, 50);
+  color: white;
 }
 
 .filter-button {
@@ -273,6 +302,7 @@ html {
   -webkit-justify-content: space-around;
       -ms-flex-pack: distribute;
           justify-content: space-around;
+  box-shadow: 0 3px 6px rgba(50, 50, 50, 0.3);
 }
 
 .show-all,
@@ -289,6 +319,7 @@ html {
   padding-left: 0;
   height: calc(100% - 11.5rem);
   overflow-y: auto;
+  margin: 0;
 }
 
 .place-list-item {
@@ -297,9 +328,18 @@ html {
   border-bottom: 1px solid #efefef;
 }
 
+.dark .place-list-item {
+  border-bottom-color: #222;
+}
+
 .place-list-item:hover,
 .placeListItemExpanded {
   background-color: rgba(245,245,245,0.8);
+}
+
+.dark .place-list-item:hover,
+.dark .placeListItemExpanded {
+  background-color: rgba(50,50,50,0.8);
 }
 
 .place-header {
@@ -313,7 +353,7 @@ html {
 }
 
 .place-name {
-  font: 600 small-caps 1.6rem/2.75rem "Roboto", sans-serif;
+  font: 400 small-caps 1.6rem/2.75rem "Roboto", sans-serif;
   letter-spacing: 0.52px;
   letter-spacing: 0.52px;
   letter-spacing: 0.05rem;
@@ -374,6 +414,7 @@ html {
 
 /* Venue info */
 
+.middle-details,
 .foursquare-info-wrapper {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -382,15 +423,88 @@ html {
       -ms-flex-pack: justify;
           justify-content: space-between;
   flex-direction: column;
-  border-top: 1px solid #dedede;
   align-items: center;
   text-align: center;
+  margin: 1rem 0;
 }
 
 .open-status {
   display: block;
-  font: 1.45rem "Roboto", sans-serif;
-  margin: 1rem 0;
+  font: small-caps 400 2rem "Roboto", sans-serif;
+  margin: -1rem 0 1rem;
+  color: #d3cece;
+}
+
+.openStatusAvailable {
+  animation: 5s flicker infinite;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+  5% {
+    opacity: 0.95;
+  }
+  8% {
+    opacity: 0.3;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  30% {
+    opacity: 0.95;
+  }
+  31% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.85;
+  }
+  45% {
+    opacity: 0.6;
+  }
+  55% {
+    opacity: 0.77;
+  }
+  59% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.2;
+  }
+  64% {
+    opacity: 0.76;
+  }
+  75% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.89;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+.open {
+  color: #66ff66;
+}
+
+.closed {
+  color: #ff355e;
 }
 
 .place-type {
@@ -405,13 +519,15 @@ html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-width: 100px;
+  min-width: 75px;
+  max-width: 150px;
 }
 
 .contact-text {
   display: inline-block;
   font: 1.45rem "Roboto", sans-serif;
   letter-spacing: 0.1rem;
+  margin: 1rem 0 1.5rem;
 }
 
 .contact-icon {
@@ -426,10 +542,21 @@ html {
   text-decoration: none;
 }
 
+.dark .contact-link {
+  color: #fefefe;
+}
+
 .contact-link:hover,
 .contact-link:active,
 .contact-link:focus {
   color: #333;
+  text-decoration: none;
+}
+
+.dark .contact-link:hover,
+.dark .contact-link:active,
+.dark .contact-link:focus {
+  color: #fefefe;
   text-decoration: none;
 }
 
@@ -443,9 +570,13 @@ html {
   padding-right: 0;
 }
 
+.middle-details {
+  border-top: 1px solid #dedede;
+}
+
 .api-link {
   position: relative;
-  float: right;
+  left: 1rem;
   text-decoration: none;
   color: #333;
 }
@@ -453,6 +584,11 @@ html {
 .api-link-text {
   position: relative;
   font: 1rem "Roboto", sans-serif;
+}
+
+.dark .api-link-text,
+.dark .api-icon-text {
+  color: #fefefe;
 }
 
 .foursquare-link-text {
@@ -540,6 +676,12 @@ html {
   background-color: #fff;
 }
 
+.dark .yelp-review {
+  background-color: #222;
+  border-color: #fefefe;
+  color: #ccc;
+}
+
 .info-wrapper {
   padding: 0 0 1rem;
 }
@@ -551,6 +693,10 @@ html {
   display: block;
   height: 0;
   clear: both;
+}
+
+.yelp-api-link {
+  float: right;
 }
 
 .yelp-link-text {
@@ -569,12 +715,16 @@ html {
 }
 
 .places-list::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+  -webkit-box-shadow: none;
 }
 
 .places-list::-webkit-scrollbar-thumb {
   height: 2rem;
   background-color: #333;
+}
+
+.dark .places-list::-webkit-scrollbar-thumb {
+  background-color: #fefefe;
 }
 
 /* Day/Night mode */
@@ -822,7 +972,12 @@ html {
   box-shadow: 1px 2px 6px rgba(0,0,0,0.3);
   left: calc(50% - 150px);
   top: -300px;
-  transition: top 0.3s ease-in-out;
+  transition: top 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dark .alert-modal {
+  background-color: rgb(50, 50, 50);
+  color: #fefefe;
 }
 
 .modal-body {
@@ -913,6 +1068,11 @@ html {
   .places {
     width: 500px;
     top: 4rem;
+    box-shadow: 1px 6px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .show-options {
+    box-shadow: -3px 4px 4px rgba(50, 50, 50, 0.1);
   }
 
   .places-list {
@@ -936,8 +1096,16 @@ html {
     flex-flow: row wrap;
   }
 
+  .open-status {
+    margin: 0;
+  }
+
   .contact {
     min-width: auto;
+  }
+
+  .contact-text {
+    margin: 0;
   }
 
   .place-name {
