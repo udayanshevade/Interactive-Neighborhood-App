@@ -5,22 +5,41 @@ var app = app || {};
      * ViewModel for Knockout bindings
      */
     var ViewModel = function() {
-
-        // alias reference to this
         var self = this;
-
         var anchorInfowindowTimeout;
 
-        /* Early ViewModel observables */
-        // decides loading state of app
-        this.loading = ko.observable(true);
-        // binds whether the alert modal is visible
-        this.alerting = ko.observable(true);
-        // initial search
-        this.initialSearch = ko.observable(true);
-        // alert on geolocation
-        this.alertTitle = ko.observable('geolocation note');
-        this.alertDetails = ko.observable('For best results enable browser geolocation, or attempt a new search.');
+        /**
+         * Initialize the app's first processes
+         */
+        this.startUp = function() {
+            // Early ViewModel observables
+            // decides loading state of app
+            this.loading = ko.observable(true);
+            // initial search
+            this.initialSearch = ko.observable(true);
+            this.initializeAlerts();
+        };
+
+        /**
+         * Initialize alert system
+         */
+        this.initializeAlerts = function() {
+            // binds whether the alert modal is visible
+            this.alerting = ko.observable(true);
+            // stack of accumulated alerts
+            this.alerts = ko.observableArray([]);
+            // default message on geolocation
+            this.alerts.push({
+                title: 'geolocation note',
+                details: 'For best results enable browser geolocation, or attempt a new search.',
+            });
+            this.currentAlert = ko.computed(function() {
+                var alerts = this.alerts();
+                if (alerts.length) return alerts[0];
+            }, this);
+        };
+
+        this.startUp();
 
         /*
          * @description Contains venue data imported from Foursquare and Yelp
@@ -92,9 +111,6 @@ var app = app || {};
             this.rating = (rating === 'NaN') ? '--' : rating;
         };
 
-
-
-
         /*
          * @description Gets the Price for the venue
          * or sets the class field to empty
@@ -104,7 +120,6 @@ var app = app || {};
             // if no price, mark price tier as empty
             this.price = price ? price : { 'tier': 0 };
         };
-
 
         /*
          * @description Gets the Price for the venue
@@ -118,7 +133,6 @@ var app = app || {};
               this.yelpURL = ko.observable();
             }
         };
-
 
         /*
          * @description Gets the Price for the venue
@@ -139,23 +153,19 @@ var app = app || {};
             }
         };
 
-
         /**
          * @description Callback to initialize app when map loads
          */
         this.init = function() {
-
             // configure API requirements
             this.configFoursquare();
             this.configFlickr();
-
             // configure yelp secrets
             this.yelpKeySecret = "EbOO2hHGytkLpd1lycWv7K-faa4";
             this.yelpTokenSecret = "oZEPYCr8TQ2cNaqrDN7_G0ISsis";
 
             // Initialize observables
             this.initializeObservables();
-
         };
 
         /*
@@ -220,6 +230,17 @@ var app = app || {};
         };
 
 
+        /*
+         * Initialize reference to database
+         */
+        this.initializeDatabase = function() {
+            self.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
+            // create reference to 'users' category in database
+            self.usersRef = self.myDataRef.child('users');
+            // TODO: set up a reference to 'venues' category in database
+            self.venuesRef = self.myDataRef.child('venues');
+        };
+
 
         /**
          * Handles geolocation error or absence
@@ -271,11 +292,10 @@ var app = app || {};
                         app.map.setCenter(center);
                     });
 
-                    self.constructAlert({
+                    self.newAlert({
                         title: 'geolocation failed',
                         details: 'All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.'
                     });
-                    self.toggleAlert('open');
                     // default search
                     self.updateSearch();
                 });
@@ -292,11 +312,10 @@ var app = app || {};
                 self.user(user);
                 self.login();
             } else {
-                self.constructAlert({
+                self.newAlert({
                     title: 'welcome!',
                     details: 'Feel free to explore the map, create a user profile, and favorite locations.'
                 });
-                self.toggleAlert('open');
             }
         };
 
@@ -403,12 +422,11 @@ var app = app || {};
                     place.review(review);
                 })
                 .fail(function(err) {
-                    self.constructAlert({
+                    self.newAlert({
                         title: 'Yelp error',
                         details: 'There was an error with the Yelp API. Some requested data may be unavailable at this time. Please try again.',
-                        delay: 2000
+                        duration: 2000
                     });
-                    self.toggleAlert('open');
                 });
         };
 
@@ -439,24 +457,36 @@ var app = app || {};
         /**
          * Toggles the alert modal
          */
-        this.toggleAlert = function(mode, temp) {
+        this.toggleAlert = function(mode) {
             // enables the alert modal
             if (mode === 'open') { this.alerting(true); }
             // closes the alert modal
             else { this.alerting(false); }
         };
 
-
+        /*
+         * Closes alerts
+         */
+        this.closeAlerts = function() {
+            this.toggleAlert();
+            this.alerts.removeAll();
+        };
 
         /**
          * Constructs the alert message
          */
-        this.constructAlert = function(obj) {
-            var delay = obj.delay || 0;
-            setTimeout(function() {
-                self.alertTitle(obj.title);
-                self.alertDetails(obj.details);
-            }, delay);
+        this.newAlert = function(obj) {
+            this.alerts.push(obj);
+            this.toggleAlert('open')
+        };
+
+        /**
+         * Advance to next alert
+         */
+        this.getNextAlert = function() {
+            var alerts = this.alerts();
+            // remove current alert
+            this.alerts.shift();
         };
 
 
@@ -495,11 +525,10 @@ var app = app || {};
                 // perform Google Maps API text search
                 service.textSearch(request, self.updateLatLng);
             } else {
-                self.constructAlert({
+                self.newAlert({
                     title: 'invalid search',
                     details: 'Please enter a valid location. Specific locations yield accurate results.'
                 });
-                self.toggleAlert('open');
             }
         };
 
@@ -520,11 +549,10 @@ var app = app || {};
                     });
                 }
             } else {
-                self.constructAlert({
+                self.newAlert({
                     title: 'google maps error',
                     details: 'There was an issue while discovering the specified location. Please try again.'
                 });
-                self.toggleAlert('open');
             }
             var lat = self.coordinates().lat;
             var lng = self.coordinates().lng;
@@ -629,11 +657,10 @@ var app = app || {};
                             self.venuesArray.push(new Venue(venue));
                         }
                     } else {
-                        self.constructAlert({
+                        self.newAlert({
                             title: 'try another search',
                             details: 'Just as with the meaning of life, this search provided no concrete results. Please try a valid search with a specific location for accurate results.'
                         });
-                        self.toggleAlert('open');
                         self.loading(false);
                     }
                 // after the api requests are processed
@@ -648,15 +675,6 @@ var app = app || {};
                     self.orderVenues();
 
                     if (!self.loggedIn() && self.initialSearch()) {
-
-                        // initialize reference to Firebase database
-                        self.myDataRef = new Firebase('https://fendneighborhoodmap.firebaseio.com/');
-                        // create reference to 'users' category in database
-                        self.usersRef = self.myDataRef.child('users');
-                        // TODO: set up a reference to 'venues' category in database
-                        self.venuesRef = self.myDataRef.child('venues');
-
-
                         // harvest persistent user from localStorage
                         if (typeof(Storage)) {
                             self.localStorageAvailable = true;
@@ -693,11 +711,10 @@ var app = app || {};
                 }, 500);
             }).fail(function(err) {
                 // toggle alert if the foursquare response fails
-                self.constructAlert({
+                self.newAlert({
                     this: 'foursquare error',
                     details: 'There was an error with the Foursquare query. Please try again momentarily, or refine the query.'
                 });
-                self.toggleAlert('open');
             });
         };
 
@@ -767,12 +784,11 @@ var app = app || {};
                 place.multiPhotos(place.featuredPhotos.items.length > 1);
             }).fail(function(err) {
                 // if Flickr fails, display alert modal
-                self.constructAlert({
+                self.newAlert({
                     title: 'flickr error',
                     details: 'There was a problem harvesting Flickr photos for the venues. Please try again later.',
-                    delay: 3000
+                    duration: 3000
                 });
-                self.toggleAlert('open');
             });
         };
 
@@ -935,11 +951,10 @@ var app = app || {};
             if (this.loggedIn()) {
                 this.favoritesOnly(true);
             } else {
-                this.constructAlert({
+                this.newAlert({
                     title: 'no favorites yet',
                     details: 'You must create a new user profile or be logged in to use this feature.'
                 });
-                this.toggleAlert('open');
             }
         };
 
@@ -959,19 +974,17 @@ var app = app || {};
                         if (status == google.maps.GeocoderStatus.OK) {
                             self.getLocations(results);
                         } else {
-                            self.constructAlert({
+                            self.newAlert({
                                 title: 'google maps error',
                                 details: 'There was an issue while discovering the specified location. Please try again.'
                             });
-                            self.toggleAlert('open');
                         }
                     });
                 } else {
-                    self.constructAlert({
+                    self.newAlert({
                         title: 'google maps error',
                         details: 'There was an error with the map. Please refresh the page and try again.'
                     });
-                    self.toggleAlert('open');
                 }
             } else {
                 navigator.geolocation.getCurrentPosition(function(position) {
@@ -987,19 +1000,17 @@ var app = app || {};
                                 self.loading(true);
                                 self.updateLatLng('', status);
                             } else {
-                                self.constructAlert({
+                                self.newAlert({
                                     title: 'google maps error',
                                     details: 'There was an issue while discovering the specified location. Please try again.'
                                 });
-                                self.toggleAlert('open');
                             }
                         });
                     }  else {
-                        self.constructAlert({
+                        self.newAlert({
                             title: 'google maps error',
                             details: 'There was an error with the map. Please refresh the page and try again.'
                         });
-                        self.toggleAlert('open');
                     }
                 }, self.handleLocationError);
             }
@@ -1230,11 +1241,10 @@ var app = app || {};
             var user = this.user();
             if (!user) return;
             if (user === this.currentUser()) {
-                self.constructAlert({
+                self.newAlert({
                     title: 'nice try.',
                     details: 'You\'re already logged in!',
                 });
-                self.toggleAlert('open');
                 return;
             }
             var loginPath = 'users/' + this.user();
@@ -1245,12 +1255,11 @@ var app = app || {};
 
                     if (result) {
                         // creates a welcome back alert if login successful
-                        self.constructAlert({
+                        self.newAlert({
                             title: 'welcome back, ' + user,
                             details: 'You are logged in. Feel free to explore and favorite any locations you find enjoyable.',
                         });
                         self.currentUser(user);
-                        self.toggleAlert('open');
                         self.importUserFavorites(user);
                     } else {
                         // if user doesn't exist create a new one
@@ -1261,20 +1270,18 @@ var app = app || {};
                         self.usersRef.update(users, function(error) {
                             // if user creation fails, display an error alert
                             if (error) {
-                                self.constructAlert({
+                                self.newAlert({
                                     title: 'login error',
                                     details: 'The user profile could not be created at this time. Please try again later.',
-                                    delay: 4000
+                                    duration: 4000
                                 });
-                                self.toggleAlert('open');
                             // else create a welcome alert
                             } else {
-                                self.constructAlert({
+                                self.newAlert({
                                     title: 'welcome, ' + user,
                                     details: 'The user profile was successfully created. Feel free to explore and favorite any locations around the world you find enjoyable.',
-                                    delay: 4000
+                                    duration: 4000
                                 });
-                                self.toggleAlert('open');
                             }
                         });
 
@@ -1290,20 +1297,18 @@ var app = app || {};
                     }
                 }, function(err) {
                     if (err) {
-                        self.constructAlert({
+                        self.newAlert({
                             title: 'database error',
                             details: 'There was an error contacting the database. Please check the connection and try again.'
                         });
-                        self.toggleAlert('open');
                     }
                 });
             } else {
                 // if login/signin invalid, create error alert
-                self.constructAlert({
+                self.newAlert({
                     title: 'user error',
                     details: 'Please use a valid name. Paths must be non-empty strings, not containing the following characters: ". # $ [ ]".'
                 });
-                self.toggleAlert('open');
             }
         };
 
@@ -1318,11 +1323,10 @@ var app = app || {};
                 self.checkUserFavorites(self.loggedInUser, current, 'favorite');
             } else {
                 // if not logged in, alert user
-                self.constructAlert({
+                self.newAlert({
                     title: 'login required',
                     details: 'Please login or create a user profile first, and try again.'
                 });
-                self.toggleAlert('open');
             }
         };
 
@@ -1332,11 +1336,12 @@ var app = app || {};
         this.logout = function() {
             self.currentUser('');
             self.user('');
-            self.constructAlert({
+            self.loggedIn(false);
+            self.emptyUserFavorites();
+            self.newAlert({
                 title: 'so long, adieu',
                 details: 'You have successfully logged out. Check back in again soon!',
             });
-            self.toggleAlert('open');
             if (self.localStorageAvailable) {
                 localStorage.user = '';
             }
@@ -1356,11 +1361,10 @@ var app = app || {};
                 this.usersRef.child(user).push().update(location, function(error) {
                     // if update error, alert user
                     if (error) {
-                        self.constructAlertTitle({
+                        self.newAlertTitle({
                             title: 'database error',
                             details: 'There was an error while handling user favorites. Please try again later.'
                         });
-                        self.toggleAlert();
                     } else {
                         // otherwise toggle live 'favorited' status
                         current.favorited(true);
@@ -1421,11 +1425,10 @@ var app = app || {};
 
             }, function(err) {
                 if (err) {
-                    self.constructAlert({
+                    self.newAlert({
                         title: 'database error',
                         details: 'There was an error contacting the database. Please check the connection and try again.'
                     });
-                    self.toggleAlert('open');
                 }
             });
         };
@@ -1450,11 +1453,10 @@ var app = app || {};
                             // remove the database match
                             this.usersRef.child(node).remove(function(error) {
                                 if (error) {
-                                    self.constructAlert({
+                                    self.newAlert({
                                         title: 'database error',
                                         details: 'There was an error contacting the database. Please check the connection and try again.'
                                     });
-                                    self.toggleAlert('open');
                                 }
                             });
                             // unfavorite the location
@@ -1466,11 +1468,10 @@ var app = app || {};
                             self.usersRef.update(users, function(error) {
                                 // if there is an error, alert user
                                 if (error) {
-                                    self.constructAlert({
+                                    self.newAlert({
                                         title: 'favorite error',
                                         details: 'There was an error in saving the user favorite. Please try again later.'
                                     });
-                                    self.toggleAlert('open');
                                 }
                             });
                         }

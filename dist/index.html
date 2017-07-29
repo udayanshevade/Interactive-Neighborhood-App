@@ -235,9 +235,17 @@
   <!-- alert modal -->
   <aside class="alert-modal alert" data-bind="style: { top: alerting() ? 'calc(50% - 100px)' : 'calc(-300px)' } ">
     <div class="modal-body">
-      <i class="alert-close fa fa-times" data-bind="click: toggleAlert"></i>
-      <h3 class="alert-title" data-bind="text: alertTitle"></h3>
-      <h5 class="alert-details" data-bind="text: alertDetails"></h5>
+      <i class="alert-icon alert-close fa fa-times" data-bind="click: closeAlerts"></i>
+      <div class="modal-content" data-bind="with: currentAlert">
+        <h3 class="alert-title" data-bind="text: title"></h3>
+        <h5 class="alert-details" data-bind="text: details"></h5>
+      </div>
+      <!-- ko if: alerts().length > 1 -->
+      <div class="alert-next-box" data-bind="click: getNextAlert, css: { 'alert-next-visible': alerts().length > 1 }" style="display:none">
+        <span class="alert-next-text">next</span>
+        <i class="alert-icon alert-next fa fa-chevron-right"></i>
+      </div>
+      <!-- /ko -->
     </div>
   </aside>
 
@@ -258,7 +266,7 @@
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="js/app.min.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=app.initializeMap" onerror="app.mapFallback()"></script>
-  <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+  <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js" onload="app.viewModel.initializeDatabase()"></script>
   <script async defer src="lib/oauth-signature/dist/oauth-signature.min.js"></script>
 </body>
 </html>

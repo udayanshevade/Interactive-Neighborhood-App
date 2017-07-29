@@ -525,7 +525,7 @@ html {
 .place-type {
   display: block;
   font: small-caps 600 1.75rem "Roboto", sans-serif;
-  margin: 1.45rem 0;
+  margin: 3rem 0 1.45rem;
 }
 
 .contact {
@@ -875,6 +875,11 @@ html {
           justify-content: space-between;
 }
 
+.login-cancel-icon {
+  position: relative;
+  top: 0.125rem;
+}
+
 .login-cancel-icon:before {
   font-size: 1.25rem;
 }
@@ -1042,14 +1047,40 @@ html {
   font: 400 1.5rem/1.25 "Roboto", sans-serif;
 }
 
-.alert-close {
-  padding-left: 0 1rem 0.5rem;
-  float: right;
+.alert-icon {
+  padding: 1rem;
   display: inline-block;
 }
 
-.alert-close:before {
+.alert-icon:before {
   font-size: 1.5rem;
+}
+
+.alert-close {
+  top: 0;
+  position: absolute;
+  right: 0;
+}
+
+.alert-next-box {
+  cursor: pointer;
+}
+
+.alert-next-visible {
+  display: inline-block !important;
+}
+
+.alert-next-text {
+  font: 400 small-caps 1.75rem "Roboto", sans-serif;
+  padding: 1rem 0 1rem 1rem;
+}
+
+.alert-next {
+  padding-left: 0.5rem;
+}
+
+.alert-next:before {
+  font-size: 1.25rem;
 }
 
 
