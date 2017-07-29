@@ -161,10 +161,10 @@
               <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
             </a>
           </div>
-          <div class="info-wrapper">
+          <div class="info-wrapper" data-bind="if: venue.photoURL">
             <!-- venues picture -->
             <div class="info-pic-wrapper">
-              <div class="info-pic-container" data-bind="if: venue.photoURL">
+              <div class="info-pic-container">
                 <span data-bind="if: venue.multiPhotos">
                   <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
                 </span>

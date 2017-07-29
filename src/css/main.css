@@ -180,7 +180,7 @@ html {
 .search-button {
   background-color: #fff;
   border: 0;
-  transition: all 0.4s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .dark .search-button {
@@ -239,7 +239,7 @@ html {
 }
 
 .dark .places {
-  background-color: rgb(40, 40, 40);
+  background-color: rgb(50, 50, 50);
   color: white;
 }
 
@@ -302,7 +302,6 @@ html {
   -webkit-justify-content: space-around;
       -ms-flex-pack: distribute;
           justify-content: space-around;
-  box-shadow: 0 3px 6px rgba(50, 50, 50, 0.3);
 }
 
 .show-all,
@@ -864,6 +863,8 @@ html {
 .infowindow-title {
   font: 600 small-caps 1.5rem "Roboto", sans-serif;
   text-align: center;
+  margin: 0;
+  padding: 1rem 0;
 }
 
 .infowindow-info {
@@ -897,47 +898,8 @@ html {
 
 /* custom infowindow styles */
 
-.custom-window {
-  display: flex;
-  position: absolute;
-  background: white;
-  border-radius: 2px;
-  box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-.infowindow-close-button {
-  position: absolute;
-  right: -2rem;
-  outline: 0;
-  border: 0;
-  margin: 0;
-  padding: 0.25rem 0.5rem;
-  border-radius: 1px;
-}
-
-.dark .infowindow-close-button {
-  background: #fff;
-}
-
-.dark .infowindow-close-icon {
-  color: #000;
-}
-
-.infowindow-close-button {
-  background: #000;
-}
-
-.infowindow-close-icon {
-  color: #fff;
-}
-
-@media screen and (min-width: 992px) {
-  .custom-window: {
-    max-width: 500px;
-  }
-}
-
 .infoBox {
+  border-radius: 2px;
   transform: transalteY(0);
   transition: all 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -958,6 +920,52 @@ html {
   } to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.infowindow-content {
+  box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.dark .infowindow-content {
+  background: #333;
+}
+
+.infowindow-close-button {
+  position: absolute;
+  right: calc(-2rem - 1px);
+  outline: 0;
+  border: 0;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1px;
+  color: #333;
+}
+
+.infowindow-close-button {
+  background: #fff;
+}
+
+.infowindow-close-icon {
+  color: #333;
+}
+
+.dark .infowindow-close-button {
+  background: #333;
+}
+
+.dark .infowindow-close-icon {
+  color: #fff;
+}
+
+.dark .infowindow-content {
+  background: #333;
+  color: #fff;
+}
+
+@media screen and (min-width: 992px) {
+  .custom-window: {
+    max-width: 500px;
   }
 }
 
@@ -1069,10 +1077,6 @@ html {
     width: 500px;
     top: 4rem;
     box-shadow: 1px 6px 6px rgba(0, 0, 0, 0.3);
-  }
-
-  .show-options {
-    box-shadow: -3px 4px 4px rgba(50, 50, 50, 0.1);
   }
 
   .places-list {

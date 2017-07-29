@@ -372,13 +372,14 @@ var app = app || {};
             $.ajax(settings)
                 .done(function(results) {
                     var business = results.businesses[0];
+                    var review = 'No Yelp review available.'
                     if (business) {
                         // bind venue review
-                        var review = business.snippet_text || 'No Yelp review available.';
-                        place.review(review);
-                        // bind venue URL
-                        place.yelpURL(business.url);
+                        review = business.snippet_text;
                     }
+                    place.review(review);
+                    // bind venue URL
+                    place.yelpURL(business.url);
                 })
                 .fail(function(err) {
                     self.constructAlert({
@@ -804,8 +805,8 @@ var app = app || {};
                 (placePhoto
                     ? '<div class="infowindow-pic" style="background-image: url(' + placePhoto + '); height: 138px"></div>'
                     : '') +
-                '<h3 class="infowindow-title">' + this.name +
-                '</h3><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div>';
+                '<div class="infowindow-content"><h3 class="infowindow-title">' + this.name +
+                '</h3><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div></div>';
 
             // add click event to marker for opening infowindow
             google.maps.event.addListener(this.marker, 'click', (function(place){
