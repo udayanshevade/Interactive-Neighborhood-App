@@ -306,11 +306,11 @@ html {
   -webkit-justify-content: space-around;
       -ms-flex-pack: distribute;
           justify-content: space-around;
-  box-shadow: -1px 3px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: -1px 4px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dark .show-options {
-  box-shadow: -1px 3px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: -1px 4px 4px rgba(0, 0, 0, 0.1);
 }
 
 .show-all,
@@ -719,6 +719,17 @@ html {
     -webkit-align-self: center;
         align-self: center;
   width: 5rem;
+}
+
+.no-list {
+  font: 400 2rem "Roboto", sans-serif;
+  margin: 2rem 0 1rem;
+  text-align: center;
+  color: #666;
+}
+
+.dark .no-list {
+  color: #aaa;
 }
 
 .places-list-section::-webkit-scrollbar {

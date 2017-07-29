@@ -45,6 +45,7 @@ var app = app || {};
             // sets venue contact and phone
             this.contact = venue.contact;
             this.url = venue.url;
+            this.review = ko.observable('No yelp review available.');
             this.setPhone(this.contact.phone);
             // define photos
             this.setPhotos(venue.featuredPhotos);
@@ -113,7 +114,7 @@ var app = app || {};
         Venue.prototype.setPhone = function(phone) {
             if (phone && phone.length === 10) {
               // bind empty observables for Yelp data
-              this.review = ko.observable('Loading Yelp review');
+              this.review('Loading Yelp review...');
               this.yelpURL = ko.observable();
             }
         };
@@ -163,6 +164,28 @@ var app = app || {};
         this.initializeObservables = function() {
             // binds search term, e.g. 'popular', ''
             this.searchTerm = ko.observable('Popular');
+            // binds array of returned venues
+            this.venuesArray = ko.observableArray();
+            // binds user filter input for returned venues
+            this.filterQuery = ko.observable('');
+            // only display favorited locations
+            this.favoritesOnly = ko.observable(false);
+            // return favorited computed array
+            this.filteredVenuesArray = ko.computed(function() {
+                this.closeInfoWindow();
+                var venues = this.venuesArray();
+                var len = venues.length;
+                var filter = this.filterQuery().toLowerCase();
+                var favoritesOnly = this.favoritesOnly();
+                return venues.filter(function(venue) {
+                    var favorited = venue.favorited();
+                    var venueName = venue.name.toLowerCase();
+                    var match = venueName.indexOf(filter) > -1;
+                    var showVenue = match && (!favoritesOnly || favorited);
+                    venue.marker.marker.setMap(showVenue ? app.map : null);
+                    return showVenue;
+                });
+            }, this);
             // binds location
             this.poi = ko.observable('');
             // binds range options visibility
@@ -178,14 +201,9 @@ var app = app || {};
                 return this.coordinates().lat + ',' + this.coordinates().lng;
             }, this);
 
-            // binds user filter input for returned venues
-            this.filterQuery = ko.observable('');
-
             // binds empty location of interest
             this.anchorMarker = ko.observable();
 
-            // binds array of returned venues
-            this.venuesArray = ko.observableArray();
             // binds whether list of venues is expanded
             this.placesExpanded = ko.observable(false);
             // binds current day/night mode of map
@@ -546,19 +564,21 @@ var app = app || {};
 
         /**
          * Delete markers
+         * Used when moving to a new vicinity via search
          */
         this.hideMarkers = function() {
-            var len = self.venuesArray().length;
             if (self.anchorMarker()) {
                 self.anchorMarker().setMap(null);
-                self.anchorMarker('');
+                self.anchorMarker(null);
             }
+            var venues = self.venuesArray();
+            var len = venues.length;
             var venue;
             for (var i = 0; i < len; i++) {
-                venue = self.venuesArray()[i];
-                // delete marker by
-                // setting its map object to null
+                venue = venues[i];
+                // hide and delete marker
                 venue.marker.marker.setMap(null);
+                venue.marker.marker = null;
             }
         };
 
@@ -654,7 +674,9 @@ var app = app || {};
 
                     // get additional yelp and flickr data for each venue
                     // loads async in the background since it is non-critical
-                    var venue, phone, venues = self.venuesArray();
+                    var venue;
+                    var phone;
+                    var venues = self.venuesArray();
                     for (var i = 0, len = venues.length; i < len; i++) {
                         venue = venues[i];
                         phone = venue.contact.phone;
@@ -695,7 +717,6 @@ var app = app || {};
             });
             // save the ordered venues
             self.venuesArray(orderedVenues);
-
         };
 
 
@@ -899,15 +920,8 @@ var app = app || {};
          * Show all venues
          */
         this.showAll = function(event) {
-            this.closeInfoWindow();
-            var len = this.venuesArray().length;
-            var venue;
-            for (var i = 0; i < len; i++) {
-                venue = this.venuesArray()[i];
-                venue.venueVisible(true);
-                venue.marker.marker.setMap(app.map);
-                venue.venueExpanded(false);
-            }
+            this.filterQuery('');
+            this.favoritesOnly(false);
             app.map.fitBounds(app.mapBounds);
         };
 
@@ -917,21 +931,8 @@ var app = app || {};
          * Show only user favorites, if any
          */
         this.showFavorites = function(event) {
-            this.closeInfoWindow();
-            var len = this.venuesArray().length;
-            var venue;
             if (this.loggedIn()) {
-                for (var i = 0; i < len; i++) {
-                    venue = this.venuesArray()[i];
-                    if (venue.favorited()) {
-                        venue.marker.marker.setMap(app.map);
-                    } else {
-                        venue.venueVisible(false);
-                        venue.marker.marker.setMap(null);
-                    }
-                    venue.venueExpanded(false);
-                }
-                app.map.fitBounds(app.mapBounds);
+                this.favoritesOnly(true);
             } else {
                 this.constructAlert({
                     title: 'no favorites yet',
@@ -1018,7 +1019,7 @@ var app = app || {};
 
             if (this.anchorMarker()) {
                 this.anchorMarker().setMap(null);
-                this.anchorMarker('');
+                this.anchorMarker(null);
             }
 
             this.anchorMarker(new google.maps.Marker({
@@ -1080,29 +1081,6 @@ var app = app || {};
                 this.currentMode('light');
             }
         };
-
-
-
-        /**
-         * Live filter of list of venues
-         */
-        this.filterVenues = function() {
-            var venueName;
-            var len = this.venuesArray().length;
-            var search = this.filterQuery().toLowerCase();
-            for (var i = 0; i < len; i++) {
-                var venue = this.venuesArray()[i];
-                venueName = venue.name.toLowerCase();
-                if (venueName.indexOf(search) >= 0) {
-                    venue.venueVisible(true);
-                    venue.marker.marker.setMap(app.map);
-                } else {
-                    venue.venueVisible(false);
-                    venue.marker.marker.setMap(null);
-                }
-            }
-        };
-
 
 
         /**
@@ -1493,7 +1471,8 @@ var app = app || {};
          * Imports user favorites if any
          */
         this.importUserFavorites = function(user) {
-            var venue, venues = this.venuesArray();
+            var venue;
+            var venues = this.venuesArray();
             // for each location in the current venue array
             for (var i = 0, len = venues.length; i < len; i++) {
                 venue = venues[i];
@@ -1504,8 +1483,10 @@ var app = app || {};
 
 
         this.closeInfoWindow = function() {
-            $('.infoBox').toggleClass('entering leaving')
-            app.infoWindow.close();
+            if (app.infoWindow) {
+                $('.infoBox').removeClass('entering').addClass('leaving');
+                app.infoWindow.close();
+            }
         };
 
 

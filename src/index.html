@@ -90,7 +90,7 @@
     <!-- filter -->
     <header class="ui-filter-form">
       <i class="icon fa fa-filter filter-button" title="Filter"></i>
-      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded(), event: { keyup: filterVenues() }" placeholder="Filter venues">
+      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()" placeholder="Filter venues">
     </header>
 
     <div class="show-options">
@@ -101,10 +101,10 @@
 
     </div>
 
-    <!-- ko if: venuesArray().length -->
+    <!-- ko if: filteredVenuesArray().length -->
     <div id="places-list-section" class="places-list-section">
       <!-- venues list -->
-      <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
+      <ul class="places-list" data-bind="foreach: { data: filteredVenuesArray, as: 'venue' }">
 
         <!-- each venue -->
         <li class="place-list-item" data-bind="css: {placeListItemExpanded: venue.venueExpanded}">
@@ -199,8 +199,8 @@
       </ul>
     </div>
     <!-- /ko -->
-    <!-- ko if: !venuesArray().length -->
-    <div id="class-list no-list">No locations here.</div>
+    <!-- ko if: !filteredVenuesArray().length -->
+    <p class="no-list">No locations here.</p>
     <!-- /ko -->
   </section>
 
