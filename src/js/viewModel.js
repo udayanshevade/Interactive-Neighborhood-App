@@ -9,6 +9,8 @@ var app = app || {};
         // alias reference to this
         var self = this;
 
+        var anchorInfowindowTimeout;
+
         /* Early ViewModel observables */
         // decides loading state of app
         this.loading = ko.observable(true);
@@ -376,10 +378,10 @@ var app = app || {};
                     if (business) {
                         // bind venue review
                         review = business.snippet_text;
+                        // bind venue URL
+                        place.yelpURL(business.url);
                     }
                     place.review(review);
-                    // bind venue URL
-                    place.yelpURL(business.url);
                 })
                 .fail(function(err) {
                     self.constructAlert({
@@ -848,6 +850,9 @@ var app = app || {};
          * Select and focus on venue from list or map
          */
         this.chooseVenue = function(data, event) {
+            if (anchorInfowindowTimeout) {
+                clearTimeout(anchorInfowindowTimeout);
+            }
             if (!this.placesExpanded()) {
                 this.shouldScroll(true);
             } else {
@@ -1029,12 +1034,15 @@ var app = app || {};
 
             google.maps.event.addListener(this.anchorMarker(), 'click', (function(marker, infoWindow){
                 return function() {
+                    if (anchorInfowindowTimeout) {
+                        clearTimeout(anchorInfowindowTimeout);
+                    }
                     if (self.selected()) {
                         self.toggleVenueExpand(self.selected());
                     }
                     infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                     infoWindow.open(app.map, this);
-                    setTimeout(function() {
+                    anchorInfowindowTimeout = setTimeout(function() {
                         self.closeInfoWindow();
                     }, 3000)
                     app.map.panTo(marker.getPosition());
