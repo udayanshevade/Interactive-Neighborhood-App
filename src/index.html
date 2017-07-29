@@ -206,18 +206,23 @@
 
   <!-- login interface -->
   <aside class="login-wrapper" data-bind="css: { loginWrapperExpand: loginExpanded }">
-    <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin">
+    <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin, clickBubble: false">
       <i class="fa fa-user mode-option login-icon" title="Login"></i>
     </button>
     <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
-      <button type="submit" class="login-button" data-bind="visible: loginExpanded, click: login">
-        <i class="fa fa-sign-in login-icon" title="Login"></i>
-      </button>
       <!-- login input -->
-      <input class="login-input" type="text" data-bind="textInput: user, hasFocus: loginExpanded" placeholder="Create user or Login">
-      <button class="login-button" data-bind="click: toggleLogin">
-        <i class="fa fa-times login-icon" title="Cancel login"></i>
-      </button>
+      <input class="login-input" type="text" data-bind="textInput: user" placeholder="Create user or Login">
+      <div class="login-buttons-tray">
+        <button type="submit" class="login-button" data-bind="visible: !currentUser(), click: login">
+          <i class="fa fa-sign-in login-icon" title="Login"></i>
+        </button>
+        <button class="login-button" data-bind="visible: currentUser, click: logout, clickBubble: false">
+          <i class="fa fa-sign-out login-icon" title="Logout"></i>
+        </button>
+        <button class="login-button" data-bind="click: toggleLogin, clickBubble: false">
+          <i class="fa fa-chevron-left login-icon login-cancel-icon" title="Close login"></i>
+        </button>
+      </div>
     </form>
   </aside>
 

@@ -210,6 +210,7 @@ var app = app || {};
             this.currentMode = ko.observable('');
             // binds logged in user
             this.user = ko.observable('');
+            this.currentUser = ko.observable('');
             // binds whether a user is successfully logged in
             this.loggedIn = ko.observable(false);
             // binds whether the login interface is visible
@@ -1197,8 +1198,12 @@ var app = app || {};
         /**
          * Toggle Login interface
          */
-        this.toggleLogin = function() {
-            this.loginExpanded(!this.loginExpanded());
+        this.toggleLogin = function(set) {
+            if (typeof set === 'boolean') {
+                this.loginExpanded(set);
+            } else {
+                this.loginExpanded(!this.loginExpanded());
+            }
         };
 
 
@@ -1222,8 +1227,17 @@ var app = app || {};
          * Log in the user via external app database
          */
         this.login = function() {
-            var loginPath = 'users/' + this.user();
             var user = this.user();
+            if (!user) return;
+            if (user === this.currentUser()) {
+                self.constructAlert({
+                    title: 'nice try.',
+                    details: 'You\'re already logged in!',
+                });
+                self.toggleAlert('open');
+                return;
+            }
+            var loginPath = 'users/' + this.user();
             if (user && !this.contains(user, ' .#$[]')) {
                 this.myDataRef.child(loginPath).once('value', function(snapshot) {
 
@@ -1234,8 +1248,8 @@ var app = app || {};
                         self.constructAlert({
                             title: 'welcome back, ' + user,
                             details: 'You are logged in. Feel free to explore and favorite any locations you find enjoyable.',
-                            delay: 4000
                         });
+                        self.currentUser(user);
                         self.toggleAlert('open');
                         self.importUserFavorites(user);
                     } else {
@@ -1309,6 +1323,22 @@ var app = app || {};
                     details: 'Please login or create a user profile first, and try again.'
                 });
                 self.toggleAlert('open');
+            }
+        };
+
+        /**
+         * Log out current user
+         */
+        this.logout = function() {
+            self.currentUser('');
+            self.user('');
+            self.constructAlert({
+                title: 'so long, adieu',
+                details: 'You have successfully logged out. Check back in again soon!',
+            });
+            self.toggleAlert('open');
+            if (self.localStorageAvailable) {
+                localStorage.user = '';
             }
         };
 
@@ -1478,6 +1508,20 @@ var app = app || {};
                 venue = venues[i];
                 // import the locations
                 this.checkUserFavorites(user, venue, 'import');
+            }
+        };
+
+        /**
+         * Empties user favorites on logout
+         */
+        this.emptyUserFavorites = function() {
+            var venue;
+            var venues = this.venuesArray();
+            // for each location in the current venue array
+            for (var i = 0, len = venues.length; i < len; i++) {
+                venue = venues[i];
+                // emptythe locations
+                venue.favorited(false);
             }
         };
 

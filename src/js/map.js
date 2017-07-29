@@ -57,6 +57,10 @@ var app = app || {};
                     // map
                     app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
 
+                    google.maps.event.addListener(app.map, 'click', function() {
+                        app.viewModel.toggleLogin(false);
+                    });
+
                     if (infoBoxLoaded) {
                         app.infoWindow = new InfoBox({
                             disableAutoPan: false,
