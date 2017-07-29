@@ -1117,9 +1117,9 @@ var app = app || {};
         this.scrollToLocation = function(id, speed) {
             var placesListEl = document.getElementById('places-list');
             var navOffset = 135;
-            var scrollTo = id ? document.getElementById(id).offsetTop - navOffset : 0;
+            var scrollTo = id ? document.getElementById(id).offsetTop - navOffset : null;
             var scrollDuration = 500;
-            if (scrollTo < 0) scrollTo = 0;
+            if (scrollTo && scrollTo < 0) scrollTo = 0;
             smoothScrollTo(placesListEl, scrollTo, scrollDuration);
         };
 
@@ -1134,6 +1134,7 @@ var app = app || {};
             interrupted
          */
         var smoothScrollTo = function(element, target, duration) {
+            if (target === null) return;
             target = Math.round(target);
             duration = Math.round(duration);
             if (duration < 0) return Promise.reject("bad duration");

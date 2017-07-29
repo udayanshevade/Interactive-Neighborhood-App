@@ -381,16 +381,10 @@ html {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  flex-flow: column;
+  flex-direction: column;
   border-top: 1px solid #dedede;
   align-items: center;
   text-align: center;
-}
-
-@media screen (min-width: 500px) {
-  .foursquare-info-wrapper {
-    flex-flow: row wrap;
-  }
 }
 
 .open-status {
@@ -402,7 +396,7 @@ html {
 .place-type {
   display: block;
   font: small-caps 600 1.45rem "Roboto", sans-serif;
-  margin: 1.5rem 0 1rem;
+  margin: 1.45rem 0;
 }
 
 .contact {
@@ -454,6 +448,16 @@ html {
   float: right;
   text-decoration: none;
   color: #333;
+}
+
+.api-link-text {
+  position: relative;
+  font: 1rem "Roboto", sans-serif;
+}
+
+.foursquare-link-text {
+  bottom: 1rem;
+  left: 0.25rem;
 }
 
 .api-icon-text {
@@ -518,7 +522,7 @@ html {
 }
 
 .yelp-review-wrapper {
-  padding: 1rem 0;
+  padding: 1rem 0 2rem;
 }
 
 .yelp-title {
@@ -527,13 +531,17 @@ html {
 }
 
 .yelp-review {
-  margin: 0.5rem 1.5rem 1rem;
+  margin: 0.5rem 1.5rem 2rem;
   padding: 1rem 1.5rem 1rem;
   font: 300 1.35rem/1.5 "Roboto", sans-serif;
   color: #333;
   letter-spacing: 0.1rem;
   border: 1px solid rgba(0,0,0,0.1);
   background-color: #fff;
+}
+
+.info-wrapper {
+  padding: 0 0 1rem;
 }
 
 .info-wrapper:after,
@@ -543,6 +551,10 @@ html {
   display: block;
   height: 0;
   clear: both;
+}
+
+.yelp-link-text {
+  bottom: 0.75rem;
 }
 
 .yelp-logo {
@@ -918,6 +930,14 @@ html {
 
   .placeListItemExpanded .place-header:hover {
     cursor: pointer;
+  }
+
+  .foursquare-info-wrapper {
+    flex-flow: row wrap;
+  }
+
+  .contact {
+    min-width: auto;
   }
 
   .place-name {

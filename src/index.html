@@ -131,10 +131,15 @@
           <div class="info-wrapper">
             <div class="foursquare-info-wrapper">
               <!-- type of establishment -->
+              <!-- ko if: venue.categories[0].name -->
               <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
+              <!-- /ko -->
               <!-- open status -->
+              <!-- ko if: venue.hours.status -->
               <h5 class="open-status" data-bind="style: { color: venue.hours.isOpen ? 'green' : 'red' }, text: venue.hours.status"></h5>
+              <!-- /ko -->
               <!-- place contact info -->
+              <!-- ko if: venue.contact.formattedPhone || venue.url -->
               <div class="contact" data-bind="if: venue.contact.formattedPhone && venue.url, visible: venue.contact.formattedPhone && venue.url">
                 <!-- venue phone -->
                 <h5 class="contact-text" data-bind="if: venue.contact.formattedPhone, visible: venue.contact.formattedPhone">
@@ -149,6 +154,7 @@
                   </a>
                 </h5>
               </div>
+              <!-- /ko -->
             </div>
 
             <!-- venues picture -->
@@ -168,6 +174,7 @@
 
             <!-- foursquare logo link -->
             <a class="api-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
+              <span class="api-link-text foursquare-link-text">Read more on:</span>
               <i class="fa fa-share contact-icon api-icon-text"></i>
               <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
             </a>
@@ -178,6 +185,7 @@
             <h6 class="yelp-title">Yelp Review:</h6>
             <p class="yelp-review" data-bind="text: venue.review"></p>
             <a class="api-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
+              <span class="api-link-text yelp-link-text">Read more on:</span>
               <i class="fa fa-share contact-icon api-icon-text"></i>
               <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
             </a>
