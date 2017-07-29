@@ -1031,8 +1031,9 @@ html {
   color: #fefefe;
 }
 
-.modal-body {
+.alert-body {
   padding: 1.5rem;
+  overflow-x: hidden;
 }
 
 .alert {
