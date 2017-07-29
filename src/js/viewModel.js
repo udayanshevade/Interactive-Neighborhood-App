@@ -530,6 +530,7 @@ var app = app || {};
                     infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                     infoWindow.open(app.map, this);
                     app.map.panTo(marker.getPosition());
+                    app.map.panBy(0, -75);
                     app.map.setZoom(12);
                 };
             })(self.anchorMarker(), app.infoWindow));
@@ -870,6 +871,7 @@ var app = app || {};
             // zoom and pan
             app.map.setZoom(12);
             app.map.panTo(data.marker.marker.getPosition());
+            app.map.panBy(0, -75);
         };
 
 
@@ -1035,6 +1037,7 @@ var app = app || {};
                         self.closeInfoWindow();
                     }, 3000)
                     app.map.panTo(marker.getPosition());
+                    map.panBy(0, -75);
                     app.map.setZoom(12);
                 };
             })(this.anchorMarker(), app.infoWindow));

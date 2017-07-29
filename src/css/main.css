@@ -789,12 +789,12 @@ html {
 
 .infoBox {
   transform: transalteY(0);
-  transition: all 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .infoBox.entering {
   opacity: 0;
-  animation: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) normal forwards running enter;
+  animation: 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) normal forwards running enter;
 }
 
 .infoBox.leaving {
