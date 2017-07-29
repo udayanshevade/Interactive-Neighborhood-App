@@ -149,7 +149,7 @@ html {
   letter-spacing: 0.1rem;
   border: 0;
   border-bottom: 1px solid #333;
-  opacity: 0.3;
+  opacity: 0.6;
   transition: all 0.3s ease-in-out;
 }
 
@@ -220,6 +220,11 @@ html {
   justify-content: space-between;
 }
 
+.dark .search-range {
+  background-color: #333;
+  color: #fff;
+}
+
 .range-label {
   font: 1.35rem "Roboto", sans-serif;
 }
@@ -273,11 +278,10 @@ html {
 .ui-filter {
   font: small-caps 2rem "Roboto";
   width: 200px;
-  opacity: 0.3;
+  opacity: 0.6;
   border: 0;
   border-bottom: 1px solid #cecece;
   color: #333;
-  transition: all 0.3s ease-in-out;
 }
 
 .dark .ui-filter {
@@ -302,6 +306,11 @@ html {
   -webkit-justify-content: space-around;
       -ms-flex-pack: distribute;
           justify-content: space-around;
+  box-shadow: -1px 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+.dark .show-options {
+  box-shadow: -1px 3px 5px rgba(0, 0, 0, 0.2);
 }
 
 .show-all,
@@ -314,11 +323,17 @@ html {
 
 /* List of venues */
 
-.places-list {
-  padding-left: 0;
+.places-list-section {
   height: calc(100% - 11.5rem);
   overflow-y: auto;
   margin: 0;
+}
+
+.dark places-list-section {
+}
+
+.places-list {
+  padding-left: 0;
 }
 
 .place-list-item {
@@ -367,27 +382,6 @@ html {
   border-radius: 0.5rem;
 }
 
-/* Ratings */
-.highRating {
-  background-color: greenyellow;
-}
-
-.goodRating {
-  background-color: yellowgreen;
-}
-
-.averageRating {
-  background-color: khaki;
-}
-
-.lowRating {
-  background-color: orange;
-}
-
-.badRating {
-  background-color: darkred;
-}
-
 .place-options {
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -425,6 +419,28 @@ html {
   align-items: center;
   text-align: center;
   margin: 1rem 0;
+}
+
+.middle-details {
+  position: relative;
+}
+
+.middle-details:before {
+  position: absolute;
+  width: 100%;
+  display: block;
+  content: "";
+  transform: scaleX(0);
+  transition: transform 0.25s ease-in-out;
+  border-top: 1px solid #dedede;
+}
+
+.dark .middle-details:before {
+  border-top: 1px solid #636363;
+}
+
+.placeListItemExpanded .middle-details:before {
+  transform: scaleX(1);
 }
 
 .open-status {
@@ -508,7 +524,7 @@ html {
 
 .place-type {
   display: block;
-  font: small-caps 600 1.45rem "Roboto", sans-serif;
+  font: small-caps 600 1.75rem "Roboto", sans-serif;
   margin: 1.45rem 0;
 }
 
@@ -567,10 +583,6 @@ html {
 .website-icon {
   padding-left: 0.75rem;
   padding-right: 0;
-}
-
-.middle-details {
-  border-top: 1px solid #dedede;
 }
 
 .api-link {
@@ -677,7 +689,7 @@ html {
 
 .dark .yelp-review {
   background-color: #222;
-  border-color: #fefefe;
+  border-color: #636363;
   color: #ccc;
 }
 
@@ -709,20 +721,20 @@ html {
   width: 5rem;
 }
 
-.places-list::-webkit-scrollbar {
+.places-list-section::-webkit-scrollbar {
   width: 1.25rem;
 }
 
-.places-list::-webkit-scrollbar-track {
+.places-list-section::-webkit-scrollbar-track {
   -webkit-box-shadow: none;
 }
 
-.places-list::-webkit-scrollbar-thumb {
+.places-list-section::-webkit-scrollbar-thumb {
   height: 2rem;
   background-color: #333;
 }
 
-.dark .places-list::-webkit-scrollbar-thumb {
+.dark .places-list-section::-webkit-scrollbar-thumb {
   background-color: #fefefe;
 }
 
@@ -1053,7 +1065,6 @@ html {
     letter-spacing: 0.2rem;
     font-size: 1.75rem;
     width: 140px;
-    transition: width 0.3s ease-in-out;
   }
 
   .search-near {
@@ -1079,7 +1090,7 @@ html {
     box-shadow: 1px 6px 6px rgba(0, 0, 0, 0.3);
   }
 
-  .places-list {
+  .places-list=section {
     height: calc(100% - 13rem);
   }
 

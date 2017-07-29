@@ -99,96 +99,107 @@
 
     </div>
 
-    <!-- venues list -->
-    <ul id="places-list" class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
+    <!-- ko if: venuesArray().length -->
+    <div id="places-list-section" class="places-list-section">
+      <!-- venues list -->
+      <ul class="places-list" data-bind="foreach: { data: venuesArray, as: 'venue' }">
 
-      <!-- each venue -->
-      <li class="place-list-item" data-bind="visible: venue.venueVisible, css: {placeListItemExpanded: venue.venueExpanded}">
+        <!-- each venue -->
+        <li class="place-list-item" data-bind="css: {placeListItemExpanded: venue.venueExpanded}">
 
-        <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: domID }">
+          <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: domID }">
 
-          <div class="place-name-wrapper">
-            <!-- venues rating -->
-            <h2 class="place-rating" data-bind="text: rating, css: { highRating: rating >= 8.75, goodRating: rating >= 8 && rating < 8.75, averageRating: rating >= 7 && rating < 8, lowRating: rating >= 6 && rating < 7, badRating: rating < 6}"></h2>
-            <!-- venues name -->
-            <h2 class="place-name" data-bind="text: name"></h2>
-          </div>
-
-          <div class="place-options">
-            <!-- favorite option -->
-            <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: venue.favorited }" title="Favorite"></i>
-          </div>
-
-        </header>
-
-        <!-- expanded venues information -->
-        <section class="place-info" data-bind="visible: venue.venueExpanded">
-          <!-- place details -->
-          <div class="foursquare-info-wrapper">
-            <!-- open status -->
-            <!-- ko if: venue.hours.status -->
-            <h5 class="open-status" data-bind="css: { closed: venue.hours.isOpen === false, open: venue.hours.isOpen, openStatusAvailable: venue.hours.isOpen !== null }, text: venue.hours.status"></h5>
-            <!-- /ko -->
-            <!-- place contact info -->
-            <!-- ko if: venue.contact.formattedPhone || venue.url -->
-            <div class="contact" data-bind="if: venue.contact.formattedPhone && venue.url, visible: venue.contact.formattedPhone && venue.url">
-              <!-- venue phone -->
-              <h5 class="contact-text" data-bind="if: venue.contact.formattedPhone, visible: venue.contact.formattedPhone">
-                <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
-                  <i class="fa fa-phone contact-icon" title="Call"></i>
-                </a>
-              </h5>
-              <!-- venue link -->
-              <h5 class="contact-text" data-bind="if: venue.url, visible: venue.contact.formattedPhone">
-                <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
-                  <i class="fa fa-link contact-icon website-icon" title="Website"></i>
-                </a>
-              </h5>
+            <div class="place-name-wrapper">
+              <!-- venues rating -->
+              <h2 class="place-rating" data-bind="text: rating"></h2>
+              <!-- venues name -->
+              <h2 class="place-name" data-bind="text: name"></h2>
             </div>
-            <!-- /ko -->
-          </div>
-          <div class="middle-details">
-            <!-- type of establishment -->
-            <!-- ko if: venue.categories[0].name -->
-            <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
-            <!-- /ko -->
-            <!-- foursquare logo link -->
-            <a class="api-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
-              <span class="api-link-text foursquare-link-text">Read more on:</span>
-              <i class="fa fa-share contact-icon api-icon-text"></i>
-              <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
-            </a>
-          </div>
-          <div class="info-wrapper">
-            <!-- venues picture -->
-            <div class="info-pic-wrapper">
-              <div class="info-pic-container" data-bind="if: venue.photoURL">
-                <span data-bind="if: venue.multiPhotos">
-                  <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
-                </span>
-                <div class="info-pic-div">
-                  <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
+
+            <div class="place-options">
+              <!-- favorite option -->
+              <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: venue.favorited }" title="Favorite"></i>
+            </div>
+
+          </header>
+
+          <!-- expanded venues information -->
+          <section class="place-info" data-bind="visible: venue.venueExpanded">
+            <!-- place details -->
+            <div class="foursquare-info-wrapper">
+              <!-- open status -->
+              <!-- ko if: venue.hours.status -->
+              <h5 class="open-status" data-bind="css: { closed: venue.hours.isOpen === false, open: venue.hours.isOpen, openStatusAvailable: venue.hours.isOpen !== null }, text: venue.hours.status"></h5>
+              <!-- /ko -->
+              <!-- place contact info -->
+              <!-- ko if: venue.contact.formattedPhone || venue.url -->
+              <div class="contact" data-bind="visible: venue.contact.formattedPhone || venue.url">
+                <!-- venue phone -->
+                <!-- ko if: venue.contact.formattedPhone -->
+                <h5 class="contact-text">
+                  <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
+                    <i class="fa fa-phone contact-icon" title="Call"></i>
+                  </a>
+                </h5>
+                <!-- /ko -->
+                <!-- venue link -->
+                <!-- ko if: venue.url -->
+                <h5 class="contact-text">
+                  <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
+                    <i class="fa fa-link contact-icon website-icon" title="Website"></i>
+                  </a>
+                </h5>
+                <!-- /ko -->
+              </div>
+              <!-- /ko -->
+            </div>
+            <div class="middle-details">
+              <!-- type of establishment -->
+              <!-- ko if: venue.categories[0].name -->
+              <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
+              <!-- /ko -->
+              <!-- foursquare logo link -->
+              <a class="api-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
+                <span class="api-link-text foursquare-link-text">Read more on:</span>
+                <i class="fa fa-share contact-icon api-icon-text"></i>
+                <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
+              </a>
+            </div>
+            <div class="info-wrapper" data-bind="if: venue.photoURL">
+              <!-- venues picture -->
+              <div class="info-pic-wrapper">
+                <div class="info-pic-container">
+                  <span data-bind="if: venue.multiPhotos">
+                    <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
+                  </span>
+                  <div class="info-pic-div">
+                    <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
+                  </div>
+                  <span data-bind="if: venue.multiPhotos">
+                    <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
+                  </span>
                 </div>
-                <span data-bind="if: venue.multiPhotos">
-                  <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
-                </span>
               </div>
             </div>
-          </div>
 
-          <!-- yelp review -->
-          <div class="yelp-review-wrapper" data-bind="visible: venue.review">
-            <h6 class="yelp-title">Yelp Review:</h6>
-            <p class="yelp-review" data-bind="text: venue.review"></p>
-            <a class="api-link yelp-api-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
-              <span class="api-link-text yelp-link-text">Read more on:</span>
-              <i class="fa fa-share contact-icon api-icon-text"></i>
-              <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
-            </a>
-          </div>
-        </section>
-      </li>
-    </ul>
+            <!-- yelp review -->
+            <div class="yelp-review-wrapper" data-bind="visible: venue.review">
+              <h6 class="yelp-title">Yelp Review:</h6>
+              <p class="yelp-review" data-bind="text: venue.review"></p>
+              <a class="api-link yelp-api-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
+                <span class="api-link-text yelp-link-text">Read more on:</span>
+                <i class="fa fa-share contact-icon api-icon-text"></i>
+                <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
+              </a>
+            </div>
+          </section>
+        </li>
+      </ul>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: !venuesArray().length -->
+    <div id="class-list no-list">No locations here.</div>
+    <!-- /ko -->
   </section>
 
   <!-- login interface -->

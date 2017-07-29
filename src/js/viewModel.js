@@ -92,6 +92,8 @@ var app = app || {};
         };
 
 
+
+
         /*
          * @description Gets the Price for the venue
          * or sets the class field to empty
@@ -135,8 +137,6 @@ var app = app || {};
                 this.infowindowPic = this.photoURL();
             }
         };
-
-
 
 
         /**
@@ -1127,7 +1127,7 @@ var app = app || {};
          * Scrolls to the selected venue's list item
          */
         this.scrollToLocation = function(id, speed) {
-            var placesListEl = document.getElementById('places-list');
+            var placesListEl = document.getElementById('places-list-section');
             var navOffset = 135;
             var scrollTo = id ? document.getElementById(id).offsetTop - navOffset : null;
             var scrollDuration = 500;
@@ -1516,7 +1516,6 @@ var app = app || {};
         function nonceGenerate() {
           return (Math.floor(Math.random() * 1e12).toString());
         }
-
 
         // Initialize the view
         this.init();
