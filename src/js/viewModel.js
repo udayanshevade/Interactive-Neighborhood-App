@@ -205,8 +205,8 @@ var app = app || {};
          */
         this.handleLocationError = function() {
             // use third-party geolocation api for approximate geolocation
-            getJSON('https://freegeoip.net/json/')
-                .then(function(result) {
+            $.getJSON('https://freegeoip.net/json/')
+                .done(function(result) {
                     var pos = {
                         lat: result.latitude,
                         lng: result.longitude
@@ -229,7 +229,7 @@ var app = app || {};
 
                     self.geoLocate(pos.lat, pos.lng);
 
-                }).catch(function(result) {
+                }).fail(function(result) {
                     // set default place to Rome
                     self.poi('Rome');
                     // Rome hardcoded if all else fails
@@ -519,8 +519,8 @@ var app = app || {};
                     "lat": lat,
                     "lng": lng
                 },
-                icon: 'img/target.svg',
-                size: new google.maps.Size(3, 3),
+                icon: self.currentMode() === 'light' ? app.lightIcon : app.darkIcon,
+                size: new google.maps.Size(5, 5),
                 title: 'Showing locations near:',
                 animation: google.maps.Animation.DROP
             }));
@@ -530,7 +530,7 @@ var app = app || {};
                     infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                     infoWindow.open(app.map, this);
                     app.map.panTo(marker.getPosition());
-                    app.map.setZoom(14);
+                    app.map.setZoom(12);
                 };
             })(self.anchorMarker(), app.infoWindow));
             // extend map bounds to include coordinates
@@ -588,8 +588,8 @@ var app = app || {};
                 '&time=any&day=any&limit=35&venuePhotos=1';
 
             // Get Foursquare API query response
-            getJSON(url)
-                .then(function(data) {
+            $.getJSON(url)
+                .done(function(data) {
                     var venue;
                     // access list of returned venues in the JSON response
                     var venues = data.response.groups[0].items;
@@ -664,7 +664,7 @@ var app = app || {};
                     self.loading(false);
 
                 }, 500);
-            }).catch(function(err) {
+            }).fail(function(err) {
                 // toggle alert if the foursquare response fails
                 self.constructAlert({
                     this: 'foursquare error',
@@ -713,7 +713,7 @@ var app = app || {};
                 '&lon=' + lng +
                 '&text=' + place.name;
 
-            getJSON(url).then(function(data) {
+            $.getJSON(url).done(function(data) {
                 var photos = data.photos.photo;
                 if (!photos.length) return;
                 var imagePrefix, imageSuffix;
@@ -739,8 +739,7 @@ var app = app || {};
                     });
                 });
                 place.multiPhotos(place.featuredPhotos.items.length > 1);
-            }).catch(function(err) {
-                console.log(err);
+            }).fail(function(err) {
                 // if Flickr fails, display alert modal
                 self.constructAlert({
                     title: 'flickr error',
@@ -797,25 +796,22 @@ var app = app || {};
 
             // define placePhoto
             var placePhoto = place.infowindowPic || '';
-            if (placePhoto) {
-                this.placeImage = '<img class="infowindow-img" src=' + placePhoto + '>';
-            } else { this.placeImage = placePhoto; }
 
             // encapsulate marker content
-            this.marker.content = '<div class="infowindow"><div class="infowindow-pic">' + this.placeImage +
+            this.marker.content = '<div class="infowindow">' +
+                '<button class="infowindow-close-button"><i class="fa fa-close infowindow-close-icon"></i></button>' +
+                (placePhoto
+                    ? '<div class="infowindow-pic" style="background-image: url(' + placePhoto + '); height: 138px"></div>'
+                    : '') +
                 '<h3 class="infowindow-title">' + this.name +
-                '</h3></div><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div>';
+                '</h3><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div>';
 
             // add click event to marker for opening infowindow
-            google.maps.event.addListener(this.marker, 'click', (function(content, marker, infoWindow, place){
+            google.maps.event.addListener(this.marker, 'click', (function(place){
                 return function() {
-                    infoWindow.setContent(marker.content);
-                    infoWindow.open(app.map, this);
-                    app.map.panTo(marker.getPosition());
                     self.toggleVenueExpand(place);
-                    self.toggleMarkerBounce(true, marker);
                 };
-            })(this.marker.content, this.marker, app.infoWindow, place));
+            })(place));
 
             // extend map bounds to include coordinates
             app.mapBounds.extend(new google.maps.LatLng(that.lat, that.lng));
@@ -855,23 +851,24 @@ var app = app || {};
             } else {
                 this.scrollToLocation(data.domID);
             }
-            this.selected(data);
-            var len = this.venuesArray().length;
-            var venue;
-            for (var i = 0; i < len; i++) {
-                venue = this.venuesArray()[i];
-                venue.venueExpanded(false);
+            // deselect previous selected
+            var prevSelected = this.selected();
+            if (prevSelected) {
+                prevSelected.venueExpanded(false);
+                prevSelected.marker.marker.setAnimation(null);
             }
+            // overwrite with new selected data
+            this.selected(data);
             // set marker map property if undefined
             data.marker.marker.setMap(app.map);
-            // define specific content of infowindow
+            // define specific content of i`nfowindow
             app.infoWindow.setContent(data.marker.marker.content);
             // toggle marker animation
             this.toggleMarkerBounce(true, data.marker.marker);
             // open infowindow
             app.infoWindow.open(app.map, data.marker.marker);
             // zoom and pan
-            app.map.setZoom(14);
+            app.map.setZoom(12);
             app.map.panTo(data.marker.marker.getPosition());
         };
 
@@ -881,15 +878,11 @@ var app = app || {};
          * Toggles Marker animation
          */
         this.toggleMarkerBounce = function(state, marker) {
-            // or end all marker animations
-            var venue, venues = this.venuesArray();
-            for (var i = 0, len = venues.length; i < len; i++) {
-                venue = this.venuesArray()[i];
-                venue.marker.marker.setAnimation(null);
-            }
             // toggle specific marker to bounce
             if (state) {
                 marker.setAnimation(google.maps.Animation.BOUNCE);
+            } else {
+                marker.setAnimation(null);
             }
         };
 
@@ -898,7 +891,7 @@ var app = app || {};
          * Show all venues
          */
         this.showAll = function(event) {
-            app.infoWindow.close();
+            this.closeInfoWindow();
             var len = this.venuesArray().length;
             var venue;
             for (var i = 0; i < len; i++) {
@@ -916,7 +909,7 @@ var app = app || {};
          * Show only user favorites, if any
          */
         this.showFavorites = function(event) {
-            app.infoWindow.close();
+            this.closeInfoWindow();
             var len = this.venuesArray().length;
             var venue;
             if (this.loggedIn()) {
@@ -1026,17 +1019,23 @@ var app = app || {};
                     "lat": lat,
                     "lng": lng
                 },
-                icon: 'img/target.svg',
+                icon: self.currentMode() === 'light' ? app.lightIcon : app.darkIcon,
                 title: 'Showing locations near:',
-                size: new google.maps.Size(3, 3),
+                size: new google.maps.Size(5, 5),
             }));
 
             google.maps.event.addListener(this.anchorMarker(), 'click', (function(marker, infoWindow){
                 return function() {
+                    if (self.selected()) {
+                        self.toggleVenueExpand(self.selected());
+                    }
                     infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                     infoWindow.open(app.map, this);
+                    setTimeout(function() {
+                        self.closeInfoWindow();
+                    }, 3000)
                     app.map.panTo(marker.getPosition());
-                    app.map.setZoom(14);
+                    app.map.setZoom(12);
                 };
             })(this.anchorMarker(), app.infoWindow));
 
@@ -1054,10 +1053,16 @@ var app = app || {};
          */
         this.toggleMapMode = function() {
             if (this.currentMode() === 'light') {
+                if (this.anchorMarker()) {
+                    this.anchorMarker().setIcon(app.darkIcon);
+                }
                 app.map.mapTypes.set('map_style', app.lightMode);
                 app.map.setMapTypeId('map_style');
                 this.currentMode('');
             } else {
+                if (this.anchorMarker()) {
+                    this.anchorMarker().setIcon(app.lightIcon);
+                }
                 app.map.mapTypes.set('map_style', app.darkMode);
                 app.map.setMapTypeId('map_style');
                 this.currentMode('light');
@@ -1092,17 +1097,12 @@ var app = app || {};
          * Opens/closes chosen venue
          */
         this.toggleVenueExpand = function($data, event) {
-            var len = self.venuesArray().length;
-            var venue;
             if (!$data.venueExpanded()) {
-                for (var i = 0; i < len; i++) {
-                    venue = self.venuesArray()[i];
-                    if (venue.venueExpanded()) venue.venueExpanded(false);
-                }
+                if (self.selected()) self.selected().venueExpanded(false);
                 self.chooseVenue($data, event);
             } else {
-                app.infoWindow.close();
-                self.toggleMarkerBounce();
+                self.closeInfoWindow();
+                self.toggleMarkerBounce(false, $data.marker.marker);
                 self.scrollToLocation();
                 self.selected(null);
                 self.shouldScroll(false);
@@ -1118,9 +1118,9 @@ var app = app || {};
             var placesListEl = document.getElementById('places-list');
             var navOffset = 135;
             var scrollTo = id ? document.getElementById(id).offsetTop - navOffset : 0;
-            var duration = 1000;
+            var scrollDuration = 500;
             if (scrollTo < 0) scrollTo = 0;
-            smoothScrollTo(placesListEl, scrollTo, duration);
+            smoothScrollTo(placesListEl, scrollTo, scrollDuration);
         };
 
 
@@ -1490,6 +1490,11 @@ var app = app || {};
         };
 
 
+        this.closeInfoWindow = function() {
+            $('.infoBox').toggleClass('entering leaving')
+            app.infoWindow.close();
+        };
+
 
         /**
          * Generates a random number and returns it as a string for OAuthentication
@@ -1497,22 +1502,6 @@ var app = app || {};
          */
         function nonceGenerate() {
           return (Math.floor(Math.random() * 1e12).toString());
-        }
-
-        // Adapts fetch/jsonp result into usable data
-        function getJSON(url, headers, options) {
-            var fetchPromise;
-            if (options && options.jsonp) {
-                var jsonpOpts = {};
-                Object.keys(options).forEach(function(opt) {
-                    if (opt === 'jsonp') return;
-                    jsonpOpts[opt] = options[opt];
-                });
-                fetchPromise = fetchJsonp(url, jsonpOpts);
-            } else {
-                fetchPromise = fetch(url);
-            }
-            return fetchPromise.then(function(res) { return res.json(); });
         }
 
 
