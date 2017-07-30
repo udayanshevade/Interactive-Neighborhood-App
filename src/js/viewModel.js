@@ -577,8 +577,17 @@ var app = app || {};
 
             google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
                 return function() {
+                    if (anchorInfowindowTimeout) {
+                        clearTimeout(anchorInfowindowTimeout);
+                    }
+                    if (self.selected()) {
+                        self.toggleVenueExpand(self.selected());
+                    }
                     infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
                     infoWindow.open(app.map, this);
+                    anchorInfowindowTimeout = setTimeout(function() {
+                        self.closeInfoWindow();
+                    }, 3000)
                     app.map.panTo(marker.getPosition());
                     app.map.panBy(0, -75);
                     app.map.setZoom(12);
@@ -707,7 +716,8 @@ var app = app || {};
 
                     // give user feel of completed loading
                     self.loading(false);
-
+                    // show which location we are centered on
+                    new google.maps.event.trigger(self.anchorMarker(), 'click');
                 }, 500);
             }).fail(function(err) {
                 // toggle alert if the foursquare response fails

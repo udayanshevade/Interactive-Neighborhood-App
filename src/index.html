@@ -171,15 +171,15 @@
               <!-- venues picture -->
               <div class="info-pic-wrapper">
                 <div class="info-pic-container">
-                  <span data-bind="if: venue.multiPhotos">
-                    <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
-                  </span>
+                  <!-- ko if: venue.multiPhotos -->
+                  <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
+                  <!-- /ko -->
                   <div class="info-pic-div">
                     <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
                   </div>
-                  <span data-bind="if: venue.multiPhotos">
-                    <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
-                  </span>
+                  <!-- ko if: venue.multiPhotos -->
+                  <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
+                  <!-- /ko -->
                 </div>
               </div>
             </div>
