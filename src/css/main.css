@@ -232,7 +232,6 @@ html {
 /* Places section */
 .places {
   position: fixed;
-  z-index: 2;
   top: 3.5rem;
   left: 0;
   width: 100%;
