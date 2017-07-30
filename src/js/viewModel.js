@@ -476,8 +476,13 @@ var app = app || {};
          * Constructs the alert message
          */
         this.newAlert = function(obj) {
-            this.alerts.push(obj);
-            this.toggleAlert('open')
+            var alertAlreadyExists = this.alerts().some(function(alert) {
+                return alert.title === obj.title;
+            });
+            if (!alertAlreadyExists) {
+                this.alerts.push(obj);
+                this.toggleAlert('open')
+            }
         };
 
         /**
