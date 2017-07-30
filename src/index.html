@@ -90,9 +90,10 @@
     <section class="places" data-bind="visible: placesExpanded" style="display:none">
 
       <!-- filter -->
-      <header class="ui-filter-form">
-        <i class="icon fa fa-filter filter-button" title="Filter"></i>
-        <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()" placeholder="Filter venues">
+      <header class="ui-filter-form" data-bind="css: { 'filter-expand': filterExpanded }">
+        <i class="icon fa fa-filter filter-button filter-icon" title="Filter"></i>
+        <input class="ui-filter" type="text" data-bind="textInput: filterQuery" placeholder="Filter venues">
+        <i class="icon fa fa-caret-down filter-button" data-bind="click: toggleFilterExpanded, css: { 'expand-icon': filterExpanded }"></i>
       </header>
 
       <div class="show-options">
@@ -123,6 +124,7 @@
               <div class="place-options">
                 <!-- favorite option -->
                 <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: favorited }" title="Favorite"></i>
+                <i class="icon fa fa-compass place-icon" data-bind="click: $parent.getDirection, clickBubble: false, css: { 'direction-active': directionActive }"></i>
               </div>
 
             </header>
@@ -213,36 +215,43 @@
     </section>
 
     <!-- login interface -->
-    <aside class="login-wrapper overlay-button" data-bind="css: { 'login-wrapper-expand': loginExpanded }">
-      <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin, clickBubble: false">
+    <aside class="login-wrapper overlay-wrapper" data-bind="css: { 'wrapper-expand': loginExpanded }">
+      <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin">
         <i class="fa fa-user mode-option login-icon" title="Login"></i>
       </button>
-      <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
+      <form class="overlay-form login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
         <!-- login input -->
         <input class="login-input" type="text" data-bind="textInput: user" placeholder="Create user or Login">
         <div class="login-buttons-tray">
           <button type="submit" class="login-button" data-bind="visible: !currentUser(), click: login">
             <i class="fa fa-sign-in login-icon" title="Login"></i>
           </button>
-          <button class="login-button" data-bind="visible: currentUser, click: logout, clickBubble: false">
+          <button class="login-button" data-bind="visible: currentUser, click: logout">
             <i class="fa fa-sign-out login-icon" title="Logout"></i>
           </button>
-          <button class="login-button" data-bind="click: toggleLogin, clickBubble: false">
+          <button class="login-button" data-bind="click: toggleLogin">
             <i class="fa fa-chevron-left login-icon login-cancel-icon" title="Close login"></i>
           </button>
         </div>
       </form>
     </aside>
 
+    <!-- directions interface -->
+    <aside class="directions-wrapper overlay-wrapper">
+      <button class="mode-button" data-bind="click: getDirections">
+        <i class="fa fa-compass mode-option login-icon" title="Directions"></i>
+      </button>
+    </aside>
+
     <!-- settings interface -->
-    <aside class="settings-wrapper overlay-button">
+    <aside class="settings-wrapper overlay-wrapper">
       <form class="settings-form">
         <button class="mode-button" data-bind="click: toggleMapMode">
           <!-- ko if: !currentMode() -->
-          <i class="fa fa-moon-o night-toggle mode-option"></i>
+          <i class="fa fa-moon-o night-toggle mode-option login-icon"></i>
           <!-- /ko -->
           <!-- ko if: currentMode() === 'light' -->
-          <i class="fa fa-sun-o day-toggle mode-option"></i>
+          <i class="fa fa-sun-o day-toggle mode-option login-icon"></i>
           <!-- /ko -->
         </button>
       </form>
@@ -308,7 +317,7 @@
   <script src="js/map.js"></script>
   <script src="js/viewModel.js"></script>
   <!-- /build -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=app.initializeMap" onerror="app.mapFallback()"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places,geometry&callback=app.initializeMap" onerror="app.mapFallback()"></script>
   <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js" onload="app.viewModel.initializeDatabase()"></script>
   <script async defer src="lib/oauth-signature/dist/oauth-signature.min.js"></script>
 </body>

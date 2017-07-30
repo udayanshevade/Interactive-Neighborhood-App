@@ -239,6 +239,7 @@ html {
   margin: 0;
   background-color: #fff;
   box-shadow: 0 5px 2px -2px rgba(0, 0, 0, 0.2);
+  transition: color 0.3s ease-in-out, background 0.3s ease-in-out;
 }
 
 .dark .places {
@@ -261,25 +262,42 @@ html {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
   -webkit-transform: scale(1, -1);
   -ms-transform: scale(1, -1);
-  transform: scaleY(1, -1);
+  transform: scale(1, -1);
 }
 
 .ui-filter-form {
   display: block;
-  margin: 3rem auto 1rem;
-  padding-left: 1rem;
   transition: all 0.3s ease-in-out;
   text-align: center;
 }
 
+.filter-expand {
+  margin: 2rem auto 1rem;
+  height: auto;
+}
+
+.filter-button {
+  padding: 0.5rem 0.75rem 0;
+}
+
 /* Filter the available venues */
 .ui-filter {
+  display: none;
   font: small-caps 2rem "Roboto";
   width: 200px;
   opacity: 0.6;
   border: 0;
   border-bottom: 1px solid #cecece;
   color: #333;
+  transition: background 0.3s ease-in-out;
+}
+
+.filter-expand .ui-filter {
+  display: inline-block;
+}
+
+.filter-expand .filter-button {
+  padding: 0.75rem;
 }
 
 .dark .ui-filter {
@@ -394,6 +412,10 @@ html {
   color: gold;
 }
 
+.direction-active:before {
+  color: #50bfe6;
+}
+
 .place-list-item-expanded .marker-icon:before {
   color: #c40000;
 }
@@ -425,7 +447,7 @@ html {
 .middle-details {
   position: relative;
   margin: 0;
-  border-top: 1px solid #333;
+  border-top: 1px solid #aaa;
 }
 
 .dark .middle-details {
@@ -754,14 +776,23 @@ html {
   background-color: #fefefe;
 }
 
+/* Overlay buttons */
+.overlay-wrapper {
+  position: absolute;
+  bottom: 2.5rem;
+  padding: 0.5rem 0;
+  width: 3.5rem;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dark .overlay-wrapper {
+  background: rgb(50, 50, 50);
+}
+
 /* Day/Night mode */
 
 .settings-wrapper {
-  position: absolute;
-  right: 1rem;
-  bottom: 2.5rem;
-  padding: 1rem 0;
-  width: 5rem;
+  right: 1.35rem;
 }
 
 .settings-form {
@@ -772,6 +803,8 @@ html {
   background-color: transparent;
   border: none;
   opacity: 0.7;
+  width: 100%;
+  padding: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
@@ -789,13 +822,11 @@ html {
   font-weight: bold;
   width: 2.5rem;
   height: 2.5rem;
-  padding: 0 1rem;
 
 }
 
 .night-toggle {
   color: #333;
-  left: 0.25rem;
   position: relative;
 }
 
@@ -806,29 +837,10 @@ html {
 /* Login interface */
 
 .login-wrapper {
-  position: absolute;
-  z-index: 1;
-  bottom: 2.5rem;
-  width: 5rem;
-  left: 1rem;
-  padding: 1rem 0;
-  background-color: rgb(245, 245, 245);
+  left: 1.35rem;
 }
 
-.login-wrapper-expand {
-  background-color: #fff;
-  box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
-  left: 0;
-  width: 100%;
-  border-radius: 0;
-  transition: width 0.3s ease-in-out;
-}
-
-.dark .login-wrapper {
-  background-color: rgb(50, 50, 50);
-}
-
-.login-form {
+.overlay-form {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -839,7 +851,6 @@ html {
 }
 
 .login-icon {
-  padding: 0 1rem;
   opacity: 0.7;
   transition: opacity 0.2s ease-in-out;
 }
@@ -851,14 +862,11 @@ html {
 .login-icon:before {
   font-size: 2rem;
   color: #333;
+  vertical-align: middle;
 }
 
 .dark .login-icon:before {
   color: #fff;
-}
-
-.dark .login-form .login-icon:before {
-  color: #666;
 }
 
 .login-input {
@@ -896,6 +904,21 @@ html {
 
 .login-cancel-icon:before {
   font-size: 1.25rem;
+}
+
+/* Directions wrapper */
+
+.directions-wrapper {
+  left: 7.7rem;
+}
+
+.wrapper-expand {
+  background-color: #fff;
+  box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  transition: width 0.3s ease-in-out, left 0.3s ease-in-out;
 }
 
 /* Infowindow styles */
@@ -1229,7 +1252,12 @@ html {
     width: 80%;
   }
 
-  .login-wrapper-expand {
+  .overlay-wrapper {
+    padding: 1rem 0;
+    width: 5rem;
+  }
+
+  .wrapper-expand {
     width: 500px;
   }
 

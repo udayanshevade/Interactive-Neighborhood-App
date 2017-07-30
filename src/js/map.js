@@ -58,7 +58,9 @@ var app = app || {};
                     app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
 
                     google.maps.event.addListener(app.map, 'click', function() {
-                        app.viewModel.toggleLogin(false);
+                        if (app.viewModel.loginExpanded()) {
+                            app.viewModel.toggleLogin(false);
+                        }
                     });
 
                     if (infoBoxLoaded) {
@@ -115,20 +117,20 @@ var app = app || {};
                     // if chrome geolocation does not work, please try
                     // again in a different tab or browser
                     if (pos.lat === pos.lng === 0) {
-                        app.viewModel.handleLocationError();
+                        app.handleLocationError();
                     } else {
                         // enable the map using the geolocated coordinates
-                        app.viewModel.geoLocate(pos.lat, pos.lng);
+                        app.geoLocate(pos.lat, pos.lng);
                     }
 
                 }, function() {
                     // handle the geolocation error
-                    app.viewModel.handleLocationError();
+                    app.handleLocationError();
                 }, {timeout: 7500});
 
             } else {
                 // fallback in case browser doesn't support geolocation
-                app.viewModel.handleLocationError();
+                app.handleLocationError();
             }
             // initialize mapBounds
             app.mapBounds = new google.maps.LatLngBounds();
@@ -147,5 +149,185 @@ var app = app || {};
             details: 'There was an error loading the map. Please refresh the page and try again.'
         });
         app.viewModel.loading(false);
+    };
+
+    /**
+     * Convert geolocated coordinates to a text location
+     */
+    app.geoLocate = function(lat, lng) {
+        var latlng;
+        app.viewModel.loading(true);
+        // if coordinates have already been passed in, skip the geolocation
+        if (typeof lat === 'number' && typeof lng === 'number') {
+            latlng = new google.maps.LatLng(lat, lng);
+            if (app.geocoder) {
+                app.geocoder.geocode({'latLng': latlng}, function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        app.viewModel.getLocations(results);
+                    } else {
+                        app.viewModel.newAlert({
+                            title: 'google maps error',
+                            details: 'There was an issue while discovering the specified location. Please try again.'
+                        });
+                    }
+                });
+            } else {
+                app.viewModel.newAlert({
+                    title: 'google maps error',
+                    details: 'There was an error with the map. Please refresh the page and try again.'
+                });
+            }
+        } else {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                if (app.geocoder) {
+                    app.geocoder.geocode({'latLng': latlng}, function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            app.viewModel.poi(results[0].address_components[2].long_name);
+                            app.viewModel.coordinates({
+                                'lat': latlng.lat(),
+                                'lng': latlng.lng()
+                            });
+                            app.viewModel.loading(true);
+                            app.viewModel.updateLatLng('', status);
+                        } else {
+                            app.viewModel.newAlert({
+                                title: 'google maps error',
+                                details: 'There was an issue while discovering the specified location. Please try again.'
+                            });
+                        }
+                    });
+                }  else {
+                    app.viewModel.newAlert({
+                        title: 'google maps error',
+                        details: 'There was an error with the map. Please refresh the page and try again.'
+                    });
+                }
+            }, app.viewModel.handleLocationError);
+        }
+    };
+
+    /**
+     * Handles geolocation error or absence
+     */
+    app.handleLocationError = function() {
+        // use third-party geolocation api for approximate geolocation
+        $.getJSON('https://freegeoip.net/json/')
+            .done(function(result) {
+                var pos = {
+                    lat: result.latitude,
+                    lng: result.longitude
+                };
+
+                app.viewModel.coordinates(pos);
+
+                app.mapOptions.center = pos;
+
+                app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
+
+                google.maps.event.addDomListener(window, 'resize', function() {
+                    var center = app.map.getCenter();
+                    google.maps.event.trigger(app.map, 'resize');
+                    app.map.setCenter(center);
+                });
+
+                // define the time of day for the map style
+                app.viewModel.initializeTime();
+
+                app.geoLocate(pos.lat, pos.lng);
+
+            }).fail(function(result) {
+                // set default place to Rome
+                app.viewModel.poi('Rome');
+                // Rome hardcoded if all else fails
+                app.viewModel.coordinates({
+                    lat: 41.90278349999999,
+                    lng: 12.496365500000024
+                });
+
+                app.mapOptions.pos = app.viewModel.coordinates();
+
+                app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
+
+                app.viewModel.initializeTime();
+
+                google.maps.event.addDomListener(window, 'resize', function() {
+                    var center = app.map.getCenter();
+                    google.maps.event.trigger(app.map, 'resize');
+                    app.map.setCenter(center);
+                });
+
+                app.viewModel.newAlert({
+                    title: 'geolocation failed',
+                    details: 'All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.'
+                });
+                // default search
+                app.viewModel.updateSearch();
+            });
+    };
+
+    /**
+     * Update current map coordinates
+     */
+    app.updateLatLng = function(results, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            if (results) {
+                // find coordinates of places service result
+                var loc = results[0].geometry.location;
+                // save the coordinates associated with new location
+                app.viewModel.coordinates({
+                    lat: loc.lat(),
+                    lng: loc.lng()
+                });
+            }
+        } else {
+            app.viewModel.newAlert({
+                title: 'google maps error',
+                details: 'There was an issue while discovering the specified location. Please try again.'
+            });
+        }
+        var lat = app.viewModel.coordinates().lat;
+        var lng = app.viewModel.coordinates().lng;
+        // hide markers
+        app.viewModel.hideMarkers();
+
+        // define new map bounds
+        app.mapBounds = new google.maps.LatLngBounds();
+
+        // define new central anchor marker
+        app.viewModel.anchorMarker(new google.maps.Marker({
+            map: app.map,
+            position: {
+                "lat": lat,
+                "lng": lng
+            },
+            icon: self.currentMode() === 'light' ? app.lightIcon : app.darkIcon,
+            size: new google.maps.Size(5, 5),
+            title: 'Showing locations near:',
+            animation: google.maps.Animation.DROP
+        }));
+
+        google.maps.event.addListener(app.viewModel.anchorMarker(), 'click', (function(marker, infoWindow){
+            return function() {
+                if (anchorInfowindowTimeout) {
+                    clearTimeout(anchorInfowindowTimeout);
+                }
+                if (app.viewModel.selected()) {
+                    app.viewModel.toggleVenueExpand(app.viewModel.selected());
+                }
+                infoWindow.setContent('<div class="infowindow"><div class="infowindow-content"><h3 class="infowindow-title">' + app.viewModel.poi() + '</h3></div></div>');
+                infoWindow.open(app.map, this);
+                anchorInfowindowTimeout = setTimeout(function() {
+                    app.viewModel.closeInfoWindow();
+                }, 3000)
+                app.map.panTo(marker.getPosition());
+                app.map.panBy(0, -75);
+                app.map.setZoom(12);
+            };
+        })(app.viewModel.anchorMarker(), app.infoWindow));
+        // extend map bounds to include coordinates
+        app.mapBounds.extend(new google.maps.LatLng(lat, lng));
+        // get new venue data
+        app.viewModel.getVenuesData();
     };
 })();

@@ -83,6 +83,8 @@ var app = app || {};
             this.setTip(tips);
             // create a new marker object
             this.marker = new self.Marker(this);
+            this.directionActive = ko.observable(false);
+            this.directionFetched = ko.observable(false);
         };
 
         /*
@@ -237,9 +239,9 @@ var app = app || {};
 
             // binds empty location of interest
             this.anchorMarker = ko.observable();
-
             // binds whether list of venues is expanded
             this.placesExpanded = ko.observable(false);
+            this.filterExpanded = ko.observable(true);
             // binds current day/night mode of map
             this.currentMode = ko.observable('');
             // binds logged in user
@@ -251,6 +253,7 @@ var app = app || {};
             this.loginExpanded = ko.observable(false);
             this.selected = ko.observable(null);
             this.shouldScroll = ko.observable(false);
+            this.directionsExpanded = ko.observable(false);
         };
 
 
@@ -263,66 +266,6 @@ var app = app || {};
             self.usersRef = self.myDataRef.child('users');
             // TODO: set up a reference to 'venues' category in database
             self.venuesRef = self.myDataRef.child('venues');
-        };
-
-
-        /**
-         * Handles geolocation error or absence
-         */
-        this.handleLocationError = function() {
-            // use third-party geolocation api for approximate geolocation
-            $.getJSON('https://freegeoip.net/json/')
-                .done(function(result) {
-                    var pos = {
-                        lat: result.latitude,
-                        lng: result.longitude
-                    };
-
-                    self.coordinates(pos);
-
-                    app.mapOptions.center = pos;
-
-                    app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
-
-                    google.maps.event.addDomListener(window, 'resize', function() {
-                        var center = app.map.getCenter();
-                        google.maps.event.trigger(app.map, 'resize');
-                        app.map.setCenter(center);
-                    });
-
-                    // define the time of day for the map style
-                    self.initializeTime();
-
-                    self.geoLocate(pos.lat, pos.lng);
-
-                }).fail(function(result) {
-                    // set default place to Rome
-                    self.poi('Rome');
-                    // Rome hardcoded if all else fails
-                    self.coordinates({
-                        lat: 41.90278349999999,
-                        lng: 12.496365500000024
-                    });
-
-                    app.mapOptions.pos = self.coordinates();
-
-                    app.map = new google.maps.Map(document.getElementById('mapDiv'), app.mapOptions);
-
-                    self.initializeTime();
-
-                    google.maps.event.addDomListener(window, 'resize', function() {
-                        var center = app.map.getCenter();
-                        google.maps.event.trigger(app.map, 'resize');
-                        app.map.setCenter(center);
-                    });
-
-                    self.newAlert({
-                        title: 'geolocation failed',
-                        details: 'All roads lead to Rome. But for a personalized experience please enable browser geolocation and try again, or attempt a new search.'
-                    });
-                    // default search
-                    self.updateSearch();
-                });
         };
 
 
@@ -552,80 +495,13 @@ var app = app || {};
                     "query": self.poi()
                 };
                 // perform Google Maps API text search
-                service.textSearch(request, self.updateLatLng);
+                service.textSearch(request, app.updateLatLng);
             } else {
                 self.newAlert({
                     title: 'invalid search',
                     details: 'Please enter a valid location. Specific locations yield accurate results.'
                 });
             }
-        };
-
-
-
-        /**
-         * Update current map coordinates
-         */
-        this.updateLatLng = function(results, status) {
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                if (results) {
-                    // find coordinates of places service result
-                    var loc = results[0].geometry.location;
-                    // save the coordinates associated with new location
-                    self.coordinates({
-                        lat: loc.lat(),
-                        lng: loc.lng()
-                    });
-                }
-            } else {
-                self.newAlert({
-                    title: 'google maps error',
-                    details: 'There was an issue while discovering the specified location. Please try again.'
-                });
-            }
-            var lat = self.coordinates().lat;
-            var lng = self.coordinates().lng;
-            // hide markers
-            self.hideMarkers();
-
-            // define new map bounds
-            app.mapBounds = new google.maps.LatLngBounds();
-
-            // define new central anchor marker
-            self.anchorMarker(new google.maps.Marker({
-                map: app.map,
-                position: {
-                    "lat": lat,
-                    "lng": lng
-                },
-                icon: self.currentMode() === 'light' ? app.lightIcon : app.darkIcon,
-                size: new google.maps.Size(5, 5),
-                title: 'Showing locations near:',
-                animation: google.maps.Animation.DROP
-            }));
-
-            google.maps.event.addListener(self.anchorMarker(), 'click', (function(marker, infoWindow){
-                return function() {
-                    if (anchorInfowindowTimeout) {
-                        clearTimeout(anchorInfowindowTimeout);
-                    }
-                    if (self.selected()) {
-                        self.toggleVenueExpand(self.selected());
-                    }
-                    infoWindow.setContent('<div class="infowindow"><div class="infowindow-content"><h3 class="infowindow-title">' + self.poi() + '</h3></div></div>');
-                    infoWindow.open(app.map, this);
-                    anchorInfowindowTimeout = setTimeout(function() {
-                        self.closeInfoWindow();
-                    }, 3000)
-                    app.map.panTo(marker.getPosition());
-                    app.map.panBy(0, -75);
-                    app.map.setZoom(12);
-                };
-            })(self.anchorMarker(), app.infoWindow));
-            // extend map bounds to include coordinates
-            app.mapBounds.extend(new google.maps.LatLng(lat, lng));
-            // get new venue data
-            self.getVenuesData();
         };
 
 
@@ -729,6 +605,7 @@ var app = app || {};
                     }
 
 
+                    // initialize direction display per venue
                     // get additional yelp and flickr data for each venue
                     // loads async in the background since it is non-critical
                     var venue;
@@ -736,13 +613,23 @@ var app = app || {};
                     var venues = self.venuesArray();
                     for (var i = 0, len = venues.length; i < len; i++) {
                         venue = venues[i];
+                        venue.directionsService = new google.maps.DirectionsService();
+                        venue.directionsRenderer = new google.maps.DirectionsRenderer({
+                            suppressMarkers: true,
+                            suppressInfoWindows: true,
+                            preserveViewport: true,
+                            polylineOptions: {
+                                strokeColor: '#50bfe6',
+                                strokeWeight: 5,
+                                strokeOpacity: 0.1,
+                            },
+                        });
                         phone = venue.contact.phone;
                         self.getPhotos(venue);
                         if (phone && phone.length === 10) {
                             self.getYelpData(venue);
                         }
                     }
-
                     // give user feel of completed loading
                     self.loading(false);
                     // show which location we are centered on
@@ -943,7 +830,6 @@ var app = app || {};
             // open infowindow
             app.infoWindow.open(app.map, data.marker.marker);
             // zoom and pan
-            app.map.setZoom(12);
             app.map.panTo(data.marker.marker.getPosition());
             app.map.panBy(0, -75);
         };
@@ -994,56 +880,7 @@ var app = app || {};
          * Convert geolocated coordinates to a text location
          */
         this.geoLocate = function(lat, lng) {
-            var latlng;
-            this.loading(true);
-            // if coordinates have already been passed in, skip the geolocation
-            if (typeof lat === 'number' && typeof lng === 'number') {
-                latlng = new google.maps.LatLng(lat, lng);
-                if (app.geocoder) {
-                    app.geocoder.geocode({'latLng': latlng}, function(results, status) {
-                        if (status == google.maps.GeocoderStatus.OK) {
-                            self.getLocations(results);
-                        } else {
-                            self.newAlert({
-                                title: 'google maps error',
-                                details: 'There was an issue while discovering the specified location. Please try again.'
-                            });
-                        }
-                    });
-                } else {
-                    self.newAlert({
-                        title: 'google maps error',
-                        details: 'There was an error with the map. Please refresh the page and try again.'
-                    });
-                }
-            } else {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                    if (app.geocoder) {
-                        app.geocoder.geocode({'latLng': latlng}, function(results, status) {
-                            if (status == google.maps.GeocoderStatus.OK) {
-                                self.poi(results[0].address_components[2].long_name);
-                                self.coordinates({
-                                    'lat': latlng.lat(),
-                                    'lng': latlng.lng()
-                                });
-                                self.loading(true);
-                                self.updateLatLng('', status);
-                            } else {
-                                self.newAlert({
-                                    title: 'google maps error',
-                                    details: 'There was an issue while discovering the specified location. Please try again.'
-                                });
-                            }
-                        });
-                    }  else {
-                        self.newAlert({
-                            title: 'google maps error',
-                            details: 'There was an error with the map. Please refresh the page and try again.'
-                        });
-                    }
-                }, self.handleLocationError);
-            }
+            app.geoLocate(lat, lng);
         };
 
 
@@ -1090,7 +927,6 @@ var app = app || {};
                     }, 3000)
                     app.map.panTo(marker.getPosition());
                     app.map.panBy(0, -75);
-                    app.map.setZoom(12);
                 };
             })(this.anchorMarker(), app.infoWindow));
 
@@ -1101,6 +937,17 @@ var app = app || {};
             this.getVenuesData();
         };
 
+
+        /**
+         * Toggle filter expanded
+         */
+        this.toggleFilterExpanded = function(set) {
+            if (typeof set === 'boolean') {
+                this.filterExpanded(set);
+            } else {
+                this.filterExpanded(!this.filterExpanded());
+            }
+        };
 
 
         /**
@@ -1240,6 +1087,7 @@ var app = app || {};
          * Toggle Login interface
          */
         this.toggleLogin = function(set) {
+            if (this.directionsExpanded()) this.toggleDirections(false);
             if (typeof set === 'boolean') {
                 this.loginExpanded(set);
             } else {
@@ -1247,6 +1095,18 @@ var app = app || {};
             }
         };
 
+
+        /**
+         * Toggle directions interface
+         */
+        this.toggleDirections = function(set) {
+            if (this.loginExpanded()) this.toggleLogin(false);
+            if (typeof set === 'boolean') {
+                this.directionsExpanded(set);
+            } else {
+                this.directionsExpanded(!this.directionsExpanded());
+            }
+        };
 
 
         /**
@@ -1554,6 +1414,58 @@ var app = app || {};
                 // emptythe locations
                 venue.favorited(false);
             }
+        };
+
+        /**
+         * Gets directions from origin to specified venue
+         */
+        this.getDirections = function() {
+            self.venuesArray().forEach(function(venue, i) {
+                // get route from place to place
+                setTimeout(function() {
+                    self.getDirection(venue, true);
+                }, 1000 * i);
+            });
+        };
+
+
+        this.getDirection = function(venue, set) {
+            if (venue.directionFetched()) {
+                self.toggleDirectionActive(venue, set);
+                return;
+            }
+            venue.directionsService.route({
+                origin: self.coordinates(),
+                destination: {
+                    lat: venue.location.lat,
+                    lng: venue.location.lng,
+                },
+                travelMode: 'DRIVING'
+            }, function(response, status) {
+                console.log(response);
+                console.log(status);
+                if (status === 'OK') {
+                    venue.directionsRenderer.setDirections(response);
+                    self.toggleDirectionActive(venue);
+                    venue.directionFetched(true);
+                } else {
+                    self.newAlert({
+                        title: 'the old fashioned way',
+                        details: 'Directions aren\'t responding right now. I guess you\'ll have to ask someone. Ew.',
+                    });
+                }
+            });
+        };
+
+        this.toggleDirectionActive = function(venue, set) {
+            var isActive;
+            if (typeof set === 'boolean') {
+                isActive = !set;
+            } else {
+                isActive = venue.directionActive();
+            }
+            venue.directionsRenderer.setMap(isActive ? null : app.map);
+            venue.directionActive(!isActive);
         };
 
 
