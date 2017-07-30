@@ -205,7 +205,7 @@
   </section>
 
   <!-- login interface -->
-  <aside class="login-wrapper" data-bind="css: { loginWrapperExpand: loginExpanded }">
+  <aside class="login-wrapper overlay-button" data-bind="css: { loginWrapperExpand: loginExpanded }">
     <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin, clickBubble: false">
       <i class="fa fa-user mode-option login-icon" title="Login"></i>
     </button>
@@ -227,9 +227,15 @@
   </aside>
 
   <!-- settings interface -->
-  <aside class="settings-wrapper">
+  <aside class="settings-wrapper overlay-button">
     <form class="settings-form">
-      <button class="mode-button" data-bind="click: toggleMapMode"><i class="fa fa-moon-o night-toggle mode-option" data-bind="visible: !currentMode()"></i><i class="fa fa-sun-o day-toggle mode-option" data-bind="visible: currentMode() === 'light'"></i>
+      <button class="mode-button" data-bind="click: toggleMapMode">
+        <!-- ko if: !currentMode() -->
+        <i class="fa fa-moon-o night-toggle mode-option"></i>
+        <!-- /ko -->
+        <!-- ko if: currentMode() === 'light' -->
+        <i class="fa fa-sun-o day-toggle mode-option"></i>
+        <!-- /ko -->
       </button>
     </form>
   </aside>
