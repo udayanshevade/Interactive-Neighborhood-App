@@ -253,11 +253,11 @@ html {
   transition: transform 0.2s, -webkit-transform 0.2s;
 }
 
-.expandIcon:before {
+.expand-icon:before {
   content: "\f0d7";
 }
 
-.expandIcon {
+.expand-icon {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
   -webkit-transform: scale(1, -1);
   -ms-transform: scale(1, -1);
@@ -345,12 +345,12 @@ html {
 }
 
 .place-list-item:hover,
-.placeListItemExpanded {
+.place-list-item-expanded {
   background-color: rgba(245,245,245,0.8);
 }
 
 .dark .place-list-item:hover,
-.dark .placeListItemExpanded {
+.dark .place-list-item-expanded {
   background-color: rgba(50,50,50,0.8);
 }
 
@@ -394,7 +394,7 @@ html {
   color: gold;
 }
 
-.placeListItemExpanded .marker-icon:before {
+.place-list-item-expanded .marker-icon:before {
   color: #c40000;
 }
 
@@ -405,8 +405,8 @@ html {
 
 /* Venue info */
 
-.middle-details,
-.foursquare-info-wrapper {
+.foursquare-info-wrapper,
+.middle-details {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -416,39 +416,29 @@ html {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin: 1rem 0;
+}
+
+.foursquare-info-wrapper {
+  margin: -0.5rem 0 0;
 }
 
 .middle-details {
   position: relative;
+  margin: 0;
+  border-top: 1px solid #333;
 }
 
-.middle-details:before {
-  position: absolute;
-  width: 100%;
-  display: block;
-  content: "";
-  transform: scaleX(0);
-  transition: transform 0.25s ease-in-out;
-  border-top: 1px solid #dedede;
-}
-
-.dark .middle-details:before {
-  border-top: 1px solid #636363;
-}
-
-.placeListItemExpanded .middle-details:before {
-  transform: scaleX(1);
+.dark .middle-details {
+  border-top-color: #636363;
 }
 
 .open-status {
-  display: block;
   font: small-caps 400 2rem "Roboto", sans-serif;
   margin: -1rem 0 1rem;
   color: #d3cece;
 }
 
-.openStatusAvailable {
+.open-status-available {
   animation: 5s flicker infinite;
 }
 
@@ -512,18 +502,19 @@ html {
   }
 }
 
-.open {
+.open[class*="open-status"] {
   color: #66ff66;
 }
 
-.closed {
+.closed[class*="open-status"] {
   color: #ff355e;
 }
 
 .place-type {
   display: block;
   font: small-caps 600 1.75rem "Roboto", sans-serif;
-  margin: 3rem 0 1.45rem;
+  margin: 2rem 0 1.45rem 2rem;
+  align-self: flex-start;
 }
 
 .contact {
@@ -607,7 +598,7 @@ html {
 
 .api-icon-text {
   position: absolute;
-  top: 1rem;
+  top: -1rem;
   left: -2rem;
 }
 
@@ -668,29 +659,47 @@ html {
   opacity: 1;
 }
 
-.yelp-review-wrapper {
-  padding: 1rem 0 2rem;
+.review-wrapper {
+  text-align: center;
+  margin: 1rem 0 2rem;
 }
 
-.yelp-title {
-  margin: 1rem 0;
-  font: small-caps 1.35rem "Roboto", sans-serif;
-}
-
-.yelp-review {
-  margin: 0.5rem 1.5rem 2rem;
-  padding: 1rem 1.5rem 1rem;
+.review {
+  margin: 0.75rem 1.5rem;
+  padding: 2rem 2rem 2rem 4rem;
   font: 300 1.35rem/1.5 "Roboto", sans-serif;
   color: #333;
   letter-spacing: 0.1rem;
   border: 1px solid rgba(0,0,0,0.1);
   background-color: #fff;
+  text-align: initial;
+  position: relative;
 }
 
-.dark .yelp-review {
+.comment-icon:before {
+  content: "\f0e5";
+  display: inline-block;
+  font: normal normal normal 1.35rem/1 "FontAwesome";
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: absolute;
+  top: calc(50% - 1.75rem);
+  left: -1.8rem;
+  padding: 1.25rem;
+  border-radius: 50%;
+  background: rgb(245,245,245);
+}
+
+.dark .review {
   background-color: #222;
   border-color: #636363;
   color: #ccc;
+}
+
+.dark .comment-icon:before {
+  content: "\f075";
+  background: rgb(50, 50, 50);
 }
 
 .info-wrapper {
@@ -698,16 +707,12 @@ html {
 }
 
 .info-wrapper:after,
-.yelp-review-wrapper:after {
+.review-wrapper:after {
   content: " ";
   visibility: hidden;
   display: block;
   height: 0;
   clear: both;
-}
-
-.yelp-api-link {
-  float: right;
 }
 
 .yelp-link-text {
@@ -785,10 +790,13 @@ html {
   width: 2.5rem;
   height: 2.5rem;
   padding: 0 1rem;
+
 }
 
 .night-toggle {
   color: #333;
+  left: 0.25rem;
+  position: relative;
 }
 
 .day-toggle {
@@ -804,23 +812,20 @@ html {
   width: 5rem;
   left: 1rem;
   padding: 1rem 0;
-  transition: all 0.3s ease-in-out;
+  background-color: rgb(245, 245, 245);
 }
 
-.overlay-button {
-  background-color: rgba(250, 250, 250, 0.8);
-  border-radius: 50px;
-}
-
-.dark .overlay-button {
-  background-color: rgba(50, 50, 50, 0.8);
-}
-
-.loginWrapperExpand {
+.login-wrapper-expand {
   background-color: #fff;
   box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.2);
   left: 0;
   width: 100%;
+  border-radius: 0;
+  transition: width 0.3s ease-in-out;
+}
+
+.dark .login-wrapper {
+  background-color: rgb(50, 50, 50);
 }
 
 .login-form {
@@ -834,7 +839,7 @@ html {
 }
 
 .login-icon {
-  padding: 0.5rem 1.5rem;
+  padding: 0 1rem;
   opacity: 0.7;
   transition: opacity 0.2s ease-in-out;
 }
@@ -909,13 +914,19 @@ html {
 .infowindow {
   width: 100%;
   position: relative;
+  text-align: center;
 }
 
 .infowindow-title {
   font: 600 small-caps 1.5rem "Roboto", sans-serif;
-  text-align: center;
   margin: 0;
   padding: 1rem 0;
+}
+
+.infowindow-open-status {
+  font: small-caps 400 1.35rem "Roboto", sans-serif;
+  color: #d3cece;
+  margin: 0.5rem 0;
 }
 
 .infowindow-info {
@@ -930,6 +941,16 @@ html {
 .infowindow-pic {
   background-size: cover;
   background-repeat: no-repeat;
+  height: 138px;
+}
+
+.infowindow-place-options {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .infowindow-fa {
@@ -1072,17 +1093,16 @@ html {
   right: 0;
 }
 
-.alert-next-box {
-  cursor: pointer;
-}
-
 .alert-next-visible {
   display: inline-block !important;
 }
 
 .alert-next-text {
   font: 400 small-caps 1.75rem "Roboto", sans-serif;
-  padding: 1rem 0 1rem 1rem;
+  display: inline-block;
+  margin: 1rem 0;
+  float: right;
+  cursor: pointer;
 }
 
 .alert-next {
@@ -1170,16 +1190,21 @@ html {
     cursor: pointer;
   }
 
-  .placeListItemExpanded.place-list-item:hover {
+  .place-list-item-expanded.place-list-item:hover {
     cursor: default;
   }
 
-  .placeListItemExpanded .place-header:hover {
+  .place-list-item-expanded .place-header:hover {
     cursor: pointer;
   }
 
   .foursquare-info-wrapper {
     flex-flow: row wrap;
+    margin: -1rem 0 1rem;
+  }
+
+  .middle-details {
+    margin: 1rem 0;
   }
 
   .open-status {
@@ -1204,17 +1229,13 @@ html {
     width: 80%;
   }
 
-  .loginWrapperExpand {
+  .login-wrapper-expand {
     width: 500px;
   }
 
   .login-input {
     font-size: 2rem;
     margin: 0.5rem 0;
-  }
-
-  .login-icon {
-    padding: 0 1rem;
   }
 
   .login-cancel-icon {
@@ -1231,6 +1252,16 @@ html {
 
   .mode-option:before {
     font-size: 2.5rem;
+  }
+
+  .day-toggle {
+    right: 0.25rem;
+    position: relative;
+  }
+
+  .night-toggle {
+    left: 0;
+    position: relative;
   }
 
   .alert-modal {

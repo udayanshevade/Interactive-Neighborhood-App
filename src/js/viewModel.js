@@ -46,7 +46,9 @@ var app = app || {};
          * @constructor Class Venue
          * @params {object} location data
          */
-        var Venue = function(venue) {
+        var Venue = function(venueData) {
+            var venue = venueData.venue;
+            var tips = venueData.tips;
             this.FoursquareURL = self.Foursquare.baseVenueURL + venue.id;
             // sets the name of the venue
             this.name = venue.name;
@@ -64,9 +66,11 @@ var app = app || {};
             // sets venue contact and phone
             this.contact = venue.contact;
             this.url = venue.url;
-            this.review = ko.observable('No yelp review available.');
+            this.review = ko.observable('');
+            this.yelpURL = ko.observable();
             this.setPhone(this.contact.phone);
             // define photos
+            this.photoURL = ko.observable('');
             this.setPhotos(venue.featuredPhotos);
             this.multiPhotos = ko.observable(false);
             // by default all venues are initially visible
@@ -75,7 +79,8 @@ var app = app || {};
             this.venueExpanded = ko.observable(false);
             // no venues are favorited
             this.favorited = ko.observable(false);
-
+            // get foursquare tip
+            this.setTip(tips);
             // create a new marker object
             this.marker = new self.Marker(this);
         };
@@ -130,7 +135,6 @@ var app = app || {};
             if (phone && phone.length === 10) {
               // bind empty observables for Yelp data
               this.review('Loading Yelp review...');
-              this.yelpURL = ko.observable();
             }
         };
 
@@ -147,10 +151,28 @@ var app = app || {};
                 var initialPhoto = photos.items[this.currentPic];
                 initialPhoto.size = '250x100';
                 // define current photoURL
-                this.photoURL = ko.observable(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
+                this.photoURL(initialPhoto.prefix + initialPhoto.size + initialPhoto.suffix);
                 // define infoWindow picture
                 this.infowindowPic = this.photoURL();
             }
+        };
+
+        /*
+         * @description Gets the tip for the venue
+         * or sets the class field to empty
+         * @param {object} Venue Tip
+         */
+        Venue.prototype.setTip = function(tips) {
+            this.tip = ko.observable();
+            if (!tips || !tips.length) {
+                this.tip(null);
+            }
+            var tipData = tips[0];
+            this.tip({
+                text: tipData.text,
+                agree: tipData.agreeCount,
+                img: tipData.photo ? tipData.photo.prefix + tipData.photo.suffix : '',
+            });
         };
 
         /**
@@ -182,7 +204,6 @@ var app = app || {};
             this.favoritesOnly = ko.observable(false);
             // return favorited computed array
             this.filteredVenuesArray = ko.computed(function() {
-                this.closeInfoWindow();
                 var venues = this.venuesArray();
                 var len = venues.length;
                 var filter = this.filterQuery().toLowerCase();
@@ -192,7 +213,10 @@ var app = app || {};
                     var venueName = venue.name.toLowerCase();
                     var match = venueName.indexOf(filter) > -1;
                     var showVenue = match && (!favoritesOnly || favorited);
-                    venue.marker.marker.setMap(showVenue ? app.map : null);
+                    var markerVisible = venue.marker.marker.getMap() === app.map;
+                    if (showVenue !== markerVisible) {
+                        venue.marker.marker.setMap(showVenue ? app.map : null);
+                    }
                     return showVenue;
                 });
             }, this);
@@ -412,7 +436,7 @@ var app = app || {};
             $.ajax(settings)
                 .done(function(results) {
                     var business = results.businesses[0];
-                    var review = 'No Yelp review available.'
+                    var review = '';
                     if (business) {
                         // bind venue review
                         review = business.snippet_text;
@@ -588,7 +612,7 @@ var app = app || {};
                     if (self.selected()) {
                         self.toggleVenueExpand(self.selected());
                     }
-                    infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
+                    infoWindow.setContent('<div class="infowindow"><div class="infowindow-content"><h3 class="infowindow-title">' + self.poi() + '</h3></div></div>');
                     infoWindow.open(app.map, this);
                     anchorInfowindowTimeout = setTimeout(function() {
                         self.closeInfoWindow();
@@ -665,10 +689,10 @@ var app = app || {};
                         // iterate over the returned venues
                         for (var v = 0, len = venues.length; v < len; v++) {
                             // for each venue
-                            venue = venues[v].venue;
+                            venueData = venues[v];
 
                             // push the venue to the venues array
-                            self.venuesArray.push(new Venue(venue));
+                            self.venuesArray.push(new Venue(venueData));
                         }
                     } else {
                         self.newAlert({
@@ -854,15 +878,6 @@ var app = app || {};
             // define placePhoto
             var placePhoto = place.infowindowPic || '';
 
-            // encapsulate marker content
-            this.marker.content = '<div class="infowindow">' +
-                '<button class="infowindow-close-button"><i class="fa fa-close infowindow-close-icon"></i></button>' +
-                (placePhoto
-                    ? '<div class="infowindow-pic" style="background-image: url(' + placePhoto + '); height: 138px"></div>'
-                    : '') +
-                '<div class="infowindow-content"><h3 class="infowindow-title">' + this.name +
-                '</h3><div class="infowindow-info"><h4 class="infowindow-rating">Rating: ' + this.placeRating + '</h4><h4 class="infowindow-price">Price: ' + this.placePrice + '</h4></div></div></div>';
-
             // add click event to marker for opening infowindow
             google.maps.event.addListener(this.marker, 'click', (function(place){
                 return function() {
@@ -922,7 +937,7 @@ var app = app || {};
             // set marker map property if undefined
             data.marker.marker.setMap(app.map);
             // define specific content of i`nfowindow
-            app.infoWindow.setContent(data.marker.marker.content);
+            app.infoWindow.setContent($('#infowindow-template').html());
             // toggle marker animation
             this.toggleMarkerBounce(true, data.marker.marker);
             // open infowindow
@@ -1068,7 +1083,7 @@ var app = app || {};
                     if (self.selected()) {
                         self.toggleVenueExpand(self.selected());
                     }
-                    infoWindow.setContent('<div class="infowindow"><h3 class="infowindow-title">' + self.poi() + '</h3></div>');
+                    infoWindow.setContent('<div class="infowindow"><div class="infowindow-content"><h3 class="infowindow-title">' + self.poi() + '</h3></div></div>');
                     infoWindow.open(app.map, this);
                     anchorInfowindowTimeout = setTimeout(function() {
                         self.closeInfoWindow();

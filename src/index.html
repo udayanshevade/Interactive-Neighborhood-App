@@ -29,233 +29,265 @@
   <!-- map -->
   <div id="mapDiv" class="fade" data-bind="css: { fade: alerting, fade: loading } "></div>
 
-  <!-- location search input -->
-  <header class="ui-overlay">
-    <form class="ui-form" data-bind="submit: updateSearch">
+  <main>
+    <!-- location search input -->
+    <header class="ui-overlay">
+      <form class="ui-form" data-bind="submit: updateSearch">
 
-      <!-- search a term -->
-      <input class="ui-search ui-term" type="text" data-bind="textInput: searchTerm, hasFocus: !placesExpanded()">
+        <!-- search a term -->
+        <input class="ui-search ui-term" type="text" data-bind="textInput: searchTerm, hasFocus: !placesExpanded()">
 
-      <span class="search-near">near</span>
-      <!-- search a location -->
-      <input class="ui-search ui-location" type="text" data-bind="textInput: poi">
+        <span class="search-near">near</span>
+        <!-- search a location -->
+        <input class="ui-search ui-location" type="text" data-bind="textInput: poi">
 
-      <!-- search button -->
-      <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon" title="Search"></i></button>
+        <!-- search button -->
+        <button class="icon search-button ui-search-focus" type="submit"><i class="fa fa-search search-icon" title="Search"></i></button>
 
-      <!-- geo location -->
-      <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate" title="Search near you"></i>
+        <!-- geo location -->
+        <i class="icon fa fa-location-arrow locate-icon" data-bind="visible: navigator.geolocation, click: geoLocate" title="Search near you"></i>
 
-      <!-- expand range icon -->
-      <span class="icon range-icon" data-bind="click: expandRangeOptions, css: { rangeVisible: rangeVisible }" title="Define range">km</span>
+        <!-- expand range icon -->
+        <span class="icon range-icon" data-bind="click: expandRangeOptions, css: { rangeVisible: rangeVisible }" title="Define range">km</span>
 
-      <!-- range options -->
-      <div class="search-range" data-bind="visible: rangeVisible" style="display:none">
-        <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="1000" id="1000" data-bind="checked: Foursquare.radius">
-          <label class="range-label" for="1000">1km</label>
+        <!-- range options -->
+        <div class="search-range" data-bind="visible: rangeVisible" style="display:none">
+          <div class="range-option">
+            <input class="range-input" type="radio" name="range" value="1000" id="1000" data-bind="checked: Foursquare.radius">
+            <label class="range-label" for="1000">1km</label>
+          </div>
+          <div class="range-option">
+            <input class="range-input" type="radio" name="range" value="5000" id="5000" data-bind="checked: Foursquare.radius">
+            <label class="range-label" for="5000">5km</label>
+          </div>
+          <div class="range-option">
+            <input class="range-input" type="radio" name="range" value="10000" id="10000" data-bind="checked: Foursquare.radius">
+            <label class="range-label" for="10000">10km</label>
+          </div>
+          <div class="range-option">
+            <input class="range-input" type="radio" name="range" value="25000" id="25000" data-bind="checked: Foursquare.radius">
+            <label class="range-label" for="25000">25km</label>
+          </div>
+          <div class="range-option">
+            <input class="range-input" type="radio" name="range" value="50000" id="50000" data-bind="checked: Foursquare.radius">
+            <label class="range-label" for="50000">50km</label>
+          </div>
         </div>
-        <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="5000" id="5000" data-bind="checked: Foursquare.radius">
-          <label class="range-label" for="5000">5km</label>
-        </div>
-        <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="10000" id="10000" data-bind="checked: Foursquare.radius">
-          <label class="range-label" for="10000">10km</label>
-        </div>
-        <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="25000" id="25000" data-bind="checked: Foursquare.radius">
-          <label class="range-label" for="25000">25km</label>
-        </div>
-        <div class="range-option">
-          <input class="range-input" type="radio" name="range" value="50000" id="50000" data-bind="checked: Foursquare.radius">
-          <label class="range-label" for="50000">50km</label>
-        </div>
-      </div>
 
-    </form>
-    <!-- expand venues -->
-    <span>
-      <!-- ko if: venuesArray().length -->
-      <i class="icon places-icon fa fa-bars" data-bind="click: expandPlaces, css: { expandIcon: placesExpanded() }" title="See Places"></i>
-      <!-- /ko -->
-      <!-- ko if: loading && !venuesArray().length -->
-      <i class="icon places-icon fa fa-spinner loading"></i>
-      <!-- /ko -->
-  </header>
-
-  <!-- places section -->
-  <section class="places" data-bind="visible: placesExpanded" style="display:none">
-
-    <!-- filter -->
-    <header class="ui-filter-form">
-      <i class="icon fa fa-filter filter-button" title="Filter"></i>
-      <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()" placeholder="Filter venues">
+      </form>
+      <!-- expand venues -->
+      <span>
+        <!-- ko if: venuesArray().length -->
+        <i class="icon places-icon fa fa-bars" data-bind="click: expandPlaces, css: { 'expand-icon': placesExpanded() }" title="See Places"></i>
+        <!-- /ko -->
+        <!-- ko if: loading && !venuesArray().length -->
+        <i class="icon places-icon fa fa-spinner loading"></i>
+        <!-- /ko -->
+      </span>
     </header>
 
-    <div class="show-options">
-      <!-- show all venues -->
-      <h3 class="show-all" data-bind="click: showAll">show all</h3>
-      <!-- show favorite venues -->
-      <h3 class="show-favorites" data-bind="click: showFavorites">show favorites</h3>
+    <!-- places section -->
+    <section class="places" data-bind="visible: placesExpanded" style="display:none">
 
-    </div>
+      <!-- filter -->
+      <header class="ui-filter-form">
+        <i class="icon fa fa-filter filter-button" title="Filter"></i>
+        <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()" placeholder="Filter venues">
+      </header>
 
-    <!-- ko if: filteredVenuesArray().length -->
-    <div id="places-list-section" class="places-list-section">
-      <!-- venues list -->
-      <ul class="places-list" data-bind="foreach: { data: filteredVenuesArray, as: 'venue' }">
+      <div class="show-options">
+        <!-- show all venues -->
+        <h3 class="show-all" data-bind="click: showAll">show all</h3>
+        <!-- show favorite venues -->
+        <h3 class="show-favorites" data-bind="click: showFavorites">show favorites</h3>
 
-        <!-- each venue -->
-        <li class="place-list-item" data-bind="css: {placeListItemExpanded: venue.venueExpanded}">
+      </div>
 
-          <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: domID }">
+      <!-- ko if: filteredVenuesArray().length -->
+      <div id="places-list-section" class="places-list-section">
+        <!-- venues list -->
+        <ul class="places-list" data-bind="foreach: { data: filteredVenuesArray, as: 'venue' }">
 
-            <div class="place-name-wrapper">
-              <!-- venues rating -->
-              <h2 class="place-rating" data-bind="text: rating"></h2>
-              <!-- venues name -->
-              <h2 class="place-name" data-bind="text: name"></h2>
-            </div>
+          <!-- each venue -->
+          <li class="place-list-item" data-bind="css: { 'place-list-item-expanded': venue.venueExpanded, with: venue }">
 
-            <div class="place-options">
-              <!-- favorite option -->
-              <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: venue.favorited }" title="Favorite"></i>
-            </div>
+            <header class="place-header" data-bind="click: $parent.toggleVenueExpand, attr: { id: domID }">
 
-          </header>
-
-          <!-- expanded venues information -->
-          <section class="place-info" data-bind="visible: venue.venueExpanded">
-            <!-- place details -->
-            <div class="foursquare-info-wrapper">
-              <!-- open status -->
-              <!-- ko if: venue.hours.status -->
-              <h5 class="open-status" data-bind="css: { closed: venue.hours.isOpen === false, open: venue.hours.isOpen, openStatusAvailable: venue.hours.isOpen !== null }, text: venue.hours.status"></h5>
-              <!-- /ko -->
-              <!-- place contact info -->
-              <!-- ko if: venue.contact.formattedPhone || venue.url -->
-              <div class="contact" data-bind="visible: venue.contact.formattedPhone || venue.url">
-                <!-- venue phone -->
-                <!-- ko if: venue.contact.formattedPhone -->
-                <h5 class="contact-text">
-                  <a class="contact-link" data-bind="attr: { href: 'tel:' + venue.contact.formattedPhone }">
-                    <i class="fa fa-phone contact-icon" title="Call"></i>
-                  </a>
-                </h5>
-                <!-- /ko -->
-                <!-- venue link -->
-                <!-- ko if: venue.url -->
-                <h5 class="contact-text">
-                  <a class="contact-link website-link" target="_blank" data-bind="attr: { href: venue.url }">
-                    <i class="fa fa-link contact-icon website-icon" title="Website"></i>
-                  </a>
-                </h5>
-                <!-- /ko -->
+              <div class="place-name-wrapper">
+                <!-- venues rating -->
+                <h2 class="place-rating" data-bind="text: rating"></h2>
+                <!-- venues name -->
+                <h2 class="place-name" data-bind="text: name"></h2>
               </div>
-              <!-- /ko -->
-            </div>
-            <div class="middle-details">
-              <!-- type of establishment -->
-              <!-- ko if: venue.categories[0].name -->
-              <h5 class="place-type" data-bind="visible: venue.categories[0], text: venue.categories[0].name"></h5>
-              <!-- /ko -->
-              <!-- foursquare logo link -->
-              <a class="api-link" data-bind="attr: { href: venue.FoursquareURL } " title="Visit Foursquare">
-                <span class="api-link-text foursquare-link-text">Read more on:</span>
-                <i class="fa fa-share contact-icon api-icon-text"></i>
-                <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
-              </a>
-            </div>
-            <div class="info-wrapper" data-bind="if: venue.photoURL">
-              <!-- venues picture -->
-              <div class="info-pic-wrapper">
-                <div class="info-pic-container">
-                  <!-- ko if: venue.multiPhotos -->
-                  <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
+
+              <div class="place-options">
+                <!-- favorite option -->
+                <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: favorited }" title="Favorite"></i>
+              </div>
+
+            </header>
+
+            <!-- expanded venues information -->
+            <section class="place-info" data-bind="visible: venueExpanded">
+              <!-- place details -->
+              <div class="foursquare-info-wrapper">
+                <!-- open status -->
+                <!-- ko if: hours.status -->
+                <h5 class="open-status" data-bind="css: { closed: hours.isOpen === false, open: hours.isOpen, 'open-status-available': hours.isOpen !== null }, text: hours.status"></h5>
+                <!-- /ko -->
+                <!-- place contact info -->
+                <!-- ko if: contact.formattedPhone || url -->
+                <div class="contact" data-bind="visible: contact.formattedPhone || url">
+                  <!-- venue phone -->
+                  <!-- ko if: contact.formattedPhone -->
+                  <h5 class="contact-text">
+                    <a class="contact-link" data-bind="attr: { href: 'tel:' + contact.formattedPhone }">
+                      <i class="fa fa-phone contact-icon" title="Call"></i>
+                    </a>
+                  </h5>
                   <!-- /ko -->
-                  <div class="info-pic-div">
-                    <img data-bind="attr: { src: venue.photoURL }" alt="venue image" class="info-pic">
-                  </div>
-                  <!-- ko if: venue.multiPhotos -->
-                  <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
+                  <!-- venue link -->
+                  <!-- ko if: url -->
+                  <h5 class="contact-text">
+                    <a class="contact-link website-link" target="_blank" data-bind="attr: { href: url }">
+                      <i class="fa fa-link contact-icon website-icon" title="Website"></i>
+                    </a>
+                  </h5>
                   <!-- /ko -->
                 </div>
+                <!-- /ko -->
               </div>
-            </div>
+              <div class="middle-details">
+                <!-- type of establishment -->
+                <!-- ko if: categories[0].name -->
+                <h5 class="place-type" data-bind="visible: categories[0], text: categories[0].name"></h5>
+                <!-- /ko -->
+                <div class="info-wrapper" data-bind="if: photoURL">
+                  <!-- venues picture -->
+                  <div class="info-pic-wrapper">
+                    <div class="info-pic-container">
+                      <!-- ko if: multiPhotos -->
+                      <i class="icon fa fa-caret-left" data-bind="click: function(data) { $parent.cyclePics('backwards', data) }" title="Previous Photo"></i>
+                      <!-- /ko -->
+                      <div class="info-pic-div">
+                        <img data-bind="attr: { src: photoURL }" alt="venue image" class="info-pic">
+                      </div>
+                      <!-- ko if: multiPhotos -->
+                      <i class="icon fa fa-caret-right" data-bind="click: function(data) { $parent.cyclePics('forwards', data) }" title="Next Photo"></i>
+                      <!-- /ko -->
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <!-- yelp review -->
-            <div class="yelp-review-wrapper" data-bind="visible: venue.review">
-              <h6 class="yelp-title">Yelp Review:</h6>
-              <p class="yelp-review" data-bind="text: venue.review"></p>
-              <a class="api-link yelp-api-link" data-bind="visible: venue.yelpURL, attr: { href: venue.yelpURL }" title="Visit Yelp">
-                <span class="api-link-text yelp-link-text">Read more on:</span>
-                <i class="fa fa-share contact-icon api-icon-text"></i>
-                <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
-              </a>
-            </div>
-          </section>
-        </li>
-      </ul>
-    </div>
-    <!-- /ko -->
-    <!-- ko if: !filteredVenuesArray().length -->
-    <p class="no-list">No locations here.</p>
-    <!-- /ko -->
-  </section>
+              <!-- Foursquare review -->
+              <div class="review-wrapper foursquare-tip-wrapper"">
+                <!-- ko if: tip -->
+                <p class="review" data-bind="text: tip().text, css: { 'comment-icon': tip().text }"></p>
+                <!-- /ko -->
+                <!-- foursquare logo link -->
+                <a class="api-link" data-bind="attr: { href: FoursquareURL } " title="Visit Foursquare">
+                  <span class="api-link-text foursquare-link-text">Read more on:</span>
+                  <i class="fa fa-share contact-icon api-icon-text"></i>
+                  <img class="foursquare-logo" src="img/foursquare-logo.svg" alt="Foursquare Logo">
+                </a>
+              </div>
 
-  <!-- login interface -->
-  <aside class="login-wrapper overlay-button" data-bind="css: { loginWrapperExpand: loginExpanded }">
-    <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin, clickBubble: false">
-      <i class="fa fa-user mode-option login-icon" title="Login"></i>
-    </button>
-    <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
-      <!-- login input -->
-      <input class="login-input" type="text" data-bind="textInput: user" placeholder="Create user or Login">
-      <div class="login-buttons-tray">
-        <button type="submit" class="login-button" data-bind="visible: !currentUser(), click: login">
-          <i class="fa fa-sign-in login-icon" title="Login"></i>
-        </button>
-        <button class="login-button" data-bind="visible: currentUser, click: logout, clickBubble: false">
-          <i class="fa fa-sign-out login-icon" title="Logout"></i>
-        </button>
-        <button class="login-button" data-bind="click: toggleLogin, clickBubble: false">
-          <i class="fa fa-chevron-left login-icon login-cancel-icon" title="Close login"></i>
-        </button>
-      </div>
-    </form>
-  </aside>
-
-  <!-- settings interface -->
-  <aside class="settings-wrapper overlay-button">
-    <form class="settings-form">
-      <button class="mode-button" data-bind="click: toggleMapMode">
-        <!-- ko if: !currentMode() -->
-        <i class="fa fa-moon-o night-toggle mode-option"></i>
-        <!-- /ko -->
-        <!-- ko if: currentMode() === 'light' -->
-        <i class="fa fa-sun-o day-toggle mode-option"></i>
-        <!-- /ko -->
-      </button>
-    </form>
-  </aside>
-
-  <!-- alert modal -->
-  <aside class="alert-modal alert" data-bind="style: { top: alerting() ? 'calc(50% - 100px)' : 'calc(-300px)' } ">
-    <div class="alert-body">
-      <i class="alert-icon alert-close fa fa-times" data-bind="click: closeAlerts"></i>
-      <div class="alert-content" data-bind="with: currentAlert">
-        <h3 class="alert-title" data-bind="text: title"></h3>
-        <h5 class="alert-details" data-bind="text: details"></h5>
-      </div>
-      <!-- ko if: alerts().length > 1 -->
-      <div class="alert-next-box" data-bind="click: getNextAlert, css: { 'alert-next-visible': alerts().length > 1 }" style="display:none">
-        <span class="alert-next-text">next</span>
-        <i class="alert-icon alert-next fa fa-chevron-right"></i>
+              <!-- yelp review -->
+              <div class="review-wrapper" data-bind="visible: review">
+                <p class="review" data-bind="text: review() || 'No Yelp review available.', css: { 'comment-icon': review }"></p>
+                <a class="api-link yelp-api-link" data-bind="visible: yelpURL, attr: { href: yelpURL }" title="Visit Yelp">
+                  <span class="api-link-text yelp-link-text">Read more on:</span>
+                  <i class="fa fa-share contact-icon api-icon-text yelp-icon-text"></i>
+                  <img class="yelp-logo" src="img/yelp-logo-xsmall@3x.png" alt="Yelp Logo">
+                </a>
+              </div>
+            </section>
+          </li>
+        </ul>
       </div>
       <!-- /ko -->
+      <!-- ko if: !filteredVenuesArray().length -->
+      <p class="no-list">No locations here.</p>
+      <!-- /ko -->
+    </section>
+
+    <!-- login interface -->
+    <aside class="login-wrapper overlay-button" data-bind="css: { 'login-wrapper-expand': loginExpanded }">
+      <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin, clickBubble: false">
+        <i class="fa fa-user mode-option login-icon" title="Login"></i>
+      </button>
+      <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
+        <!-- login input -->
+        <input class="login-input" type="text" data-bind="textInput: user" placeholder="Create user or Login">
+        <div class="login-buttons-tray">
+          <button type="submit" class="login-button" data-bind="visible: !currentUser(), click: login">
+            <i class="fa fa-sign-in login-icon" title="Login"></i>
+          </button>
+          <button class="login-button" data-bind="visible: currentUser, click: logout, clickBubble: false">
+            <i class="fa fa-sign-out login-icon" title="Logout"></i>
+          </button>
+          <button class="login-button" data-bind="click: toggleLogin, clickBubble: false">
+            <i class="fa fa-chevron-left login-icon login-cancel-icon" title="Close login"></i>
+          </button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- settings interface -->
+    <aside class="settings-wrapper overlay-button">
+      <form class="settings-form">
+        <button class="mode-button" data-bind="click: toggleMapMode">
+          <!-- ko if: !currentMode() -->
+          <i class="fa fa-moon-o night-toggle mode-option"></i>
+          <!-- /ko -->
+          <!-- ko if: currentMode() === 'light' -->
+          <i class="fa fa-sun-o day-toggle mode-option"></i>
+          <!-- /ko -->
+        </button>
+      </form>
+    </aside>
+
+    <!-- alert modal -->
+    <aside class="alert-modal alert" data-bind="style: { top: alerting() ? 'calc(50% - 100px)' : 'calc(-300px)' } ">
+      <div class="alert-body">
+        <i class="alert-icon alert-close fa fa-times" data-bind="click: closeAlerts"></i>
+        <div class="alert-content" data-bind="with: currentAlert">
+          <h3 class="alert-title" data-bind="text: title"></h3>
+          <h5 class="alert-details" data-bind="text: details"></h5>
+        </div>
+        <!-- ko if: alerts().length > 1 -->
+        <p class="alert-next-text" data-bind="click: getNextAlert, css: { 'alert-next-visible': alerts().length > 1 }" style="display:none">
+          next
+        </p>
+        <!-- /ko -->
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Templates -->
+  <!-- infowindow template -->
+  <div id="infowindow-template" style="display: none">
+    <div class="infowindow" data-bind="with: selected">
+      <button class="infowindow-close-button">
+        <i class="fa fa-close infowindow-close-icon"></i>
+      </button>
+      <!-- ko if: infowindowPic -->
+      <div class="infowindow-pic" data-bind="style: { 'background-image': 'url(' + infowindowPic + ')'}"></div>
+      <!-- /ko -->
+      <div class="infowindow-content">
+        <h3 class="infowindow-title" data-bind="text: name"></h3>
+        <h4 class="infowindow-open-status" data-bind="css: { closed: hours.isOpen === false, open: hours.isOpen, 'open-status-available': hours.isOpen !== null }, text: hours.status"></h4>
+        <div class="infowindow-info">
+          <h4 class="infowindow-rating" data-bind="text: 'Rating: ' + marker.placeRating"></h4>
+          <h4 class="infowindow-price" data-bind="text: 'Price: ' + marker.placePrice"></h4>
+        </div>
+      </div>
     </div>
-  </aside>
+  </div>
+
+  <!-- /Templates -->
 
   <!-- load scripts -->
   <script>
