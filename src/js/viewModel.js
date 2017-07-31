@@ -254,6 +254,7 @@ var app = app || {};
             this.selected = ko.observable(null);
             this.shouldScroll = ko.observable(false);
             this.directionsExpanded = ko.observable(false);
+            this.directionsTip = ko.observable('Select a location to see its directions.');
         };
 
 
@@ -595,6 +596,8 @@ var app = app || {};
                     // center the map
                     app.map.setCenter(app.mapBounds.getCenter());
 
+                    app.map.setZoom(14);
+
                     // order the venues
                     self.orderVenues();
 
@@ -806,7 +809,7 @@ var app = app || {};
         /**
          * Select and focus on venue from list or map
          */
-        this.chooseVenue = function(data, event) {
+        this.chooseVenue = function(data) {
             if (app.anchorInfowindowTimeout) {
                 clearTimeout(app.anchorInfowindowTimeout);
             }
@@ -819,7 +822,7 @@ var app = app || {};
             var prevSelected = this.selected();
             if (prevSelected) {
                 prevSelected.venueExpanded(false);
-                prevSelected.marker.marker.setAnimation(null);
+                prevSelected.route.styleLine({ strokeOpacity: 0.4 });
             }
             // overwrite with new selected data
             this.selected(data);
@@ -834,6 +837,21 @@ var app = app || {};
             // zoom and pan
             app.map.panTo(data.marker.marker.getPosition());
             app.map.panBy(0, -75);
+            if (!data.directionFetched()) {
+                var fetching = data.directionFetched.subscribe(function() {
+                    app.directionsRenderer.setDirections(self.selected().directionData);
+                    data.route.styleLine({ strokeOpacity: 1 });
+                    self.directionsTip(null);
+                    fetching.dispose();
+                    fetching = null;
+                });
+                this.directionsTip('Loading directions...');
+                this.showDirection(data);
+            } else {
+                app.directionsRenderer.setDirections(data.directionData);
+                data.route.styleLine({ strokeOpacity: 0.4 });
+                this.directionsTip(null);
+            }
         };
 
 
@@ -845,8 +863,9 @@ var app = app || {};
             // toggle specific marker to bounce
             if (state) {
                 marker.setAnimation(google.maps.Animation.BOUNCE);
-            } else {
-                marker.setAnimation(null);
+                setTimeout(function() {
+                    marker.setAnimation(null);
+                }, 1500)
             }
         };
 
@@ -986,6 +1005,7 @@ var app = app || {};
                 self.toggleMarkerBounce(false, $data.marker.marker);
                 self.scrollToLocation();
                 self.selected(null);
+                self.directionsTip('Select a venue to see its directions.');
                 self.shouldScroll(false);
             }
             $data.venueExpanded(!$data.venueExpanded());
@@ -1089,7 +1109,6 @@ var app = app || {};
          * Toggle Login interface
          */
         this.toggleLogin = function(set) {
-            if (this.directionsExpanded()) this.toggleDirections(false);
             if (typeof set === 'boolean') {
                 this.loginExpanded(set);
             } else {
@@ -1102,7 +1121,6 @@ var app = app || {};
          * Toggle directions interface
          */
         this.toggleDirections = function(set) {
-            if (this.loginExpanded()) this.toggleLogin(false);
             if (typeof set === 'boolean') {
                 this.directionsExpanded(set);
             } else {
@@ -1467,6 +1485,7 @@ var app = app || {};
                 if (status === 'OK') {
                     var points = response.routes[0].overview_path;
                     venue.route = new app.Route({ points: points });
+                    venue.directionData = response;
                     venue.directionFetched(true);
                 } else {
                     self.newAlert({
@@ -1485,7 +1504,7 @@ var app = app || {};
                 polylineOptions: {
                     strokeColor: '#50bfe6',
                     strokeWeight: 3,
-                    strokeOpacity: 0.625,
+                    strokeOpacity: 0.4,
                 },
             });
         };

@@ -10,6 +10,10 @@ html {
   box-sizing: inherit;
 }
 
+body {
+  overflow: hidden;
+}
+
 html,
 body,
 #mapFallback,
@@ -759,20 +763,24 @@ html {
   color: #aaa;
 }
 
-.places-list-section::-webkit-scrollbar {
+.places-list-section::-webkit-scrollbar,
+.directions-container::-webkit-scrollbar {
   width: 1.25rem;
 }
 
-.places-list-section::-webkit-scrollbar-track {
+.places-list-section::-webkit-scrollbar-track,
+.directions-container::-webkit-scrollbar-track {
   -webkit-box-shadow: none;
 }
 
-.places-list-section::-webkit-scrollbar-thumb {
+.places-list-section::-webkit-scrollbar-thumb,
+.directions-container::-webkit-scrollbar-thumb {
   height: 2rem;
   background-color: #333;
 }
 
-.dark .places-list-section::-webkit-scrollbar-thumb {
+.dark .places-list-section::-webkit-scrollbar-thumb,
+.dark .directions-container::-webkit-scrollbar-thumb {
   background-color: #fefefe;
 }
 
@@ -916,8 +924,58 @@ html {
 
 /* Directions wrapper */
 
-.directions-wrapper {
-  left: 7.7rem;
+.directions-toggle-wrapper {
+  left: 7.75rem;
+}
+
+.directions-container {
+  position: absolute;
+  bottom: 25%;
+  right: 0;
+  height: auto;
+  padding: 0 1rem 0.5rem;
+  width: 500px;
+  max-width: 100%;
+  box-shadow: -1px 3px 6px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  transform: translateY(100vh);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: auto;
+}
+
+.adp-directions {
+  margin: 0 auto;
+}
+
+.directions-populated {
+  height: 50%;
+}
+
+.show-directions {
+  transform: translateY(0);
+}
+
+.dark .directions-container {
+  background-color: #323232;
+}
+
+.directions-container .adp,
+.directions-container .adp-substep {
+  font-size: 1.35rem;
+}
+
+.directions-tip {
+  font: 1.35rem "Roboto", sans-serif;
+}
+
+.dark .directions-container .adp,
+.dark .directions-container .adp-substep,
+.dark .directions-tip {
+  color: #efefef;
+}
+
+.directions-tip {
+  text-align: center;
 }
 
 .wrapper-expand {
@@ -1083,8 +1141,9 @@ html {
   background-color: #fff;
   box-shadow: 1px 2px 6px rgba(0,0,0,0.3);
   left: calc(50% - 150px);
-  top: -300px;
-  transition: top 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  top: calc(50% - 100px);
+  transform: translateY(-100vh);
+  transition: transform 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .dark .alert-modal {
@@ -1098,7 +1157,7 @@ html {
 }
 
 .alert {
-  top: calc(50% - 100px);
+  transform: translateY(0);
 }
 
 .alert-title {

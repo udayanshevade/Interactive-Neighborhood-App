@@ -124,7 +124,6 @@
               <div class="place-options">
                 <!-- favorite option -->
                 <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: favorited }" title="Favorite"></i>
-                <i class="icon fa fa-compass place-icon" data-bind="click: $parent.showDirection, clickBubble: false, css: { 'direction-active': directionActive }"></i>
               </div>
 
             </header>
@@ -236,6 +235,13 @@
       </form>
     </aside>
 
+    <!-- direction toggle -->
+    <aside class="directions-toggle-wrapper overlay-wrapper">
+      <button class="mode-button" data-bind="click: toggleDirections">
+        <i class="fa fa-compass mode-option login-icon"></i>
+      </button>
+    </aside>
+
     <!-- settings interface -->
     <aside class="settings-wrapper overlay-wrapper">
       <form class="settings-form">
@@ -250,8 +256,16 @@
       </form>
     </aside>
 
+    <!-- directions interface -->
+    <aside class="directions-container" data-bind="css: { 'show-directions': directionsExpanded, 'directions-populated': selected }">
+      <section class="directions-section" id="directions-panel" data-bind="visible: selected"></section>
+      <!-- ko if: directionsTip -->
+      <section class="directions-section"><p class="directions-tip" data-bind="text: directionsTip"></p></section>
+      <!-- /ko -->
+    </aside>
+
     <!-- alert modal -->
-    <aside class="alert-modal alert" data-bind="style: { top: alerting() ? 'calc(50% - 100px)' : 'calc(-300px)' } ">
+    <aside class="alert-modal alert" data-bind="style: { transform: alerting() ? 'translateY(0)' : 'translateY(-100vh)' } ">
       <div class="alert-body">
         <i class="alert-icon alert-close fa fa-times" data-bind="click: closeAlerts"></i>
         <div class="alert-content" data-bind="with: currentAlert">

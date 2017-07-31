@@ -25,6 +25,8 @@ var app = app || {};
 
             // initialize Google Maps geocoder for reuse
             app.geocoder = new google.maps.Geocoder();
+            app.directionsRenderer = new google.maps.DirectionsRenderer();
+            app.directionsRenderer.setPanel(document.getElementById('directions-panel'));
 
             // define the map options
             app.mapOptions = {
@@ -62,6 +64,9 @@ var app = app || {};
                     google.maps.event.addListener(app.map, 'click', function() {
                         if (app.viewModel.loginExpanded()) {
                             app.viewModel.toggleLogin(false);
+                        }
+                        if (app.viewModel.directionsExpanded()) {
+                            app.viewModel.toggleDirections(false);
                         }
                     });
 
