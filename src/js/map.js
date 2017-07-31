@@ -313,7 +313,7 @@ var app = app || {};
                 "lat": lat,
                 "lng": lng
             },
-            icon: app.viewModel.currentMode() === 'dark' ? app.lightIcon : app.darkIcon,
+            icon: app.viewModel.currentMode() ? app.lightIcon : app.darkIcon,
             size: new google.maps.Size(5, 5),
             title: 'Showing locations near:',
             animation: google.maps.Animation.DROP

@@ -236,13 +236,6 @@
       </form>
     </aside>
 
-    <!-- directions interface -->
-    <aside class="directions-wrapper overlay-wrapper">
-      <button class="mode-button" data-bind="click: getDirections">
-        <i class="fa fa-compass mode-option login-icon" title="Get all directions"></i>
-      </button>
-    </aside>
-
     <!-- settings interface -->
     <aside class="settings-wrapper overlay-wrapper">
       <form class="settings-form">
@@ -250,7 +243,7 @@
           <!-- ko if: !currentMode() -->
           <i class="fa fa-moon-o night-toggle mode-option login-icon"></i>
           <!-- /ko -->
-          <!-- ko if: currentMode() === 'light' -->
+          <!-- ko if: currentMode() -->
           <i class="fa fa-sun-o day-toggle mode-option login-icon"></i>
           <!-- /ko -->
         </button>

@@ -520,7 +520,6 @@ var app = app || {};
             for (var i = 0; i < len; i++) {
                 venue = venues[i];
                 // hide and delete marker
-                if (venue.baseRoute) venue.baseRoute.hide();
                 if (venue.route) venue.route.hide();
                 venue.marker.marker.setMap(null);
                 venue.marker.marker = null;
@@ -598,6 +597,8 @@ var app = app || {};
 
                     // order the venues
                     self.orderVenues();
+
+                    self.showDirections();
 
                     if (!self.loggedIn() && self.initialSearch()) {
                         // harvest persistent user from localStorage
@@ -908,7 +909,7 @@ var app = app || {};
                     "lat": lat,
                     "lng": lng
                 },
-                icon: self.currentMode() === 'dark' ? app.lightIcon : app.darkIcon,
+                icon: self.currentMode() ? app.lightIcon : app.darkIcon,
                 title: 'Showing locations near:',
                 size: new google.maps.Size(5, 5),
             }));
@@ -955,18 +956,12 @@ var app = app || {};
          * Toggle dark/light mode of map
          */
         this.toggleMapMode = function() {
-            if (this.currentMode() === 'dark') {
+            if (this.currentMode()) {
                 if (this.anchorMarker()) {
                     this.anchorMarker().setIcon(app.darkIcon);
                 }
                 app.map.mapTypes.set('map_style', app.lightMode);
                 app.map.setMapTypeId('map_style');
-                // set all map highlight paths to opposite color
-                app.viewModel.venuesArray().forEach(function(venue) {
-                    if (venue.baseRoute) {
-                        venue.baseRoute.colorLine('#323232');
-                    }
-                });
                 this.currentMode('');
             } else {
                 if (this.anchorMarker()) {
@@ -974,12 +969,6 @@ var app = app || {};
                 }
                 app.map.mapTypes.set('map_style', app.darkMode);
                 app.map.setMapTypeId('map_style');
-                // set all map highlight paths to opposite color
-                app.viewModel.venuesArray().forEach(function(venue) {
-                    if (venue.baseRoute) {
-                        venue.baseRoute.colorLine('#fff');
-                    }
-                });
                 this.currentMode('dark');
             }
         };
@@ -1433,34 +1422,40 @@ var app = app || {};
         /**
          * Gets directions from origin to specified venues
          */
-        this.getDirections = function() {
+        this.showDirections = function() {
+            if (!self.animatedDirectionsAvailable()) return;
             var count = 0;
             self.venuesArray().forEach(function(venue) {
                 // get route from place to place
-                if (venue.directionFetched()) return;
                 count += 1;
                 setTimeout(function() {
-                    self.getDirection(venue, true);
+                    self.showDirection(venue);
                 }, 1000 * count);
             });
         };
 
+        /**
+         * Fetch direction data if it hasn't been already
+         * If it has, just display it
+         */
         this.showDirection = function(venue) {
-            if (!self.animatedDirectionsAvailable()) return
-            if (venue.directionFetched()) {
-                self.toggleDirectionActive(venue);
-                return;
+            if (!venue.directionFetched()) {
+                self.getDirection(venue)
+                var fetching = venue.directionFetched.subscribe(function() {
+                    self.renderDirection(venue);
+                    fetching.dispose();
+                    fetching = null;
+                });
+            } else {
+                self.renderDirection(venue);
             }
-            self.getDirection(venue)
-            var toggled = venue.directionFetched.subscribe(function() {
-                self.toggleDirectionActive(venue);
-                toggled.dispose();
-                toggled = null;
-            });
         };
 
 
-        this.getDirection = function(venue, set) {
+        /**
+         * Fetch direction data, set fetched status to true
+         */
+        this.getDirection = function(venue) {
             venue.directionsService.route({
                 origin: self.coordinates(),
                 destination: {
@@ -1471,49 +1466,28 @@ var app = app || {};
             }, function(response, status) {
                 if (status === 'OK') {
                     var points = response.routes[0].overview_path;
-                    venue.baseRoute = new app.Route({ points: points });
-                    var strokeColor = self.currentMode() === 'dark'
-                        ? '#fff'
-                        : '#323232';
-                    var backgroundPolylineOptions = {
-                        strokeColor: strokeColor,
-                        strokeWeight: 5,
-                        strokeOpacity: 0.125,
-                    }
-                    venue.baseRoute.render({
-                        animationSpeed: 100,
-                        steps: 2,
-                        polylineOptions: backgroundPolylineOptions,
-                    });
                     venue.route = new app.Route({ points: points });
                     venue.directionFetched(true);
                 } else {
                     self.newAlert({
                         title: 'the old fashioned way',
-                        details: 'Directions aren\'t responding right now. I guess you\'ll have to ask someone. Ew.',
+                        details: 'Directions aren\'t all available right now. You might have to ask someone around you. Ew.',
                     });
                 }
             });
         };
 
 
-        this.toggleDirectionActive = function(venue) {
-            var nextState = !venue.directionActive();
-            venue.directionActive(nextState);
-            if (nextState) {
-                var polylineOptions = {
+        this.renderDirection = function(venue) {
+            venue.route.render({
+                animationSpeed: 50,
+                steps: 5,
+                polylineOptions: {
                     strokeColor: '#50bfe6',
                     strokeWeight: 3,
                     strokeOpacity: 0.625,
-                };
-                venue.route.render({
-                    animationSpeed: 50,
-                    steps: 5,
-                    polylineOptions: polylineOptions,
-                });
-            } else {
-                venue.route.hide();
-            }
+                },
+            });
         };
 
 
