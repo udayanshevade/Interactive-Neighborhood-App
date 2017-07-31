@@ -88,9 +88,10 @@
     <section class="places" data-bind="visible: placesExpanded" style="display:none">
 
       <!-- filter -->
-      <header class="ui-filter-form">
-        <i class="icon fa fa-filter filter-button" title="Filter"></i>
-        <input class="ui-filter" type="text" data-bind="textInput: filterQuery, hasFocus: placesExpanded()" placeholder="Filter venues">
+      <header class="ui-filter-form" data-bind="css: { 'filter-expand': filterExpanded }">
+        <i class="icon fa fa-filter filter-button filter-icon" title="Filter"></i>
+        <input class="ui-filter" type="text" data-bind="textInput: filterQuery" placeholder="Filter venues">
+        <i class="icon fa fa-caret-down filter-button" data-bind="click: toggleFilterExpanded, css: { 'expand-icon': filterExpanded }"></i>
       </header>
 
       <div class="show-options">
@@ -211,43 +212,58 @@
     </section>
 
     <!-- login interface -->
-    <aside class="login-wrapper overlay-button" data-bind="css: { 'login-wrapper-expand': loginExpanded }">
-      <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin, clickBubble: false">
+    <aside class="login-wrapper overlay-wrapper" data-bind="css: { 'wrapper-expand': loginExpanded }">
+      <button class="mode-button" data-bind="visible: !loginExpanded(), click: toggleLogin">
         <i class="fa fa-user mode-option login-icon" title="Login"></i>
       </button>
-      <form class="login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
+      <form class="overlay-form login-form" data-bind="visible: loginExpanded, submit: login" style="display:none">
         <!-- login input -->
         <input class="login-input" type="text" data-bind="textInput: user" placeholder="Create user or Login">
         <div class="login-buttons-tray">
           <button type="submit" class="login-button" data-bind="visible: !currentUser(), click: login">
             <i class="fa fa-sign-in login-icon" title="Login"></i>
           </button>
-          <button class="login-button" data-bind="visible: currentUser, click: logout, clickBubble: false">
+          <button class="login-button" data-bind="visible: currentUser, click: logout">
             <i class="fa fa-sign-out login-icon" title="Logout"></i>
           </button>
-          <button class="login-button" data-bind="click: toggleLogin, clickBubble: false">
+          <button class="login-button" data-bind="click: toggleLogin">
             <i class="fa fa-chevron-left login-icon login-cancel-icon" title="Close login"></i>
           </button>
         </div>
       </form>
     </aside>
 
+    <!-- direction toggle -->
+    <aside class="directions-toggle-wrapper overlay-wrapper">
+      <button class="mode-button" data-bind="click: toggleDirections">
+        <i class="fa fa-compass mode-option login-icon"></i>
+      </button>
+    </aside>
+
     <!-- settings interface -->
-    <aside class="settings-wrapper overlay-button">
+    <aside class="settings-wrapper overlay-wrapper">
       <form class="settings-form">
         <button class="mode-button" data-bind="click: toggleMapMode">
           <!-- ko if: !currentMode() -->
-          <i class="fa fa-moon-o night-toggle mode-option"></i>
+          <i class="fa fa-moon-o night-toggle mode-option login-icon"></i>
           <!-- /ko -->
-          <!-- ko if: currentMode() === 'light' -->
-          <i class="fa fa-sun-o day-toggle mode-option"></i>
+          <!-- ko if: currentMode() -->
+          <i class="fa fa-sun-o day-toggle mode-option login-icon"></i>
           <!-- /ko -->
         </button>
       </form>
     </aside>
 
+    <!-- directions interface -->
+    <aside class="directions-container" data-bind="css: { 'show-directions': directionsExpanded, 'directions-populated': selected }">
+      <section class="directions-section" id="directions-panel" data-bind="visible: selected"></section>
+      <!-- ko if: directionsTip -->
+      <section class="directions-section"><p class="directions-tip" data-bind="text: directionsTip"></p></section>
+      <!-- /ko -->
+    </aside>
+
     <!-- alert modal -->
-    <aside class="alert-modal alert" data-bind="style: { top: alerting() ? 'calc(50% - 100px)' : 'calc(-300px)' } ">
+    <aside class="alert-modal alert" data-bind="style: { transform: alerting() ? 'translateY(0)' : 'translateY(-100vh)' } ">
       <div class="alert-body">
         <i class="alert-icon alert-close fa fa-times" data-bind="click: closeAlerts"></i>
         <div class="alert-content" data-bind="with: currentAlert">
@@ -302,8 +318,9 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="lib/GDouglasPeuker/GDouglasPeuker.js"></script>
   <script src="js/app.min.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places&callback=app.initializeMap" onerror="app.mapFallback()"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArJqPGfKNdtpT73itd-9Wjy1YySnHkDLE&libraries=places,geometry&callback=app.initializeMap" onerror="app.mapFallback()"></script>
   <script async defer src="https://cdn.firebase.com/js/client/2.2.1/firebase.js" onload="app.viewModel.initializeDatabase()"></script>
   <script async defer src="lib/oauth-signature/dist/oauth-signature.min.js"></script>
 </body>
