@@ -148,11 +148,11 @@ var app = app || {};
             .done(function() { loadMap(true); })
             .fail(function() { loadMap(false); })
         // load animated polyline plugins
-        $.getScript('js/animation.js')
+        $.getScript('js/polyline/animation.js')
             .done(function() {
-                $.getScript('js/filters.js')
+                $.getScript('js/polyline/filters.js')
                     .done(function() {
-                        $.getScript('js/route.js')
+                        $.getScript('js/polyline/route.js')
                             .done(function() {
                                 app.viewModel.animatedDirectionsAvailable(true);
                             });
