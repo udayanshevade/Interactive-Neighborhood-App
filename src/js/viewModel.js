@@ -6,7 +6,6 @@ var app = app || {};
      */
     var ViewModel = function() {
         var self = this;
-        var anchorInfowindowTimeout;
 
         /**
          * Initialize the app's first processes
@@ -17,6 +16,7 @@ var app = app || {};
             this.loading = ko.observable(true);
             // initial search
             this.initialSearch = ko.observable(true);
+            this.animatedDirectionsAvailable = ko.observable(false);
             this.initializeAlerts();
         };
 
@@ -472,7 +472,7 @@ var app = app || {};
 
             // set light/dark style for the map
             if (currentTime <= 19 && currentTime >= 7) {
-                self.currentMode('light');
+                self.currentMode('dark');
             } else { self.currentMode(''); }
 
             // Associate styled map with the MapTypeId
@@ -509,7 +509,7 @@ var app = app || {};
          * Delete markers
          * Used when moving to a new vicinity via search
          */
-        this.hideMarkers = function() {
+        this.hideMarkersAndPaths = function() {
             if (self.anchorMarker()) {
                 self.anchorMarker().setMap(null);
                 self.anchorMarker(null);
@@ -520,9 +520,20 @@ var app = app || {};
             for (var i = 0; i < len; i++) {
                 venue = venues[i];
                 // hide and delete marker
+                if (venue.baseRoute) venue.baseRoute.hide();
+                if (venue.route) venue.route.hide();
                 venue.marker.marker.setMap(null);
                 venue.marker.marker = null;
             }
+        };
+
+
+        /**
+         * Empty venues array
+         */
+        this.emptyVenuesData = function() {
+            self.venuesArray().forEach(function() {})
+            self.venuesArray([]);
         };
 
 
@@ -531,7 +542,7 @@ var app = app || {};
          */
         this.getVenuesData = function() {
             // empty current array of venues
-            self.venuesArray([]);
+            self.emptyVenuesData();
             var filter;
             // for any unique non-generic user search term
             if (self.searchTerm() &&
@@ -614,16 +625,6 @@ var app = app || {};
                     for (var i = 0, len = venues.length; i < len; i++) {
                         venue = venues[i];
                         venue.directionsService = new google.maps.DirectionsService();
-                        venue.directionsRenderer = new google.maps.DirectionsRenderer({
-                            suppressMarkers: true,
-                            suppressInfoWindows: true,
-                            preserveViewport: true,
-                            polylineOptions: {
-                                strokeColor: '#50bfe6',
-                                strokeWeight: 5,
-                                strokeOpacity: 0.1,
-                            },
-                        });
                         phone = venue.contact.phone;
                         self.getPhotos(venue);
                         if (phone && phone.length === 10) {
@@ -805,8 +806,8 @@ var app = app || {};
          * Select and focus on venue from list or map
          */
         this.chooseVenue = function(data, event) {
-            if (anchorInfowindowTimeout) {
-                clearTimeout(anchorInfowindowTimeout);
+            if (app.anchorInfowindowTimeout) {
+                clearTimeout(app.anchorInfowindowTimeout);
             }
             if (!this.placesExpanded()) {
                 this.shouldScroll(true);
@@ -891,7 +892,7 @@ var app = app || {};
          * Fetch new venues data
          */
         this.getLocations = function(result) {
-            this.hideMarkers();
+            this.hideMarkersAndPaths();
 
             var lat = this.coordinates().lat;
             var lng = this.coordinates().lng;
@@ -907,22 +908,22 @@ var app = app || {};
                     "lat": lat,
                     "lng": lng
                 },
-                icon: self.currentMode() === 'light' ? app.lightIcon : app.darkIcon,
+                icon: self.currentMode() === 'dark' ? app.lightIcon : app.darkIcon,
                 title: 'Showing locations near:',
                 size: new google.maps.Size(5, 5),
             }));
 
             google.maps.event.addListener(this.anchorMarker(), 'click', (function(marker, infoWindow){
                 return function() {
-                    if (anchorInfowindowTimeout) {
-                        clearTimeout(anchorInfowindowTimeout);
+                    if (app.anchorInfowindowTimeout) {
+                        clearTimeout(app.anchorInfowindowTimeout);
                     }
                     if (self.selected()) {
                         self.toggleVenueExpand(self.selected());
                     }
                     infoWindow.setContent('<div class="infowindow"><div class="infowindow-content"><h3 class="infowindow-title">' + self.poi() + '</h3></div></div>');
                     infoWindow.open(app.map, this);
-                    anchorInfowindowTimeout = setTimeout(function() {
+                    app.anchorInfowindowTimeout = setTimeout(function() {
                         self.closeInfoWindow();
                     }, 3000)
                     app.map.panTo(marker.getPosition());
@@ -954,12 +955,18 @@ var app = app || {};
          * Toggle dark/light mode of map
          */
         this.toggleMapMode = function() {
-            if (this.currentMode() === 'light') {
+            if (this.currentMode() === 'dark') {
                 if (this.anchorMarker()) {
                     this.anchorMarker().setIcon(app.darkIcon);
                 }
                 app.map.mapTypes.set('map_style', app.lightMode);
                 app.map.setMapTypeId('map_style');
+                // set all map highlight paths to opposite color
+                app.viewModel.venuesArray().forEach(function(venue) {
+                    if (venue.baseRoute) {
+                        venue.baseRoute.colorLine('#323232');
+                    }
+                });
                 this.currentMode('');
             } else {
                 if (this.anchorMarker()) {
@@ -967,7 +974,13 @@ var app = app || {};
                 }
                 app.map.mapTypes.set('map_style', app.darkMode);
                 app.map.setMapTypeId('map_style');
-                this.currentMode('light');
+                // set all map highlight paths to opposite color
+                app.viewModel.venuesArray().forEach(function(venue) {
+                    if (venue.baseRoute) {
+                        venue.baseRoute.colorLine('#fff');
+                    }
+                });
+                this.currentMode('dark');
             }
         };
 
@@ -1416,24 +1429,38 @@ var app = app || {};
             }
         };
 
+
         /**
-         * Gets directions from origin to specified venue
+         * Gets directions from origin to specified venues
          */
         this.getDirections = function() {
-            self.venuesArray().forEach(function(venue, i) {
+            var count = 0;
+            self.venuesArray().forEach(function(venue) {
                 // get route from place to place
+                if (venue.directionFetched()) return;
+                count += 1;
                 setTimeout(function() {
                     self.getDirection(venue, true);
-                }, 1000 * i);
+                }, 1000 * count);
+            });
+        };
+
+        this.showDirection = function(venue) {
+            if (!self.animatedDirectionsAvailable()) return
+            if (venue.directionFetched()) {
+                self.toggleDirectionActive(venue);
+                return;
+            }
+            self.getDirection(venue)
+            var toggled = venue.directionFetched.subscribe(function() {
+                self.toggleDirectionActive(venue);
+                toggled.dispose();
+                toggled = null;
             });
         };
 
 
         this.getDirection = function(venue, set) {
-            if (venue.directionFetched()) {
-                self.toggleDirectionActive(venue, set);
-                return;
-            }
             venue.directionsService.route({
                 origin: self.coordinates(),
                 destination: {
@@ -1442,11 +1469,23 @@ var app = app || {};
                 },
                 travelMode: 'DRIVING'
             }, function(response, status) {
-                console.log(response);
-                console.log(status);
                 if (status === 'OK') {
-                    venue.directionsRenderer.setDirections(response);
-                    self.toggleDirectionActive(venue);
+                    var points = response.routes[0].overview_path;
+                    venue.baseRoute = new app.Route({ points: points });
+                    var strokeColor = self.currentMode() === 'dark'
+                        ? '#fff'
+                        : '#323232';
+                    var backgroundPolylineOptions = {
+                        strokeColor: strokeColor,
+                        strokeWeight: 5,
+                        strokeOpacity: 0.125,
+                    }
+                    venue.baseRoute.render({
+                        animationSpeed: 100,
+                        steps: 2,
+                        polylineOptions: backgroundPolylineOptions,
+                    });
+                    venue.route = new app.Route({ points: points });
                     venue.directionFetched(true);
                 } else {
                     self.newAlert({
@@ -1457,15 +1496,24 @@ var app = app || {};
             });
         };
 
-        this.toggleDirectionActive = function(venue, set) {
-            var isActive;
-            if (typeof set === 'boolean') {
-                isActive = !set;
+
+        this.toggleDirectionActive = function(venue) {
+            var nextState = !venue.directionActive();
+            venue.directionActive(nextState);
+            if (nextState) {
+                var polylineOptions = {
+                    strokeColor: '#50bfe6',
+                    strokeWeight: 3,
+                    strokeOpacity: 0.625,
+                };
+                venue.route.render({
+                    animationSpeed: 50,
+                    steps: 5,
+                    polylineOptions: polylineOptions,
+                });
             } else {
-                isActive = venue.directionActive();
+                venue.route.hide();
             }
-            venue.directionsRenderer.setMap(isActive ? null : app.map);
-            venue.directionActive(!isActive);
         };
 
 

@@ -13,6 +13,8 @@ var app = app || {};
             // JSON for the 'night' style of the map
             var darkStyle = [{featureType:"all",elementType:"labels",stylers:[{visibility:"on"}]},{featureType:"all",elementType:"labels.text.fill",stylers:[{saturation:36},{color:"#000000"},{lightness:40}]},{featureType:"all",elementType:"labels.text.stroke",stylers:[{visibility:"on"},{color:"#000000"},{lightness:16}]},{featureType:"all",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"geometry.fill",stylers:[{color:"#000000"},{lightness:20}]},{featureType:"administrative",elementType:"geometry.stroke",stylers:[{color:"#000000"},{lightness:17},{weight:1.2}]},{featureType:"administrative.country",elementType:"labels.text.fill",stylers:[{color:"#e5c163"}]},{featureType:"administrative.locality",elementType:"labels.text.fill",stylers:[{color:"#c4c4c4"}]},{featureType:"administrative.neighborhood",elementType:"labels.text.fill",stylers:[{color:"#e5c163"}]},{featureType:"landscape",elementType:"geometry",stylers:[{color:"#000000"},{lightness:20}]},{featureType:"poi",elementType:"geometry",stylers:[{color:"#000000"},{lightness:21},{visibility:"on"}]},{featureType:"poi.business",elementType:"geometry",stylers:[{visibility:"on"}]},{featureType:"road.highway",elementType:"geometry.fill",stylers:[{color:"#e5c163"},{lightness:"0"}]},{featureType:"road.highway",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road.highway",elementType:"labels.text.fill",stylers:[{color:"#ffffff"}]},{featureType:"road.highway",elementType:"labels.text.stroke",stylers:[{color:"#e5c163"}]},{featureType:"road.arterial",elementType:"geometry",stylers:[{color:"#000000"},{lightness:18}]},{featureType:"road.arterial",elementType:"geometry.fill",stylers:[{color:"#575757"}]},{featureType:"road.arterial",elementType:"labels.text.fill",stylers:[{color:"#ffffff"}]},{featureType:"road.arterial",elementType:"labels.text.stroke",stylers:[{color:"#2c2c2c"}]},{featureType:"road.local",elementType:"geometry",stylers:[{color:"#000000"},{lightness:16}]},{featureType:"road.local",elementType:"labels.text.fill",stylers:[{color:"#999999"}]},{featureType:"transit",elementType:"geometry",stylers:[{color:"#000000"},{lightness:19}]},{featureType:"water",elementType:"geometry",stylers:[{color:"#000000"},{lightness:17}]}];
 
+            app.anchorInfowindowTimeout = '';
+
             // save the light and dark modes for switching
             app.lightMode = new google.maps.StyledMapType(lightStyle,
                 {name: "Light Mode"});
@@ -136,11 +138,21 @@ var app = app || {};
             app.mapBounds = new google.maps.LatLngBounds();
         }
 
-        $.getScript('lib/infobox/infobox.js').done(function() {
-            loadMap(true);
-        }).fail(function() {
-            loadMap(false);
-        });
+        // load customizable infobox
+        $.getScript('lib/infobox/infobox.js')
+            .done(function() { loadMap(true); })
+            .fail(function() { loadMap(false); })
+        // load animated polyline plugins
+        $.getScript('js/animation.js')
+            .done(function() {
+                $.getScript('js/filters.js')
+                    .done(function() {
+                        $.getScript('js/route.js')
+                            .done(function() {
+                                app.viewModel.animatedDirectionsAvailable(true);
+                            });
+                    })
+            });
     };
 
     app.mapFallback = function() {
@@ -189,7 +201,7 @@ var app = app || {};
                                 'lng': latlng.lng()
                             });
                             app.viewModel.loading(true);
-                            app.viewModel.updateLatLng('', status);
+                            app.updateLatLng('', status);
                         } else {
                             app.viewModel.newAlert({
                                 title: 'google maps error',
@@ -289,7 +301,7 @@ var app = app || {};
         var lat = app.viewModel.coordinates().lat;
         var lng = app.viewModel.coordinates().lng;
         // hide markers
-        app.viewModel.hideMarkers();
+        app.viewModel.hideMarkersAndPaths();
 
         // define new map bounds
         app.mapBounds = new google.maps.LatLngBounds();
@@ -301,7 +313,7 @@ var app = app || {};
                 "lat": lat,
                 "lng": lng
             },
-            icon: self.currentMode() === 'light' ? app.lightIcon : app.darkIcon,
+            icon: app.viewModel.currentMode() === 'dark' ? app.lightIcon : app.darkIcon,
             size: new google.maps.Size(5, 5),
             title: 'Showing locations near:',
             animation: google.maps.Animation.DROP
@@ -309,15 +321,15 @@ var app = app || {};
 
         google.maps.event.addListener(app.viewModel.anchorMarker(), 'click', (function(marker, infoWindow){
             return function() {
-                if (anchorInfowindowTimeout) {
-                    clearTimeout(anchorInfowindowTimeout);
+                if (app.anchorInfowindowTimeout) {
+                    clearTimeout(app.anchorInfowindowTimeout);
                 }
                 if (app.viewModel.selected()) {
                     app.viewModel.toggleVenueExpand(app.viewModel.selected());
                 }
                 infoWindow.setContent('<div class="infowindow"><div class="infowindow-content"><h3 class="infowindow-title">' + app.viewModel.poi() + '</h3></div></div>');
                 infoWindow.open(app.map, this);
-                anchorInfowindowTimeout = setTimeout(function() {
+                app.anchorInfowindowTimeout = setTimeout(function() {
                     app.viewModel.closeInfoWindow();
                 }, 3000)
                 app.map.panTo(marker.getPosition());

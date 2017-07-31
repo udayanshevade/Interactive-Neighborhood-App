@@ -124,7 +124,7 @@
               <div class="place-options">
                 <!-- favorite option -->
                 <i class="icon fa fa-star place-icon" data-bind="click: $parent.toggleVenueFavorite, clickBubble: false, css: { favorited: favorited }" title="Favorite"></i>
-                <i class="icon fa fa-compass place-icon" data-bind="click: $parent.getDirection, clickBubble: false, css: { 'direction-active': directionActive }"></i>
+                <i class="icon fa fa-compass place-icon" data-bind="click: $parent.showDirection, clickBubble: false, css: { 'direction-active': directionActive }"></i>
               </div>
 
             </header>
@@ -239,7 +239,7 @@
     <!-- directions interface -->
     <aside class="directions-wrapper overlay-wrapper">
       <button class="mode-button" data-bind="click: getDirections">
-        <i class="fa fa-compass mode-option login-icon" title="Directions"></i>
+        <i class="fa fa-compass mode-option login-icon" title="Get all directions"></i>
       </button>
     </aside>
 
@@ -313,6 +313,7 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="lib/GDouglasPeuker/GDouglasPeuker.js"></script>
   <!-- build:js js/app.min.js -->
   <script src="js/map.js"></script>
   <script src="js/viewModel.js"></script>

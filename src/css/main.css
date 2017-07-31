@@ -120,7 +120,7 @@ html {
 }
 
 .dark .ui-overlay {
-  background: rgb(50, 50, 50);
+  background: #323232;
   color: #fff;
 }
 
@@ -154,7 +154,7 @@ html {
 
 .dark .ui-search {
   border-bottom-color: #ccc;
-  background-color: rgb(50, 50, 50);
+  background-color: #323232;
   color: white;
 }
 
@@ -183,7 +183,7 @@ html {
 }
 
 .dark .search-button {
-  background-color: rgb(50, 50, 50);
+  background-color: #323232;
 }
 
 .dark .icon {
@@ -243,7 +243,7 @@ html {
 }
 
 .dark .places {
-  background-color: rgb(50, 50, 50);
+  background-color: #323232;
   color: white;
 }
 
@@ -302,7 +302,7 @@ html {
 
 .dark .ui-filter {
   border-bottom-color: #eee;
-  background-color: rgb(50, 50, 50);
+  background-color: #323232;
   color: white;
 }
 
@@ -535,7 +535,7 @@ html {
 .place-type {
   display: block;
   font: small-caps 600 1.75rem "Roboto", sans-serif;
-  margin: 2rem 0 1.45rem 2rem;
+  margin: 2rem 0 0 2rem;
   align-self: flex-start;
 }
 
@@ -721,7 +721,7 @@ html {
 
 .dark .comment-icon:before {
   content: "\f075";
-  background: rgb(50, 50, 50);
+  background: #323232;
 }
 
 .info-wrapper {
@@ -786,7 +786,7 @@ html {
 }
 
 .dark .overlay-wrapper {
-  background: rgb(50, 50, 50);
+  background: #323232;
 }
 
 /* Day/Night mode */
@@ -876,12 +876,19 @@ html {
   border: 0;
   border-bottom: 1px solid #666;
   font: small-caps 1.75rem "Roboto", sans-serif;
+  color: #323232;
+}
+
+.dark .login-input {
+  background: #323232;
+  color: #fff;
 }
 
 .login-button {
   background-color: transparent;
   outline: 0;
   border: 0;
+  padding: 1rem 0;
 }
 
 .fa-sign-in {
@@ -895,6 +902,7 @@ html {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  width: 7rem;
 }
 
 .login-cancel-icon {
@@ -1080,7 +1088,7 @@ html {
 }
 
 .dark .alert-modal {
-  background-color: rgb(50, 50, 50);
+  background-color: #323232;
   color: #fefefe;
 }
 
