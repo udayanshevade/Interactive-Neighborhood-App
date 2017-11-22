@@ -169,6 +169,7 @@ var app = app || {};
             if (!tips || !tips.length) {
                 this.tip(null);
             }
+            return;
             var tipData = tips[0];
             this.tip({
                 text: tipData.text,
