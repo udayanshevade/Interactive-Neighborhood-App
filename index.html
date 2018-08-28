@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <!-- viewport meta tag -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/main.min.css"/>
+  <link rel="stylesheet" href="css/main.min.css">
 </head>
 
 <!-- body -->
@@ -287,8 +287,8 @@
       <button class="infowindow-close-button">
         <i class="fa fa-close infowindow-close-icon"></i>
       </button>
-      <!-- ko if: infowindowPic -->
-      <div class="infowindow-pic" data-bind="style: { 'background-image': 'url(' + infowindowPic + ')'}"></div>
+      <!-- ko if: $root.selected().infowindowPic -->
+      <div class="infowindow-pic" data-bind="style: { 'background-image': 'url(' + $root.selected().infowindowPic + ')'}"></div>
       <!-- /ko -->
       <div class="infowindow-content">
         <h3 class="infowindow-title" data-bind="text: name"></h3>
