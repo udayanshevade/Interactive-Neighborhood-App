@@ -14,13 +14,13 @@
   "author": "Udayan Shevade",
   "license": "ISC",
   "devDependencies": {
-    "grunt": "^0.4.5",
+    "grunt": "^1.0.3",
     "grunt-contrib-cssmin": "^0.14.0",
     "grunt-contrib-htmlmin": "^0.6.0",
-    "grunt-contrib-imagemin": "^1.0.0",
+    "grunt-contrib-imagemin": "^2.0.1",
     "grunt-contrib-uglify": "^0.11.0",
     "grunt-postcss": "^0.7.1",
-    "grunt-processhtml": "^0.3.9",
+    "grunt-processhtml": "^0.4.1",
     "load-grunt-tasks": "^3.4.0"
   }
 }
